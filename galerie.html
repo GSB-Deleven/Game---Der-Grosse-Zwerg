@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Figuren-Galerie</title>
+  <style>
+    body { background: #2a2230; color: #eee; font-family: sans-serif; margin: 16px; }
+    .reihe { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+    figure { margin: 0; text-align: center; font-size: 12px; }
+    canvas { image-rendering: pixelated; background: #5da048; }
+  </style>
+</head>
+<body>
+  <h1>Figuren-Galerie – Der Grosse Zwerg</h1>
+  <p>Hier siehst du alle selbst gezeichneten Figuren. Ändern kannst du sie in <code>src/grafik/eigene-sprites.js</code>.</p>
+  <div class="reihe" id="reihe"></div>
+  <script type="module">
+    import { PALETTE, SPRITES, figurPixel } from './src/grafik/eigene-sprites.js';
+    const reihe = document.getElementById('reihe');
+    const zeige = (name, zeilen, extra = {}) => {
+      const w = Math.max(...zeilen.map((z) => z.length)), h = zeilen.length, f = +(new URLSearchParams(location.search).get('f') || 4);
+      const c = document.createElement('canvas'); c.width = w * f; c.height = h * f;
+      const ctx = c.getContext('2d');
+      zeilen.forEach((z, y) => [...z].forEach((ch, x) => {
+        const farbe = extra[ch] || PALETTE[ch];
+        if (ch !== '.' && farbe) { ctx.fillStyle = farbe; ctx.fillRect(x * f, y * f, f, f); }
+      }));
+      const fig = document.createElement('figure');
+      fig.append(c, Object.assign(document.createElement('figcaption'), { textContent: name }));
+      reihe.append(fig);
+    };
+    for (const [name, zeilen] of Object.entries(SPRITES)) zeige(name, zeilen);
+    const beispiele = [
+      { vorlage: 'zwerg', haar: 'grau', kleid: 'blau', kopf: 'stahl' },
+      { vorlage: 'zwerg', haar: 'schwarz', kleid: 'leder', kopf: 'stahl' },
+      { vorlage: 'zwergin', haar: 'blond', kleid: 'gruen', kopf: 'gold' },
+      { vorlage: 'zwergin', haar: 'braun', kleid: 'lila', kopf: 'gold' },
+      { vorlage: 'kind', haar: 'rot', kleid: 'orange', kopf: 'gruen' },
+      { vorlage: 'kind', haar: 'blond', kleid: 'blau', kopf: 'rosa' },
+      { vorlage: 'koenigin', haar: 'rot', kleid: 'lila', kopf: 'gold' },
+      { vorlage: 'bote', haar: 'braun', kleid: 'blau', kopf: 'stahl' },
+    ];
+    for (const b of beispiele) { const { pixel, extra } = figurPixel(b); zeige(`${b.vorlage} (${b.haar}/${b.kleid})`, pixel, extra); }
+  </script>
+</body>
+</html>
