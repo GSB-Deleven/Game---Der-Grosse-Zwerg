@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:artefakt": "vite build --mode artefakt",
+    "build:artefakt": "vite build --mode artefakt && node scripts/artefakt.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

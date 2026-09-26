@@ -34,7 +34,7 @@ Phaser 3 + Vite, alles in JavaScript. Grafiken sind selbst gezeichnet (im Code),
 npm install
 npm run dev              # Entwicklungsserver: http://localhost:5173/Game---Der-Grosse-Zwerg/
 npm run build            # Ordner dist/ für GitHub Pages
-npm run build:artefakt   # eine einzige Datei dist-artefakt/index.html (zum Direkt-Spielen/Teilen)
+npm run build:artefakt   # eine einzige Datei: dist-artefakt/index.html (zum Teilen) und spiel.html (fürs Claude-Artefakt)
 node tests/durchlauf.mjs # spielt Kapitel 1 automatisch durch (bei laufendem "npm run dev")
 ```
 
