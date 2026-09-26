@@ -3,37 +3,45 @@
 export default {
   name: 'Die Zwergenfeste',
   musik: 'dorf',
+  // Tiere und Leben auf der Karte
+  leben: { falter: 7, voegel: true, wolken: true, huehner: [[41, 14], [43, 15], [30, 17]] },
   karte: [
-    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
-    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
-    'MMMWWRWWWRWWMMMMMMMMMMMMWWRWWWRWWMMMMMMM',
-    'MMMWWWWWWWWWMMMMMMMMMMMMWWWW1WWWWMMMMMMM',
-    'MMTL..::::.L..T..,.......L.:::.L...T.MMM',
-    'MM.........a.......,.......::....,...TMM',
-    'MM,.b..::.c......T..........:.........MM',
-    'MM.....::....................:.....EKK.M',
-    'MMT....:::::::::::::::::::::::::::.:A.eM',
-    'MM.......:.........:........:......:..KM',
-    'MM.,.....:.....B...:...S+...:......::..M',
-    'MMT......:.........:........:.......:..M',
-    'MM......f:.........:...g....:.......:.TM',
-    'M..PP....:::::::::::::::::::::::::::::.M',
-    'M.PPP....:........................,..:.M',
-    'M..P.....:..T.......,......____......:.M',
-    'MT......,:.........T.......____F...F.:.M',
-    'M~~~~~~..:.......,.........____..h...:.M',
-    'M~~~~~~~.:...........F...............:.M',
-    'M~~~~~~~~=~~~~.............j.........:TM',
-    'MT~~~~~~.:.~~~~~.T.....F.......F...F...M',
-    'MM,......:...,.........................M',
-    'MMT..,...@.......T...T......T....T...TMM',
-    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+    'MMMMMMMMMMMMMMMMMMMWWRWWRWWRWWMMMMMMMMMMMMMMMMMM',
+    'MMMM...............WWWWW1WWWWWMMMMMMMMV+MMMMMMMM',
+    'MM...H++......T,....Y.L:::L.Y........$,.K...MMMM',
+    'M.,.,+++.*,*....,T.....:::.,..,T...^...,...,..MM',
+    'M..*,.:.,...%$..........:.....T....,...........M',
+    'M.....:.a.........*..,,.:.........T.,.H++......M',
+    'M...::::::::::::........:..,..*.......+++..KK..M',
+    'M..b,......c..!:!:::::::::::::::!:..%%::::E....M',
+    'M.JJJJ.JJJJJJJ.:::S+$K::::::$S+K::.....:Ae:...TM',
+    'M.....,........:::g::::::::::::::::::::::::::..M',
+    'MM..........T..:::::::::B:::::::::...,.....K$,.M',
+    'M..H++..*......:::::::::::::::::::.............M',
+    'M..+++...:...,.:::::::?:::::::::::*.........^,TM',
+    'M......f.:.....:!:::::::::::::::!:.............M',
+    'M.PP.PP..:...*.....,....:.......,.JJJJ..JJJJJJJM',
+    'M.P.P....::::::::::::::::..*..........,.....,..M',
+    'M.......,:..............:.........,....,F...F..M',
+    'M...,...,:......T.......::::::::::::F::........M',
+    'M..~~~~~~~,.........,*..@........j......h......M',
+    'M~~~~~~~~~~~...^........:..______...,,....,....M',
+    'M~~~~~~~~~~~~......T....:..______.......F...F..M',
+    'M~~~~~~~~~~~~...........:.,______...F,...,.....M',
+    'M~~~~~~~~~~~~...........:,.______..............M',
+    'M~~~~~~~~~~~,.T....,....:..______..*........&&MM',
+    'M..~~~~~~~..........T.,.:.?...........&...F....M',
+    'M.T..,...T........*.....:...T..^.T.............M',
+    'M...............,.......:.............,......T.M',
+    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
   ],
   ausgaenge: {
     1: { karte: 'bibliothek', ziel: 1 },
   },
   // Figuren: Buchstabe auf der Karte -> wer ist das und was wünscht er/sie sich?
-  //   aussehen: vorlage (zwerg, zwergin, kind), haar, kleid, kopf (Farben siehe eigene-sprites.js)
+  //   aussehen: Name aus src/grafik/figuren-liste.js (dort wird das Aussehen beschrieben)
   //   wunsch:   was sie sich wünschen (essen, wasser, buch, frucht)
   //   neckt:    wird beim ersten Mal gesagt (die frechen Zwerge)
   //   sagt:     die Bitte
@@ -42,7 +50,7 @@ export default {
   figuren: {
     a: {
       name: 'Mama Hilde',
-      aussehen: { vorlage: 'zwergin', haar: 'braun', kleid: 'lila', kopf: 'gold' },
+      aussehen: 'mama',
       stimme: { hoehe: 1.25 },
       wunsch: 'essen',
       sagt: 'Hallo, mein Grosser! Holst du uns bitte Essen vom Markt? Die Kinder haben so Hunger.',
@@ -51,7 +59,7 @@ export default {
     },
     b: {
       name: 'Tilda',
-      aussehen: { vorlage: 'kind', haar: 'blond', kleid: 'blau', kopf: 'rosa' },
+      aussehen: 'tilda',
       stimme: { hoehe: 1.8, tempo: 1.05 },
       wunsch: 'essen',
       neckt: 'Hihi! Du bist doch gar kein Zwerg, du bist viel zu gross!',
@@ -61,7 +69,7 @@ export default {
     },
     c: {
       name: 'Bruno',
-      aussehen: { vorlage: 'kind', haar: 'rot', kleid: 'orange', kopf: 'gruen' },
+      aussehen: 'bruno',
       stimme: { hoehe: 1.6, tempo: 1.05 },
       wunsch: 'frucht',
       neckt: 'Haha, schaut mal, der Riesen-Zwerg!',
@@ -71,7 +79,7 @@ export default {
     },
     e: {
       name: 'Schmied Balin',
-      aussehen: { vorlage: 'zwerg', haar: 'schwarz', kleid: 'leder', kopf: 'stahl' },
+      aussehen: 'schmied',
       stimme: { hoehe: 0.6, tempo: 0.9 },
       wunsch: 'wasser',
       sagt: 'Puh, an der Esse ist es heiss! Holst du mir einen Kessel Wasser vom Brunnen? Der ist so schwer.',
@@ -80,7 +88,7 @@ export default {
     },
     f: {
       name: 'Oma Runa',
-      aussehen: { vorlage: 'zwergin', haar: 'grau', kleid: 'gruen', kopf: 'gold' },
+      aussehen: 'oma',
       stimme: { hoehe: 1.1, tempo: 0.85 },
       wunsch: 'wasser',
       sagt: 'Meine Pilze sind so durstig. Bringst du mir bitte Wasser vom Brunnen?',
@@ -89,14 +97,14 @@ export default {
     },
     g: {
       name: 'Händler Dwalin',
-      aussehen: { vorlage: 'zwerg', haar: 'grau', kleid: 'blau', kopf: 'stahl' },
+      aussehen: 'haendler',
       stimme: { hoehe: 0.8 },
       // hat keinen Wunsch – er verteilt Essen
       sagt: 'Willkommen am Markt! Nimm dir Essen mit, so viel du tragen kannst.',
     },
     h: {
       name: 'Bauer Gorm',
-      aussehen: { vorlage: 'zwerg', haar: 'braun', kleid: 'gruen', kopf: 'leder' },
+      aussehen: 'bauer',
       stimme: { hoehe: 0.75 },
       wunsch: 'frucht',
       sagt: 'Die schönsten Äpfel hängen ganz oben. Da komme ich nie hin. Pflückst du mir einen?',
@@ -105,7 +113,7 @@ export default {
     },
     j: {
       name: 'Nella',
-      aussehen: { vorlage: 'kind', haar: 'braun', kleid: 'lila', kopf: 'orange' },
+      aussehen: 'nella',
       stimme: { hoehe: 1.7, tempo: 1.05 },
       wunsch: 'frucht',
       neckt: 'Bist du ein Zwerg oder ein Baum? Hihi!',

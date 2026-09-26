@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { stil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
-import { verstummen } from '../systeme/stimme.js';
+import { ZEICHEN_MS, sprechDauer } from '../systeme/stimme.js';
 
 // Alles, was über der Spielwelt liegt: Herzen, Sprechtext, Touch-Knöpfe.
 export class Oberflaeche extends Phaser.Scene {
@@ -11,6 +11,7 @@ export class Oberflaeche extends Phaser.Scene {
     this.herzAnzahl = 0;
     this.steuerZonen = [];
     this.baueHerzen();
+    this.setzeHerzen(this.registry.get('stand')?.herzen || 0);
     this.baueSprechfeld();
     this.baueMenueKnopf();
 
@@ -30,11 +31,13 @@ export class Oberflaeche extends Phaser.Scene {
     ev.on('herzFliegt', this.herzFliegt, this);
     ev.on('sprechen', this.zeigeText, this);
     ev.on('traegt', this.zeigeGetragen, this);
+    ev.on('ortBanner', this.zeigeOrt, this);
     this.events.once('shutdown', () => {
       ev.off('herzen', this.setzeHerzen, this);
       ev.off('herzFliegt', this.herzFliegt, this);
       ev.off('sprechen', this.zeigeText, this);
       ev.off('traegt', this.zeigeGetragen, this);
+      ev.off('ortBanner', this.zeigeOrt, this);
       this.registry.set('istSteuerung', null);
       this.registry.set('touchRichtung', { x: 0, y: 0 });
     });
@@ -65,46 +68,67 @@ export class Oberflaeche extends Phaser.Scene {
     });
   }
 
-  // ---- Sprechtext oben ------------------------------------------------------
+  // ---- Sprechfeld oben: Porträt, Name, Text erscheint Buchstabe für Buchstabe ----
   baueSprechfeld() {
-    this.sprechfeld = this.add.container(560, 16).setVisible(false);
+    this.sprechfeld = this.add.container(540, 12).setVisible(false);
     this.sprechRahmen = this.add.graphics();
-    this.sprechName = this.add.text(-340, 10, '', stil(20, '#f2c94c'));
-    this.sprechText = this.add.text(-340, 36, '', stil(22, '#ffffff', { wordWrap: { width: 680 } }));
-    this.sprechfeld.add([this.sprechRahmen, this.sprechName, this.sprechText]);
+    this.portraitRahmen = this.add.graphics();
+    this.portrait = this.add.image(-322, 50, 'herz').setScale(2.4);
+    this.sprechName = this.add.text(-270, 10, '', stil(21, '#f2c94c'));
+    this.sprechText = this.add.text(-270, 38, '', stil(23, '#ffffff', { wordWrap: { width: 610 }, lineSpacing: 2 }));
+    this.sprechfeld.add([this.sprechRahmen, this.portraitRahmen, this.portrait, this.sprechName, this.sprechText]);
   }
 
-  zeigeText({ name, text }) {
+  zeigeText({ name, text, bild }) {
     this.sprechName.setText(name || '');
     this.sprechText.setText(text);
-    const hoehe = 36 + this.sprechText.height + 12;
+    const hoehe = Math.max(100, 38 + this.sprechText.height + 14);
+    this.sprechText.setText('');
     this.sprechRahmen.clear()
-      .fillStyle(0x1b1420, 0.88).fillRoundedRect(-360, 0, 720, hoehe, 16)
-      .lineStyle(3, 0xf2c94c).strokeRoundedRect(-360, 0, 720, hoehe, 16);
+      .fillStyle(0x1b1420, 0.9).fillRoundedRect(-370, 0, 740, hoehe, 16)
+      .lineStyle(3, 0xf2c94c).strokeRoundedRect(-370, 0, 740, hoehe, 16);
+    this.portraitRahmen.clear().fillStyle(0x3a3048, 1).fillRoundedRect(-360, 10, 76, 80, 10);
+    if (bild && this.textures.exists(bild)) {
+      const f = this.textures.get(bild).getSourceImage();
+      const skala = Math.min(2.4, 72 / f.width);
+      this.portrait.setTexture(bild).setOrigin(0.5, 0).setCrop(0, 0, f.width, Math.min(f.height, 28)).setVisible(true);
+      this.portrait.setScale(skala).setPosition(-322, 14);
+    } else this.portrait.setVisible(false);
     this.sprechfeld.setVisible(true).setAlpha(1);
     this.textZeit?.remove();
+    this.schreiber?.remove();
     this.tweens.killTweensOf(this.sprechfeld);
-    this.textZeit = this.time.delayedCall(2500 + text.length * 70, () => {
+    let i = 0;
+    this.schreiber = this.time.addEvent({
+      delay: ZEICHEN_MS, repeat: text.length - 1,
+      callback: () => { i++; this.sprechText.setText(text.slice(0, i)); },
+    });
+    this.textZeit = this.time.delayedCall(sprechDauer(text) + 400, () => {
       this.tweens.add({ targets: this.sprechfeld, alpha: 0, duration: 400, onComplete: () => this.sprechfeld.setVisible(false) });
     });
   }
 
-  // ---- Menü-Knopf (zurück zum Titel) ---------------------------------------
+  // ---- Orts-Banner (wie bei Zelda) ------------------------------------------
+  zeigeOrt(name) {
+    const c = this.add.container(480, 250).setAlpha(0);
+    const g = this.add.graphics();
+    g.fillStyle(0x1b1420, 0.85).fillRect(-330, -38, 660, 76);
+    g.lineStyle(3, 0xf2c94c).lineBetween(-330, -38, 330, -38).lineBetween(-330, 38, 330, 38);
+    c.add([g, this.add.text(0, 0, name, stil(40, '#f2c94c', { strokeThickness: 8 })).setOrigin(0.5)]);
+    this.tweens.add({ targets: c, alpha: 1, duration: 500, hold: 1800, yoyo: true, onComplete: () => c.destroy() });
+  }
+
+  // ---- Pause-Knopf -----------------------------------------------------------
   baueMenueKnopf() {
     const k = this.add.container(930, 40);
     const g = this.add.graphics();
-    g.fillStyle(0x1b1420, 0.7).fillRoundedRect(-24, -24, 48, 48, 12);
+    g.fillStyle(0x1b1420, 0.7).fillRoundedRect(-26, -26, 52, 52, 12);
     g.fillStyle(0xffffff, 1);
-    g.fillRect(-12, -12, 7, 24); g.fillRect(4, -12, 7, 24); // Pause-Zeichen
+    g.fillRect(-12, -13, 8, 26); g.fillRect(4, -13, 8, 26);
     k.add(g);
-    k.setSize(48, 48).setInteractive({ useHandCursor: true });
-    k.on('pointerdown', () => {
-      spiele('knopf');
-      verstummen();
-      this.scene.stop('Welt');
-      this.scene.start('Titel');
-    });
-    this.steuerZonen.push((p) => Math.abs(p.x - 930) < 30 && Math.abs(p.y - 40) < 30);
+    k.setSize(52, 52).setInteractive({ useHandCursor: true });
+    k.on('pointerdown', () => { spiele('knopf'); this.game.events.emit('pause'); });
+    this.steuerZonen.push((p) => Math.abs(p.x - 930) < 32 && Math.abs(p.y - 40) < 32);
   }
 
   // ---- Touch: Steuerkreuz links, Helfen-Knopf rechts ----------------------

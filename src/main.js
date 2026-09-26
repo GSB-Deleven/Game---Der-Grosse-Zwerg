@@ -5,6 +5,9 @@ import { Geschichte } from './scenes/Geschichte.js';
 import { Welt } from './scenes/Welt.js';
 import { Oberflaeche } from './scenes/Oberflaeche.js';
 import { KapitelEnde } from './scenes/KapitelEnde.js';
+import { Spielstaende } from './scenes/Spielstaende.js';
+import { Pause } from './scenes/Pause.js';
+import { Splash } from './scenes/Splash.js';
 
 // Das Spiel rechnet mit 960 x 540 Punkten. Die Spielwelt wird 3-fach vergrössert
 // gezeigt (so sieht man 20 x 11 Kacheln) – der typische Retro-Look.
@@ -26,7 +29,7 @@ const spiel = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { gamepad: controllerErlaubt, activePointers: 3 },
-  scene: [Boot, Titel, Geschichte, Welt, Oberflaeche, KapitelEnde],
+  scene: [Boot, Titel, Spielstaende, Geschichte, Welt, Oberflaeche, Pause, Splash, KapitelEnde],
 });
 
 // Für automatische Tests und zum Ausprobieren in der Browser-Konsole

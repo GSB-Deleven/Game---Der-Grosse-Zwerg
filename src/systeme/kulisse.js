@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { figurTextur } from '../grafik/texturen.js';
+import { figurTexturen } from '../grafik/figur-texturen.js';
 
 // Malt eine hübsche Berg-Kulisse als Hintergrund (für Titel & Geschichten)
 export function bergKulisse(scene, { breite = 960, hoehe = 540, nacht = false } = {}) {
@@ -41,7 +41,7 @@ export function bergKulisse(scene, { breite = 960, hoehe = 540, nacht = false } 
   return g;
 }
 
-// Setzt einen kleinen Dorf-Zwerg als Deko
-export function dekoZwerg(scene, x, y, aussehen, skala = 4) {
-  return scene.add.image(x, y, figurTextur(scene, aussehen)).setOrigin(0.5, 1).setScale(skala);
+// Setzt eine Figur (Name aus figuren-liste.js) als Deko; bild: steh0, jubeln, links, rechts …
+export function dekoZwerg(scene, x, y, name, skala = 4, bild = 'steh0') {
+  return scene.add.image(x, y, figurTexturen(scene, name) + bild).setOrigin(0.5, 34 / 36).setScale(skala);
 }

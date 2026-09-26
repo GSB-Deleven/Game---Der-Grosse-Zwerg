@@ -3,28 +3,28 @@ import { TEXTE } from '../texte/de.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
 import { sprich, verstummen } from '../systeme/stimme.js';
-import { speichereSpielstand } from '../systeme/speichern.js';
+import { sichere } from '../systeme/speichern.js';
 import { bergKulisse, dekoZwerg } from '../systeme/kulisse.js';
 
 // Bilder zu den Geschichten-Seiten. Jede Funktion malt ein Bild in den Rahmen.
 const BILDER = {
   intro: [
     (s) => { // Der Grosse Zwerg zwischen den kleinen
-      dekoZwerg(s, 330, 400, { vorlage: 'zwerg', haar: 'grau', kleid: 'blau', kopf: 'stahl' });
-      dekoZwerg(s, 400, 400, { vorlage: 'zwergin', haar: 'braun', kleid: 'lila', kopf: 'gold' });
-      s.add.image(480, 400, 'held_unten_0').setOrigin(0.5, 1).setScale(6);
-      dekoZwerg(s, 560, 400, { vorlage: 'kind', haar: 'blond', kleid: 'blau', kopf: 'rosa' });
-      dekoZwerg(s, 630, 400, { vorlage: 'zwerg', haar: 'schwarz', kleid: 'leder', kopf: 'stahl' });
+      dekoZwerg(s, 320, 400, 'haendler', 5);
+      dekoZwerg(s, 395, 400, 'mama', 5);
+      s.add.image(480, 402, 'held_unten_steh0').setOrigin(0.5, 46 / 48).setScale(6);
+      dekoZwerg(s, 565, 400, 'tilda', 5);
+      dekoZwerg(s, 640, 400, 'schmied', 5);
     },
     (s) => { // Die frechen Zwergenkinder lachen
-      s.add.image(400, 400, 'held_seite_0').setOrigin(0.5, 1).setScale(6);
-      const k1 = dekoZwerg(s, 540, 400, { vorlage: 'kind', haar: 'rot', kleid: 'orange', kopf: 'gruen' }, 5).setFlipX(true);
-      const k2 = dekoZwerg(s, 620, 400, { vorlage: 'kind', haar: 'blond', kleid: 'blau', kopf: 'rosa' }, 5);
+      s.add.image(400, 402, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(6);
+      const k1 = dekoZwerg(s, 545, 400, 'bruno', 5.5, 'links_reden');
+      const k2 = dekoZwerg(s, 630, 400, 'tilda', 5.5, 'links_reden');
       s.tweens.add({ targets: [k1, k2], y: 385, duration: 250, yoyo: true, repeat: -1 });
       s.add.text(580, 250, 'Hihi!', stil(34, '#ffffff')).setOrigin(0.5).setAngle(-8);
     },
     (s) => { // Das grosse Herz
-      s.add.image(480, 400, 'held_unten_0').setOrigin(0.5, 1).setScale(6);
+      s.add.image(480, 402, 'held_unten_jubeln').setOrigin(0.5, 46 / 48).setScale(6);
       const h = s.add.image(480, 170, 'herz').setScale(5);
       s.tweens.add({ targets: h, scale: 6, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       s.add.image(360, 390, 'buch').setScale(3);
@@ -33,12 +33,12 @@ const BILDER = {
       s.add.image(630, 260, 'essen').setScale(3);
     },
     (s) => { // Wünsche als Bild über dem Kopf
-      dekoZwerg(s, 540, 400, { vorlage: 'zwergin', haar: 'braun', kleid: 'lila', kopf: 'gold' }, 6);
-      const blase = s.add.container(540, 230);
+      dekoZwerg(s, 540, 400, 'mama', 6);
+      const blase = s.add.container(540, 150);
       blase.add(s.add.image(0, 0, 'blase').setScale(4));
       blase.add(s.add.image(0, -10, 'essen').setScale(3));
-      s.tweens.add({ targets: blase, y: 220, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-      s.add.image(380, 400, 'held_seite_0').setOrigin(0.5, 1).setScale(6);
+      s.tweens.add({ targets: blase, y: 140, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      s.add.image(380, 402, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(6);
     },
   ],
 };
@@ -101,7 +101,7 @@ export class Geschichte extends Phaser.Scene {
     this.beendet = true;
     verstummen();
     const stand = this.registry.get('stand');
-    if (this.name === 'intro') { stand.introGesehen = true; speichereSpielstand(stand); }
+    if (this.name === 'intro') { stand.introGesehen = true; sichere(this.registry); }
     this.cameras.main.fadeOut(400);
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start(this.weiter.szene, this.weiter.daten));
   }

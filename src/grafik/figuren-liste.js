@@ -1,0 +1,21 @@
+// Aussehen aller Figuren. Wird von den Levels über den Namen benutzt (aussehen: 'mama').
+// Möglichkeiten:
+//   typ:   zwerg, zwergin, kind, koenigin, bote
+//   bart:  lang, gabel, zoepfe, kurz, keiner
+//   kopf:  nasenhelm, hoernerhelm, federhelm, kapuze, stirnband, krone, glatze
+//   Farben (haar, kleid, kopfFarbe, schuerze, umhang): siehe RAMPEN in figuren-baukasten.js
+export const FIGUREN_AUSSEHEN = {
+  mama: { typ: 'zwergin', haar: 'kastanie', kleid: 'lila', kopf: 'stirnband', kopfFarbe: 'gold', schuerze: 'beige' },
+  oma: { typ: 'zwergin', haar: 'grau', kleid: 'moos', kopf: 'stirnband', kopfFarbe: 'weinrot', umhang: 'braun' },
+  tilda: { typ: 'kind', haar: 'blond', kleid: 'blau', kopf: 'kapuze', kopfFarbe: 'rosa' },
+  bruno: { typ: 'kind', haar: 'rot', kleid: 'orange', kopf: 'kapuze', kopfFarbe: 'gruen' },
+  nella: { typ: 'kind', haar: 'kastanie', kleid: 'lila', kopf: 'kapuze', kopfFarbe: 'orange' },
+  pip: { typ: 'kind', haar: 'schwarz', kleid: 'gruen', kopf: 'kapuze', kopfFarbe: 'blau' },
+  schmied: { typ: 'zwerg', haar: 'schwarz', bart: 'gabel', kleid: 'leder', kopf: 'glatze', schuerze: 'braun' },
+  haendler: { typ: 'zwerg', haar: 'grau', bart: 'lang', kleid: 'blau', kopf: 'nasenhelm', kopfFarbe: 'stahl' },
+  bauer: { typ: 'zwerg', haar: 'braun', bart: 'kurz', kleid: 'moos', kopf: 'kapuze', kopfFarbe: 'leder' },
+  bibliothekar: { typ: 'zwerg', haar: 'weiss', bart: 'zoepfe', kleid: 'lila', kopf: 'glatze', umhang: 'blau' },
+  bote: { typ: 'bote', haar: 'blond', bart: 'kurz', kleid: 'weinrot', kopf: 'federhelm', kopfFarbe: 'stahl' },
+  koenigin: { typ: 'koenigin', haar: 'rot', kleid: 'lila', kopf: 'krone', umhang: 'weinrot' },
+  wache: { typ: 'zwerg', haar: 'braun', bart: 'zoepfe', kleid: 'blau', kopf: 'hoernerhelm', kopfFarbe: 'stahl', umhang: 'weinrot' },
+};

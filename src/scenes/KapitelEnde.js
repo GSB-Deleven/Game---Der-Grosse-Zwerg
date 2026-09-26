@@ -23,12 +23,12 @@ export class KapitelEnde extends Phaser.Scene {
       this.tweens.add({ targets: h, scale: 3, delay: 300 + i * 150, duration: 300, ease: 'Back.easeOut', onStart: () => spiele('knopf') });
     }
 
-    const held = this.add.image(380, 470, 'held_unten_0').setOrigin(0.5, 1).setScale(6);
-    this.tweens.add({ targets: held, y: 455, duration: 350, yoyo: true, repeat: -1, ease: 'Quad.easeOut' });
-    dekoZwerg(this, 580, 470, { vorlage: 'koenigin', haar: 'rot', kleid: 'lila', kopf: 'gold' }, 5);
+    const held = this.add.image(390, 500, 'held_unten_jubeln').setOrigin(0.5, 46 / 48).setScale(4.6);
+    this.tweens.add({ targets: held, y: 488, duration: 350, yoyo: true, repeat: -1, ease: 'Quad.easeOut' });
+    dekoZwerg(this, 580, 500, 'koenigin', 5, 'jubeln');
 
-    this.add.text(480, 230, TEXTE.fortsetzung, stil(28, '#ffffff', { align: 'center', wordWrap: { width: 800 } })).setOrigin(0.5);
-    knopf(this, 480, 505, { text: TEXTE.zurueck, breite: 320, hoehe: 64, groesse: 30 }, () => {
+    this.add.text(480, 222, TEXTE.fortsetzung, stil(28, '#ffffff', { align: 'center', wordWrap: { width: 800 } })).setOrigin(0.5);
+    knopf(this, 800, 505, { text: TEXTE.zurueck, breite: 320, hoehe: 64, groesse: 30 }, () => {
       verstummen();
       this.scene.start('Titel');
     });

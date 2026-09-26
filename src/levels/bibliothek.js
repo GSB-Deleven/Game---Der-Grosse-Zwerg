@@ -1,17 +1,19 @@
 // Die Runen-Bibliothek – riesige Regale, an die nur der Grosse Zwerg hinkommt
 export default {
   name: 'Die Runen-Bibliothek',
+  musik: 'bibliothek',
+  hintergrund: '#1b1420',
   karte: [
-    'WWWWWWWWWWWWWWWWWWWW',
-    'WWRWWWWWRWWWWWWRWWWW',
-    'WQQQ#L#QQQQ#L#QQQQ#W',
-    'W########||########W',
-    'W####c###||########W',
-    'W########||##d#####W',
-    'W####K###||###K####W',
-    'W########||########W',
-    'W########||########W',
-    'WWWWWWWWW1WWWWWWWWWW',
+    'WWWWWWWWWWWWWWWWWWWWWW',
+    'WWRWWWWWWRWWWWRWWWWWRW',
+    'WQQQ#L#QQQQ##QQQQ#L#QW',
+    'W#########||#########W',
+    'W####c####||#########W',
+    'W#K#######||####d##K#W',
+    'W#########||#########W',
+    'W#$#######||#######%#W',
+    'W#########||#########W',
+    'WWWWWWWWWW1WWWWWWWWWWW',
   ],
   ausgaenge: {
     1: { karte: 'dorf', ziel: 1 },
@@ -19,7 +21,7 @@ export default {
   figuren: {
     c: {
       name: 'Bibliothekar Thorin',
-      aussehen: { vorlage: 'zwerg', haar: 'grau', kleid: 'lila', kopf: 'gold' },
+      aussehen: 'bibliothekar',
       stimme: { hoehe: 0.7, tempo: 0.85 },
       wunsch: 'buch',
       sagt: 'Ach, mein Rücken! Holst du mir bitte das grosse Runenbuch vom obersten Regal?',
@@ -28,7 +30,7 @@ export default {
     },
     d: {
       name: 'Pip',
-      aussehen: { vorlage: 'kind', haar: 'schwarz', kleid: 'gruen', kopf: 'blau' },
+      aussehen: 'pip',
       stimme: { hoehe: 1.9, tempo: 1.05 },
       wunsch: 'buch',
       sagt: 'Ich will das Drachenbuch anschauen! Aber das ist so hoch oben.',

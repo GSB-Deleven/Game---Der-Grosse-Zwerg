@@ -10,7 +10,9 @@ Der Grosse Zwerg löst alles mit Mut, Hilfsbereitschaft und einem grossen Herzen
 - **PC:** Pfeiltasten oder WASD zum Laufen, Leertaste zum Helfen.
 - **Controller:** Steuerkreuz/Stick zum Laufen, A (oder jeder andere Knopf) zum Helfen.
 - Wer etwas braucht, zeigt es mit einem **Bild über dem Kopf**. Ein **gelber Pfeil** zeigt immer, wohin es als Nächstes geht.
-- Alles wird vorgelesen (Browser-Stimme). Der Spielstand wird automatisch gespeichert.
+- Beim Sprechen erscheint der Text mit Porträt, dazu ein figurentypisches «Plappern» (echte Stimmen folgen später).
+- **3 Speicherplätze** (z. B. Liv, Bruder, Papa). Automatisches Speichern, dazu «Speichern» im Pause-Menü (⏸ oben rechts, Esc/P oder Start-Knopf).
+- Coole Momente bekommen eine grosse Einblendung mit Konfetti.
 
 ## Stand
 | Kapitel | Inhalt | Stand |
@@ -23,12 +25,13 @@ Der Grosse Zwerg löst alles mit Mut, Hilfsbereitschaft und einem grossen Herzen
 ## Für Eltern: Wie ändere ich etwas?
 - **Texte der Dorf-Zwerge, Wünsche, Karte:** `src/levels/dorf.js` und `src/levels/bibliothek.js`
 - **Neues Level bauen:** siehe [docs/NEUES-LEVEL.md](docs/NEUES-LEVEL.md)
-- **Figuren umzeichnen:** `src/grafik/eigene-sprites.js` (jeder Buchstabe ist ein Pixel).
+- **Aussehen der Figuren:** `src/grafik/figuren-liste.js` (Bart, Helm, Farben …). Gezeichnet werden sie im
+  Baukasten `src/grafik/figuren-baukasten.js`, Gebäude und Deko in `src/grafik/welt-grafik.js`.
   Alle Figuren ansehen: `galerie.html` im Entwicklungsmodus öffnen.
 - **Allgemeine Texte (Titel, Einleitung):** `src/texte/de.js`
 
 ## Technik
-Phaser 3 + Vite, alles in JavaScript. Grafiken sind selbst gezeichnet (im Code), Töne werden im Code erzeugt.
+Phaser 3 + Vite, alles in JavaScript. Alle Grafiken, Töne und die Musik werden im Code erzeugt – es gibt keine Bilddateien.
 
 ```bash
 npm install

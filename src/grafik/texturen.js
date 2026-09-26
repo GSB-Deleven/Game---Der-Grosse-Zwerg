@@ -1,4 +1,4 @@
-import { PALETTE, SPRITES, figurPixel } from './eigene-sprites.js';
+import { PALETTE, SPRITES } from './eigene-sprites.js';
 
 export const KACHEL = 16;
 
@@ -198,14 +198,4 @@ export function erzeugeAlleTexturen(scene, figuren = []) {
   erzeugeKachelset(scene);
   erzeugeSchatten(scene);
   erzeugeBlase(scene);
-}
-
-// Erzeugt (einmalig) die Textur einer Dorf-Figur und gibt ihren Namen zurück
-export function figurTextur(scene, aussehen) {
-  const key = `figur_${aussehen.vorlage}_${aussehen.haar}_${aussehen.kleid}_${aussehen.kopf}`;
-  if (!scene.textures.exists(key)) {
-    const { pixel, extra } = figurPixel(aussehen);
-    malePixel(scene, key, pixel, extra);
-  }
-  return key;
 }

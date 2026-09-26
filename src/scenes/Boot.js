@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import { erzeugeAlleTexturen } from '../grafik/texturen.js';
-import { ladeSpielstand } from '../systeme/speichern.js';
+import { ladeEinstellungen, leererSpielstand } from '../systeme/speichern.js';
+import { heldTexturen } from '../grafik/figur-texturen.js';
+import { erzeugeWeltTexturen } from '../grafik/welt-grafik.js';
+import { setzeMusikLautstaerke } from '../systeme/musik.js';
+import { setzeTonLautstaerke } from '../systeme/ton.js';
 import { SCHRIFT } from '../systeme/schrift.js';
 
 export class Boot extends Phaser.Scene {
@@ -8,8 +12,12 @@ export class Boot extends Phaser.Scene {
 
   create() {
     erzeugeAlleTexturen(this);
-    this.erzeugeAnimationen();
-    this.registry.set('stand', ladeSpielstand());
+    heldTexturen(this);
+    erzeugeWeltTexturen(this);
+    this.registry.set('stand', leererSpielstand());
+    const einst = ladeEinstellungen();
+    setzeMusikLautstaerke(einst.musik);
+    setzeTonLautstaerke(einst.toene ?? 1);
 
     // Auf die Schrift warten (höchstens 2 Sekunden), dann Titelbild
     const weiter = () => this.scene.start('Titel');
@@ -19,16 +27,5 @@ export class Boot extends Phaser.Scene {
         new Promise((r) => setTimeout(r, 2000)),
       ]).then(weiter, weiter);
     } else weiter();
-  }
-
-  erzeugeAnimationen() {
-    for (const richtung of ['unten', 'oben', 'seite']) {
-      this.anims.create({
-        key: `held_${richtung}_laufen`,
-        frames: [1, 0, 2, 0].map((n) => ({ key: `held_${richtung}_${n}` })),
-        frameRate: 8,
-        repeat: -1,
-      });
-    }
   }
 }

@@ -1,115 +1,86 @@
-# Plan: «Der Grosse Zwerg» – Retro-Spiel für Liv (5) und ihren Bruder (3)
+# Plan: «Der Grosse Zwerg» – Überarbeitung 2: Stimmen, SNES-Look, Spielstände
 
 ## Kontext
-Die Gute-Nacht-Geschichte vom grossen Zwerg soll ein kleines Retro-Abenteuer im Stil von Zelda / Secret of Mana werden. Die Botschaft: **Probleme löst man nicht mit Gewalt, jeder kann ein Freund sein – Mut, Tapferkeit, Liebe.** Zielgruppe 3–5 Jahre, also: kein Kampf, kein «Game Over», kein Zeitdruck, keine Lesepflicht. Das Repo ist leer; wir starten bei null. Das Spiel soll einfach bleiben, aber so gebaut sein, dass später neue Level/Aufgaben leicht dazukommen.
+Kapitel 1 ist spielbar (Branch `claude/grosser-zwerg-game-plan-uicvh9`, Artefakt https://claude.ai/artifact/7xCpQAoHUWttCtGYtPqEUU). Feedback nach dem ersten Test:
+1. Die Browser-Computerstimme klingt «grausig» – jede Figur soll eine **eigene, natürliche Stimme** bekommen.
+2. Die Bewegung des Grossen Zwergs sieht **lächerlich** aus; das Ganze wirkt **lieblos und detailarm**.
+3. **Spielstände**: wahlweise von vorne anfangen oder den aktuellen Stand speichern.
 
-Entscheide von dir:
-- Läuft im **Browser** auf Tablet (Touch) **und** PC (Tastatur + Gamepad)
-- Aufgaben werden mit **Bildsymbolen + Vorlesestimme** (Browser-Sprachausgabe, Deutsch) vermittelt
-- Grafik: **Mischung** aus freien CC0-Paketen und selbst erstellten Pixel-Sprites
-- Veröffentlichung über **GitHub Pages** (einfach Link öffnen)
-
----
-
-## Stil: Dungeons-&-Dragons-Zwerge, keine Gartenzwerge
-Der ganze Look orientiert sich an klassischen Fantasy-/D&D-Zwergen – nicht an Zipfelmützen-Gartenzwergen.
-- **Zwerge**: stämmig, breite Schultern, **lange geflochtene Bärte** (mit Bartringen/Perlen), Lederrüstung oder Kettenhemd, Umhänge, Gürtel mit grossen Schnallen, Stiefel. Kopfbedeckungen: Hörner- oder Nasenhelme, Kapuzen, Stirnbänder – **keine Zipfelmützen**. Jeder Zwerg im Dorf hat eigene Bartfarbe/-form (rot, braun, grau, schwarz; Zöpfe, Gabelbart), die Zwerginnen ebenfalls mit Zöpfen (auf Wunsch auch mit Bart, ganz D&D).
-- **Der Grosse Zwerg**: ein richtiger Abenteurer – feuerroter (oder deine Wahl) Flechtbart, Hörnerhelm, Reiserucksack mit Seil und Laterne, Wanderstab. Sein Hammer ist ein **Werkzeug** (Schmied/Handwerker), nie eine Waffe – er wird im Spiel nur zum Bauen benutzt (z.B. Brücke im Tal).
-- **Zwergendorf**: Steinhallen in den Fels gehauen, schwere Holztore mit Eisenbeschlägen, Schmiede mit glühender Esse, Runen an den Wänden, Fackeln/Kohlebecken, Minenloren auf Schienen, Brauhaus-Fässer, Pilzgärten, Steinbrunnen, Bibliothek mit riesigen Regalen voller Wälzer. Aussenbereich: Bergtal mit Obstbäumen und Terrassenfeldern.
-- **Königin**: Zwergenkönigin mit Krone, geflochtenem Haar, Pelzmantel, Thronsaal in einer Bergfestung.
-- **Drache**: klassischer D&D-Drache (Hörner, Schuppen, Fledermausflügel) – in der Höhle eindrucksvoll, danach mit freundlich hellem Gesicht.
-- Farbpalette: warme Erd-/Steintöne, Fackelorange, Schmiedeglut; Look eher SNES (Secret of Mana) als Game-Boy-Grün.
-- Es gibt weiterhin **keinen Kampf** – Äxte/Hämmer hängen höchstens als Dekoration an der Wand oder sind Werkzeuge.
-
-## Spielidee & Grundregeln (kindgerecht)
-- Draufsicht wie Zelda / Secret of Mana (16×16-Pixel-Kacheln, gross skaliert).
-- **Der Grosse Zwerg ist 2 Kacheln hoch** – das ist die Spielmechanik: Er erreicht hohe Regale, hohe Äste, trägt schwere Eimer. Was ihn «anders» macht, ist seine Stärke.
-- **Nur zwei Steuerelemente:** Bewegen + ein grosser Knopf «Helfen» (aufheben / geben / reden). Für den 3-Jährigen zusätzlich **Antippen-und-Hinlaufen** (Touch).
-- Über jedem Zwerg, der etwas braucht, schwebt ein **Bild-Wunsch** (🍎, 💧, 📕). Ein sanfter Pfeil zeigt, wo man es findet. Die Stimme sagt den Wunsch laut.
-- Belohnung: **Herzen** sammeln (Freundschaft), Zwerge freuen sich, hüpfen, Konfetti. Nie Strafe, man kann nicht verlieren. Fortschritt wird automatisch gespeichert.
-
-## Kapitel (aus Geschichte + Livs Wünschen)
-1. **Die Zwergenfeste im Bergtal** (Livs Aufgaben)
-   - Essen (Brot, Käse, Pilzsuppe) vom Markt in der Steinhalle holen → Mama Zwerg und den Zwergenkindern bringen
-   - Wasser aus dem steinernen Brunnen holen (schwerer Eisenkessel – nur der Grosse Zwerg schafft ihn)
-   - Riesige Wälzer in der Runen-Bibliothek vom obersten Regal holen
-   - Früchte ganz oben von den Obstbäumen im Tal pflücken – für die Familie und die Dorf-Zwerge
-   - Kleine Zwerge necken ihn anfangs («Du bist doch gar kein Zwerg!») – nach jeder Hilfe werden sie freundlicher.
-2. **Der Ruf der Königin** – Glocke läutet, Schloss, die Königin bittet um Hilfe wegen des Drachen.
-3. **Die Reise** – je eine kurze Karte mit einem einfachen Rätsel: Seen (über Trittsteine), tiefes Tal (Brücke aus Holz legen), dunkler Wald (Glühwürmchen folgen), Berge.
-4. **Der höchste Berg** – ängstliche Zwerge kommen entgegen; der Grosse Zwerg macht ihnen Mut (Herz schenken), einer gibt ihm eine Fackel.
-5. **Die Höhle** – nur Fackel-Lichtkreis sichtbar; Fackel geht aus; zwei leuchtende Augen. Einziger Knopf: ❤️ «Halt, lieber Drache, ich will dir nichts tun!» Der Drache hat Hunger und Durst → der Zwerg bringt ihm Essen und Wasser (dieselben Mechaniken wie im Dorf). **So wird der Drache «bezwungen»: durch Freundschaft.** Das Gesicht des Drachen wird hell und froh.
-6. **Der Flug** – Zwerg auf dem Drachenrücken, gemütliches Gleiten über Wälder, Berge, Täler, Seen; Sterne einsammeln, keine Gefahr.
-7. **Marktplatz & Finale** – Landung, neugierige Zwerge, die Königin kommt herunter, beide werden Ehrenmitglieder der königlichen Garde. Abspann mit «Spielidee: Liv».
-
-Zwischen den Kapiteln: kurze Bildergeschichte-Szenen (Standbild + Vorlesen), angelehnt an deinen Erzähltext.
+Deine Entscheide: KI-Stimmen vorab erzeugt · SNES-Stil (Secret of Mana) mit grösseren, detaillierten Figuren · 3 Speicherplätze.
+Grundsätze bleiben: D&D-Zwerge, kein Kampf, kein Game Over, alles vorgelesen, Artefakt wird nach jeder Etappe unter derselben Adresse aktualisiert.
 
 ---
 
-## Technik (bewusst einfach)
-- **Phaser 3** (bewährte 2D-Spiel-Bibliothek, JavaScript) + **Vite** (Entwicklungsserver & Build). Keine weiteren Frameworks.
-- **Level als Textkarten** – jede Karte ist ein Raster aus Buchstaben, z.B.
-  ```
-  TTTTTTTTTT
-  T..H...B.T      T=Baum  H=Haus  B=Brunnen  .=Wiese
-  T...P....T      P=Startpunkt
-  ```
-  Neue Level = neue Textdatei + Liste der Figuren und Aufgaben. Kein Editor nötig (später optional Tiled).
-- **Aufgaben als Daten**: `{ wer: 'mamaZwerg', will: 'essen', holenBei: 'markt', sagt: '…', danke: '…' }` – eine allgemeine «Hol & Bring»-Logik deckt fast alles ab.
-- **Sprachausgabe** über die eingebaute Browser-Stimme (Web Speech API, `de-CH`/`de-DE`), Texte zentral in einer Datei – später durch eigene Aufnahmen ersetzbar.
-- **Eingabe**: Tastatur (Pfeile + Leertaste), Gamepad (Steuerkreuz + A), Touch (Steuerkreuz links, grosser Herz-Knopf rechts, oder Antippen zum Hinlaufen).
-- **Speichern** im Browser (localStorage), Kapitelauswahl auf dem Titelbild.
-- **Ton**: einfache Chiptune-Effekte (im Code erzeugt), ruhige Musik optional aus CC0-Quellen.
+## 1. Natürliche Stimmen für jede Figur
+**Technik:** Offline-Sprach-KI **Piper** (neuronale Stimmen, deutlich natürlicher als die Browser-Stimme) über `sherpa-onnx` (pip). Die deutschen Piper-Stimmen sind über GitHub-Releases erreichbar (geprüft: `k2-fsa/sherpa-onnx` → `tts-models`). Die Sätze werden **einmalig vorab** zu MP3-Dateien erzeugt und ins Spiel gepackt – kein Internet, keine Kosten, im Spiel keine Roboterstimme mehr.
 
-### Geplante Struktur
-```
-index.html
-package.json, vite.config.js        (base = '/Game---Der-Grosse-Zwerg/')
-src/main.js                          Spielstart, Pixel-Skalierung
-src/scenes/  Boot, Titel, Geschichte, Welt, Hoehle, Flug, Finale
-src/levels/  dorf.js, schloss.js, reise-*.js, berg.js, hoehle.js
-src/systeme/ eingabe.js, stimme.js, aufgaben.js, dialog.js, speichern.js
-src/texte/   de.js                   alle gesprochenen/angezeigten Sätze
-src/grafik/  eigene-sprites.js       selbst gezeichnete Pixel-Figuren
-public/assets/                       CC0-Grafikpakete (siehe unten)
-.github/workflows/deploy.yml         automatische Veröffentlichung auf GitHub Pages
-docs/NEUES-LEVEL.md                  Anleitung: so baust du ein neues Level
-```
+**Besetzung** (Basisstimme + Tonhöhe/Tempo per Nachbearbeitung, damit jede Figur unverwechselbar klingt):
+| Figur | Basisstimme | Charakter |
+|---|---|---|
+| Erzähler | thorsten (high) | ruhig, warm, Gute-Nacht-Ton |
+| Grosser Zwerg | thorsten_emotional | tiefer, gutmütig, etwas langsamer |
+| Mama Hilde | kerstin | warm, freundlich |
+| Oma Runa | eva_k | etwas tiefer, langsam |
+| Kinder (Tilda, Bruno, Nella, Pip) | ramona / kerstin / eva_k | höher (+3–5 Halbtöne), schneller, je Kind verschieden |
+| Schmied Balin | karlsson | sehr tief, kräftig |
+| Händler, Bauer, Bibliothekar | pavoque / mls-Sprecher / thorsten | je eigene Tiefe & Tempo |
+| Bote | thorsten_emotional «surprised» | aufgeregt, feierlich |
+| Später: Königin, Drache | kerstin tiefer / thorsten stark tiefer + Hall | – |
 
-### Grafik-Beschaffung
-Meine Umgebung hat **keinen Zugriff** auf kenney.nl / opengameart.org (von der Netzwerkrichtlinie blockiert). Deshalb:
-1. **Ich baue zuerst alles mit selbst gezeichneten Sprites**, das Spiel ist so ab Tag 1 vollständig spielbar.
-2. **Du lädst** (wenn du willst) diese kostenlosen CC0-Pakete herunter (Lizenz: frei, keine Namensnennung nötig) – ausgewählt, weil sie zum D&D-Stil passen:
-   - **0x72 «16x16 DungeonTileset II»** – https://0x72.itch.io/dungeontileset-ii (Steinhallen, Fackeln, Truhen, Fässer – und bereits **bärtige Zwerg-Figuren**)
-   - **Kenney «Tiny Dungeon»** – https://kenney.nl/assets/tiny-dungeon (Fantasy-Figuren, Gegenstände, Höhle)
-   - **Kenney «Tiny Town»** – https://kenney.nl/assets/tiny-town (nur für Aussenbereich: Bäume, Wiesen, Wege, Brunnen)
-   - Auf GitHub: Repo öffnen → Ordner `public/assets/` → «Add file → Upload files» → ZIP-Inhalt reinziehen → Commit.
-3. Ich binde die Pakete dann ein; **selbst erstellt** (im D&D-Stil) bleibt alles, was es nicht gibt: Grosser Zwerg (2 Kacheln hoch, Flechtbart, Hörnerhelm, Rucksack), individuelle Dorf-Zwerge mit verschiedenen Bärten, Zwergenkönigin, Drache (gross, mit «freudig hellem» Gesicht), riesiges Bücherregal, Schmiede-Details, Flug-Szene.
-   - Alternative (Netzwerk freigeben): kenney.nl in der Umgebungs-Netzwerkrichtlinie erlauben, dann hole ich sie selbst.
+Vor dem Einbau erzeuge ich eine **Hörprobe** (ein Satz pro Figur) als kleines Artefakt, damit du die Besetzung prüfen kannst.
 
-### GitHub Pages
-Einmalig durch dich: Repo-Einstellungen → Pages → Source: «GitHub Actions». (Für kostenloses Pages muss das Repo öffentlich sein – der Link ist dann für jeden aufrufbar, der ihn kennt.) Danach wird jede Änderung automatisch veröffentlicht unter `https://gsb-deleven.github.io/Game---Der-Grosse-Zwerg/`. Auf dem Tablet: «Zum Home-Bildschirm» → wirkt wie eine App.
+**Umsetzung**
+- `scripts/saetze-exportieren.mjs`: sammelt alle Sätze aus `src/levels/*.js`, `src/texte/de.js` und den Zwischenszenen → `stimmen/saetze.json` (Figur/Stimme + Text).
+- `tools/stimmen/erzeuge.py` + `tools/stimmen/besetzung.json`: erzeugt pro Satz `src/stimmen/<hash>.mp3` (Hash aus Stimme+Text → nur Neues/Geändertes wird neu erzeugt), Tonhöhe via librosa, MP3 via lameenc. Befehl: `npm run stimmen`.
+- Neues Modul `src/systeme/stimme.js` ersetzt die Browser-Sprachausgabe: spielt die MP3 zur Figur ab (Phaser Sound), gibt ein Promise bis zum Ende zurück; die sprechende Figur bewegt sich dabei («redet»). Fehlt eine Datei (z.B. neuer Satz ohne `npm run stimmen`), fällt es auf die Browser-Stimme zurück.
+- Einbindung über `import.meta.glob('../stimmen/*.mp3')` → im Pages-Build normale Dateien, im Artefakt-Build automatisch eingebettet (geschätzt ~1–2 MB).
+- `docs/NEUES-LEVEL.md` bekommt einen Abschnitt «Stimmen erzeugen».
+
+## 2. SNES-Look & lebendige Bewegung
+**Figuren – Baukasten statt Einzelbilder:** Neuer Sprite-Baukasten `src/grafik/figuren-baukasten.js`, der Figuren aus Teilen zusammensetzt (Beine, Rumpf, Arme, Kopf, Bart, Helm/Haare, Rucksack, Kleidung) und daraus **alle Richtungen und Animationsphasen** berechnet – mit automatischem Umriss und Schattierung (Licht von links oben), wie bei SNES-Sprites.
+- **Grosser Zwerg** ca. 24 × 44 px (statt 16 × 32): Hörnerhelm mit Nieten, geflochtener roter Bart mit Goldringen, Kettenhemd-Kragen, Gürtel, Rucksack mit Seil und Laterne, Stiefel.
+- Animationen: 4 Richtungen × **6-Phasen-Laufzyklus** (Armschwung, Körperwippen, schwingender Bart), Stehen mit Atmen und Blinzeln, **Tragen** (Arme hoch, Gegenstand über dem Kopf), **Strecken** (holt Äpfel/Bücher von ganz oben), Freudensprung.
+- Dorf-Zwerge ca. 20 × 28 px mit vielen Varianten (Bartformen: lang, Gabelbart, Zöpfe, kurz; Helme, Kapuzen, Glatze; Schürzen, Umhänge); Kinder ca. 16 × 22 px. Figuren blinzeln, drehen den Kopf zum Grossen Zwerg, «reden» beim Sprechen, freuen sich sichtbar.
+- **Bewegungsgefühl:** sanftes Beschleunigen/Abbremsen, 8 Richtungen mit passender Blickrichtung, Animationstempo an die Geschwindigkeit gekoppelt, kleine Staubwölkchen beim Losgehen, leise Schritte.
+
+**Welt – detailreich und lebendig:**
+- Kachel-Übergänge (Gras↔Weg, Gras↔Wasser mit Ufer, Felskanten mit Ober- und Vorderseite) statt harter Kanten.
+- Zwergengebäude als richtige Bauten: Steinhäuser mit Schieferdach und Kamin, grosses Tor der Bergfestung mit Ahnen-Statuen und Bannern, Schmiede mit Funken und Rauch, Mineneingang mit Loren, Markt mit mehreren Ständen und Waren.
+- Deko-Schicht: Blumen, Grasbüschel, Steine, Büsche, Zäune, Wegweiser, Laternen, Heuballen, Holzstapel, Fässer, Kisten.
+- Leben: Rauch aus Kaminen, flackernde Fackeln mit Lichtschein, glitzerndes Wasser, Schmetterlinge, Vögel, Hühner/Ziegen, ziehende Wolkenschatten, Zwerge mit kleinen Tätigkeiten (Schmied hämmert, Bauer hackt).
+- **Musik:** kleine Chiptune-Melodien pro Ort (Dorf, Bibliothek, Titel), im Code erzeugt; leiser, wenn jemand spricht.
+- Die Dorfkarte wird dafür neu gestaltet (gleiche Aufgaben, schönere Anordnung); Legende und `NEUES-LEVEL.md` werden um die neuen Zeichen ergänzt.
+
+## 3. Splash-Screens bei coolen Momenten
+Kurze, bildschirmfüllende Einblendungen (2–4 Sekunden, antippen überspringt), mit grossem Bild, Fanfare und gesprochenem Satz – nicht bei jeder Kleinigkeit, sondern ab und zu:
+- **Neuer Ort** betreten (erstes Mal): Ortsname als Banner wie bei Zelda, z.B. «Die Runen-Bibliothek».
+- **Meilensteine**: erstes Herz («Du hast einem Zwerg geholfen!»), alle Äpfel verteilt, alle Bücher gebracht, 5 und 9 Herzen – mit Zwerg in Siegerpose, Herzregen und Konfetti.
+- **Die frechen Kinder werden Freunde**: Einblendung «Freundschaft!» mit Kind und Grossem Zwerg.
+- **Story-Momente**: Bote der Königin kommt, Kapitel geschafft; später: Drache taucht auf, Drache wird Freund, Abflug, Ehrenmitglied der Garde.
+- Umsetzung als eigene Szene `src/scenes/Splash.js`, die über der Welt liegt und die Welt pausiert; Auslöser in den Level-Daten (`meilensteine`) festgelegt, damit neue Level eigene Splashes bekommen können.
+
+## 4. Drei Speicherplätze
+- Neuer Bildschirm **«Spielstand wählen»** nach dem Titel: 3 Plätze, jeder mit wählbarem Bild (z.B. Zwerg, Drache, Blume) und Name (für Eltern eintippbar), zeigt Kapitel, Herzen und Spielzeit. Leerer Platz → «Neues Spiel». Pro Platz «Löschen» mit Bestätigung im Spiel.
+- **Pause-Menü** im Spiel: Weiterspielen · **Speichern** («Gespeichert!») · Lautstärke Musik/Stimmen · Zum Titel.
+- Automatisches Speichern bei jedem Herz und Kartenwechsel; gespeichert werden auch Ort, Position und was der Zwerg trägt → man macht genau dort weiter.
+- `src/systeme/speichern.js` wird auf Plätze umgebaut; der bisherige Spielstand wird automatisch in Platz 1 übernommen.
 
 ---
 
-## Umsetzung in Etappen (nach jeder Etappe: mit den Kindern testen!)
-| # | Etappe | Ergebnis |
-|---|--------|----------|
-| 0 | Grundgerüst | Vite+Phaser, Titelbild, GitHub-Pages-Deployment läuft |
-| 1 | **Spielbarer Prototyp** | Dorfkarte, Zwerg läuft (Touch/Tastatur/Gamepad), 1 Aufgabe (Wasser) mit Bild-Wunsch + Stimme |
-| 2 | Dorf komplett | Alle 4 Aufgaben von Liv, necken → danken, Herzen, Speichern |
-| 3 | Königin & Reise | Schloss, Bildergeschichte, 4 Reise-Karten mit Mini-Rätseln |
-| 4 | Berg & Höhle | ängstliche Zwerge, Fackel-Licht, Drachen-Begegnung, Drache füttern |
-| 5 | Flug & Finale | Flugszene, Marktplatz, Königin, Abspann |
-| 6 | Feinschliff | CC0-Grafiken einbauen, Musik, Anleitung «Neues Level» |
+## Reihenfolge
+1. Speicherplätze + Pause-Menü (schnell spürbar) → Artefakt aktualisieren
+2. Stimmen: Hörprobe → deine Freigabe → alle Sätze erzeugen und einbauen → Artefakt
+3. Figuren-Baukasten + Bewegung → Artefakt
+4. Welt, Gebäude, Leben, Musik → Artefakt
+5. Splash-Screens (nutzen die neuen Figuren und Stimmen) → Artefakt
+Danach wie geplant weiter mit Kapitel 2 (Königin & Reise), dann Berg/Höhle/Drache, Flug, Finale.
 
-Die Etappen 0–1 mache ich zuerst und pushe auf `claude/grosser-zwerg-game-plan-uicvh9`, damit ihr früh ausprobieren könnt, ob Steuerung und Tempo für die Kinder passen.
-
-## Später ausbaubar
-Neue Dorf-Aufgaben, Jahreszeiten-Level, Abenteuer mit dem Drachen als Beschützer (z.B. verirrtes Schaf finden), eigene Sprachaufnahmen von dir (auch Schweizerdeutsch), von Liv gezeichnete Figuren einscannen/abpixeln, Zwei-Spieler-Modus (Bruder spielt den Drachen).
+## Wichtige Dateien
+- Neu: `src/grafik/figuren-baukasten.js`, `src/grafik/welt-kacheln.js`, `src/scenes/Spielstaende.js`, `src/scenes/Pause.js`, `src/scenes/Splash.js`, `src/systeme/musik.js`, `scripts/saetze-exportieren.mjs`, `tools/stimmen/erzeuge.py`, `tools/stimmen/besetzung.json`, `src/stimmen/*.mp3`
+- Umbau: `src/scenes/Welt.js` (Bewegung, Animationen, Deko, Stimmen), `src/systeme/stimme.js`, `src/systeme/speichern.js`, `src/grafik/texturen.js`, `src/levels/dorf.js`, `src/levels/legende.js`, `src/scenes/Titel.js`, `src/scenes/Oberflaeche.js`
 
 ## Überprüfung
-- `npm run dev` lokal starten; per Playwright (Chromium ist vorhanden) Screenshots jeder Szene erstellen und dir zeigen.
-- Automatischer Durchlauf-Test: Script steuert den Zwerg durch alle Aufgaben eines Kapitels und prüft, dass es abgeschlossen wird (keine Sackgassen).
-- Prüfen: Touch-Steuerung im Handy-/Tablet-Viewport, Gamepad-Eingabe, Sprachausgabe startet nach erstem Antippen (Browser-Regel).
-- `npm run build` und GitHub-Actions-Deployment grün → Link auf echtem Tablet mit den Kindern testen.
+- `tests/durchlauf.mjs` erweitern: Spielstand wählen, Kapitel 1 durchspielen, speichern, neu laden → gleicher Ort/Herzen; Platz löschen.
+- Prüfen, dass zu **jedem** Satz eine MP3 existiert (Skript meldet fehlende).
+- Bildschirmfotos jeder Szene + ein kurzes Video/GIF der Laufanimation prüfen.
+- Pages- und Artefakt-Build; Durchlauf-Test gegen die Artefakt-Datei; Artefakt neu veröffentlichen.
