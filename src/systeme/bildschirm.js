@@ -4,16 +4,23 @@
 export const BREITE = 960;
 export const HOEHE = 540;
 
-// Zusätzlicher Rand links/rechts/oben/unten gegenüber 960 x 540 (in Spiel-Punkten)
+// Hochkant (einhändig) ist das Spielfeld schmaler als 960: Menüs werden dann verkleinert
+export function zoomFuer(scene) {
+  return Math.min(1, scene.scale.width / BREITE, scene.scale.height / HOEHE);
+}
+
+// Zusätzlicher sichtbarer Rand links/rechts/oben/unten gegenüber 960 x 540 (in Welt-Punkten der Szene)
 export function rand(scene) {
-  return { x: (scene.scale.width - BREITE) / 2, y: (scene.scale.height - HOEHE) / 2 };
+  const z = zoomFuer(scene);
+  return { x: (scene.scale.width / z - BREITE) / 2, y: (scene.scale.height / z - HOEHE) / 2 };
 }
 
 // Hält die 960 x 540 grosse Gestaltung einer Szene in der Bildschirmmitte
 export function mittig(scene) {
   const setze = () => {
-    const r = rand(scene);
-    scene.cameras.main.setScroll(-r.x, -r.y);
+    const cam = scene.cameras.main;
+    cam.setZoom(zoomFuer(scene));
+    cam.centerOn(BREITE / 2, HOEHE / 2);
   };
   setze();
   scene.scale.on('resize', setze);
@@ -49,5 +56,20 @@ export function sichererRand(scene) {
     };
   } catch (e) {
     return { links: 0, rechts: 0, oben: 0, unten: 0 };
+  }
+}
+
+// Hochkant spielen: das Spielfeld dreht sich mit (540 x 960), statt «Bitte drehen» zu zeigen.
+// Nur auf Handys (schmaler als 600 Punkte) und nur, wenn es in den Einstellungen eingeschaltet ist.
+export function passeFormAn(spiel, einstellungen) {
+  const erlaubt = einstellungen?.hochkant === 'ja';
+  document.body.classList.toggle('hochkant-ok', erlaubt);
+  const hochkant = erlaubt && window.innerHeight > window.innerWidth && window.innerWidth <= 600;
+  const [b, h] = hochkant ? [HOEHE, BREITE] : [BREITE, HOEHE];
+  // Im EXPAND-Modus rechnet Phaser mit der Grösse aus der Spiel-Konfiguration
+  if (spiel.config.width !== b) {
+    spiel.config.width = b;
+    spiel.config.height = h;
+    spiel.scale.refresh();
   }
 }

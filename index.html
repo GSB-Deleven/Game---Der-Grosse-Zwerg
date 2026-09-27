@@ -27,14 +27,15 @@
     #drehen .handy { width: 70px; height: 120px; border: 6px solid #f2c94c; border-radius: 14px; position: relative;
       animation: drehen 2.4s ease-in-out infinite; }
     #drehen .handy::after { content: ''; position: absolute; left: 50%; bottom: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #f2c94c; }
+    #drehen button { font: inherit; font-size: 22px; color: #1b1420; background: #f2c94c; border: 0; border-radius: 14px; padding: 14px 22px; }
     #drehen p { font-size: 26px; margin: 0; line-height: 1.3; color: #fff; }
     @keyframes drehen { 0%, 25% { transform: rotate(0); } 55%, 100% { transform: rotate(-90deg); } }
-    @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) { #drehen { display: flex; } }
+    @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) { body:not(.hochkant-ok) #drehen { display: flex; } }
   </style>
 </head>
 <body>
   <div id="spiel"></div>
-  <div id="drehen"><div class="handy"></div><p>Bitte das Handy drehen<br>🧔 ↻</p></div>
+  <div id="drehen"><div class="handy"></div><p>Bitte das Handy drehen<br>🧔 ↻</p><p style="font-size:18px;color:#bbb">oder</p><button id="einhaendig">✋ Hochkant spielen (einhändig)</button></div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

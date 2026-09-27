@@ -10,6 +10,8 @@ import { vollbildUmschalten, istVollbild } from '../systeme/vollbild.js';
 
 const STUFEN = [{ name: 'Aus', wert: 0 }, { name: 'Leise', wert: 0.3 }, { name: 'Mittel', wert: 0.6 }, { name: 'Laut', wert: 1 }];
 const TOUCH = [{ name: 'Automatisch', wert: 'auto' }, { name: 'Immer', wert: 'an' }, { name: 'Nie', wert: 'aus' }];
+const SEITE = [{ name: 'Links', wert: 'links' }, { name: 'Rechts', wert: 'rechts' }];
+const HOCHKANT = [{ name: 'Nein', wert: 'nein' }, { name: 'Einhändig', wert: 'ja' }];
 const TEXT = [{ name: 'Langsam', wert: 1.5 }, { name: 'Normal', wert: 1 }, { name: 'Schnell', wert: 0.6 }];
 
 const BELEGUNG = [
@@ -128,18 +130,22 @@ export class Pause extends Phaser.Scene {
     };
     const name = (liste, wert) => (liste.find((s) => s.wert === wert) || liste.reduce((b, s) => (Math.abs(s.wert - wert) < Math.abs(b.wert - wert) ? s : b))).name;
     const zeile = (y, beschriftung, wertText, aendern) => {
-      this.inhalt.add(this.add.text(250, y, beschriftung, stil(26)).setOrigin(0, 0.5));
-      const k = knopf(this, 620, y, { text: wertText(), breite: 230, hoehe: 50, groesse: 22, farbe: 0x5c5460 }, () => {});
+      this.inhalt.add(this.add.text(230, y, beschriftung, stil(24)).setOrigin(0, 0.5));
+      const k = knopf(this, 620, y, { text: wertText(), breite: 230, hoehe: 40, groesse: 21, farbe: 0x5c5460 }, () => {});
       const aktion = () => { aendern(); speichereEinstellungen(einst); k.list.find((o) => o.type === 'Text').setText(wertText()); };
       k.removeAllListeners('pointerdown');
       k.on('pointerdown', () => { spiele('knopf'); aktion(); });
       this.eintrag(k, aktion);
     };
-    zeile(200, 'Musik', () => name(STUFEN, einst.musik), () => { einst.musik = STUFEN[naechste(STUFEN, einst.musik)].wert; setzeMusikLautstaerke(einst.musik); });
-    zeile(262, 'Töne', () => name(STUFEN, einst.toene ?? 1), () => { einst.toene = STUFEN[naechste(STUFEN, einst.toene ?? 1)].wert; setzeTonLautstaerke(einst.toene); spiele('herz'); });
-    zeile(324, 'Text-Tempo', () => name(TEXT, einst.textTempo ?? 1), () => { einst.textTempo = TEXT[naechste(TEXT, einst.textTempo ?? 1)].wert; this.game.events.emit('einstellungen', einst); });
-    zeile(386, 'Touch-Knöpfe', () => name(TOUCH, einst.touch || 'auto'), () => { einst.touch = TOUCH[naechste(TOUCH, einst.touch || 'auto')].wert; this.game.events.emit('einstellungen', einst); });
-    zeile(448, 'Vollbild (F)', () => (istVollbild(this) ? 'An' : 'Aus'), () => { vollbildUmschalten(this.game); });
+    const neu = () => this.game.events.emit('einstellungen', einst);
+    const y = (i) => 186 + i * 46;
+    zeile(y(0), 'Musik', () => name(STUFEN, einst.musik), () => { einst.musik = STUFEN[naechste(STUFEN, einst.musik)].wert; setzeMusikLautstaerke(einst.musik); });
+    zeile(y(1), 'Töne', () => name(STUFEN, einst.toene ?? 1), () => { einst.toene = STUFEN[naechste(STUFEN, einst.toene ?? 1)].wert; setzeTonLautstaerke(einst.toene); spiele('herz'); });
+    zeile(y(2), 'Text-Tempo', () => name(TEXT, einst.textTempo ?? 1), () => { einst.textTempo = TEXT[naechste(TEXT, einst.textTempo ?? 1)].wert; neu(); });
+    zeile(y(3), 'Touch-Knöpfe', () => name(TOUCH, einst.touch || 'auto'), () => { einst.touch = TOUCH[naechste(TOUCH, einst.touch || 'auto')].wert; neu(); });
+    zeile(y(4), 'Steuerkreuz', () => name(SEITE, einst.kreuz || 'links'), () => { einst.kreuz = SEITE[naechste(SEITE, einst.kreuz || 'links')].wert; neu(); });
+    zeile(y(5), 'Hochkant spielen', () => name(HOCHKANT, einst.hochkant || 'nein'), () => { einst.hochkant = HOCHKANT[naechste(HOCHKANT, einst.hochkant || 'nein')].wert; neu(); });
+    zeile(y(6), 'Vollbild (F)', () => (istVollbild(this) ? 'An' : 'Aus'), () => { vollbildUmschalten(this.game); });
   }
 
   reiterSteuerung() {

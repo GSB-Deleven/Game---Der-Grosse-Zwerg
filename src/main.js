@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { Boot } from './scenes/Boot.js';
 import { vollbildUmschalten } from './systeme/vollbild.js';
+import { passeFormAn } from './systeme/bildschirm.js';
+import { ladeEinstellungen, speichereEinstellungen } from './systeme/speichern.js';
 import { Titel } from './scenes/Titel.js';
 import { Geschichte } from './scenes/Geschichte.js';
 import { Welt } from './scenes/Welt.js';
@@ -35,6 +37,19 @@ const spiel = new Phaser.Game({
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { gamepad: controllerErlaubt, activePointers: 3 },
   scene: [Boot, Titel, Spielstaende, Geschichte, Welt, Oberflaeche, Pause, Splash, Entscheidung, Flug, Abspann, KapitelEnde],
+});
+
+// Hochkant spielen (einhändig), falls eingeschaltet: Spielfeld dreht sich mit dem Handy
+let einstellungenJetzt = ladeEinstellungen();
+const form = () => passeFormAn(spiel, einstellungenJetzt);
+spiel.events.once('ready', () => setTimeout(form, 100));
+window.addEventListener('resize', () => setTimeout(form, 50));
+window.addEventListener('orientationchange', () => setTimeout(form, 200));
+spiel.events.on('einstellungen', (e) => { einstellungenJetzt = e; form(); });
+document.getElementById('einhaendig')?.addEventListener('click', () => {
+  const e = { ...ladeEinstellungen(), hochkant: 'ja' };
+  speichereEinstellungen(e);
+  spiel.events.emit('einstellungen', e);
 });
 
 // Taste F: Vollbild – überall im Spiel (ausser beim Namen eintippen)

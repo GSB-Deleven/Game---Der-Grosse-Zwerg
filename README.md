@@ -12,6 +12,7 @@
 > | Menü | **Esc** / P / Start | ⏸ oben rechts |
 > | Vollbild | **F** | im Menü |
 > | Spielstände | 3 Plätze, speichert automatisch | gleich |
+> | Einhändig | – | Menü → Einstellungen: **Steuerkreuz rechts** und **Hochkant spielen** (Handy hochkant, Kreuz und Helfen-Knopf übereinander) |
 
 ### Ein Retro-Abenteuer über Mut, Freundschaft und ein grosses Herz. Im Stil von Zelda und Secret of Mana, für Kinder ab 3 Jahren.
 

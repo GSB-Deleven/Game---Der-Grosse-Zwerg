@@ -57,6 +57,7 @@ export class Oberflaeche extends Phaser.Scene {
     setzeTextTempo(einst.textTempo);
     this.zeigeTouch = einst.touch === 'an' || (einst.touch !== 'aus' && this.sys.game.device.input.touch);
     this.touchTeile.forEach((t) => t.setVisible(this.zeigeTouch));
+    this.ordneAn();
   }
 
   // Alles an die Ränder des (beliebig grossen) Bildschirms setzen, mit Abstand zur iPhone-Notch
@@ -64,13 +65,33 @@ export class Oberflaeche extends Phaser.Scene {
     const B = this.scale.width, H = this.scale.height;
     const r = sichererRand(this);
     const l = Math.max(0, r.links * 0.8), re = Math.max(0, r.rechts * 0.8), u = Math.max(0, r.unten * 0.5);
+    const rechts = this.einstellungen?.kreuz === 'rechts';
+    const hochkant = H > B;
     this.herzBox.setPosition(l, 0);
     this.menueKnopf.setPosition(B - 30 - re, 40);
-    this.sprechfeld.x = Math.max(540 + l, B / 2);
-    this.kreuz.x = 130 + l; this.kreuz.y = H - 120 - u;
-    this.kreuzTeil.setPosition(this.kreuz.x, this.kreuz.y);
-    this.kreuzKnauf.setPosition(this.kreuz.x, this.kreuz.y);
-    this.aktionsKnopf.setPosition(B - 120 - re, H - 120 - u);
+
+    // Sprechfeld: neben den Herzen, hochkant darunter und verkleinert
+    const skala = Math.min(1, (B - 20) / 760);
+    this.sprechfeld.setScale(skala);
+    this.sprechfeld.setPosition(hochkant ? B / 2 : Math.max(540 + l, B / 2), hochkant ? 90 : 12);
+
+    let kreuzX, kreuzY, knopfX, knopfY;
+    if (hochkant) {
+      // Einhändig: Steuerkreuz unten, Helfen-Knopf direkt darüber – beides mit einem Daumen
+      kreuzX = rechts ? B - 125 - re : 125 + l;
+      kreuzY = H - 150 - u;
+      knopfX = rechts ? B - 110 - re : 110 + l;
+      knopfY = kreuzY - 250;
+    } else {
+      // Quer: Steuerkreuz auf der gewählten Seite, Helfen-Knopf gegenüber
+      kreuzX = rechts ? B - 130 - re : 130 + l;
+      knopfX = rechts ? 120 + l : B - 120 - re;
+      kreuzY = knopfY = H - 120 - u;
+    }
+    this.kreuz.x = kreuzX; this.kreuz.y = kreuzY;
+    this.kreuzTeil.setPosition(kreuzX, kreuzY);
+    this.kreuzKnauf.setPosition(kreuzX, kreuzY);
+    this.aktionsKnopf.setPosition(knopfX, knopfY);
   }
 
   // ---- Herzen oben links ----------------------------------------------------
@@ -142,7 +163,7 @@ export class Oberflaeche extends Phaser.Scene {
 
   // ---- Orts-Banner (wie bei Zelda) ------------------------------------------
   zeigeOrt(name) {
-    const c = this.add.container(this.scale.width / 2, this.scale.height / 2 - 20).setAlpha(0);
+    const c = this.add.container(this.scale.width / 2, this.scale.height / 2 - 20).setAlpha(0).setScale(Math.min(1, (this.scale.width - 20) / 680));
     const g = this.add.graphics();
     g.fillStyle(0x1b1420, 0.85).fillRect(-330, -38, 660, 76);
     g.lineStyle(3, 0xf2c94c).lineBetween(-330, -38, 330, -38).lineBetween(-330, 38, 330, 38);
