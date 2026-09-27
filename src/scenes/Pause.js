@@ -12,10 +12,10 @@ const TOUCH = [{ name: 'Automatisch', wert: 'auto' }, { name: 'Immer', wert: 'an
 const TEXT = [{ name: 'Langsam', wert: 1.5 }, { name: 'Normal', wert: 1 }, { name: 'Schnell', wert: 0.6 }];
 
 const BELEGUNG = [
-  ['Laufen', 'Pfeiltasten / W A S D', 'Stick / Steuerkreuz', 'Steuerkreuz links oder irgendwo hintippen'],
-  ['Helfen / Reden', 'Leertaste / Enter / E', 'A (oder B, X, Y)', 'Grosser Herz-Knopf'],
-  ['Menü', 'Esc / P', 'Start', 'Pause-Knopf oben rechts'],
-  ['Vollbild', 'F', '–', 'im Menü'],
+  ['Laufen', 'Pfeiltasten / W A S D', 'Stick / Steuerkreuz', 'Steuerkreuz oder hintippen'],
+  ['Helfen / Reden', 'Leertaste / Enter / E', 'A (oder B, X, Y)', 'Herz-Knopf'],
+  ['Menü', 'Esc / P', 'Start', 'Pause-Knopf ⏸'],
+  ['Vollbild', 'F', 'im Menü', 'im Menü'],
   ['Im Menü wählen', 'Pfeiltasten + Enter', 'Steuerkreuz + A', 'antippen'],
 ];
 

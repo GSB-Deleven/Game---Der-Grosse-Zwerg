@@ -96,6 +96,9 @@ export class Geschichte extends Phaser.Scene {
     this.bilder = BILDER[this.name] || [];
     this.weiter = daten.weiter;
     this.seite = -1;
+    // Die Szene wird für jedes Kapitel wiederverwendet: alte Zustände löschen
+    this.beendet = false;
+    this.letzterKlick = null;
   }
 
   create() {

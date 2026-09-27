@@ -11,7 +11,7 @@ const KAP = process.env.KAPITEL;
 fs.mkdirSync(BILDER, { recursive: true });
 
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: !process.env.OHNE_TOUCH });
 const fehler = [];
 page.on('pageerror', (e) => fehler.push(e.message + '\n' + (e.stack || '').split('\n').slice(0, 3).join('\n')));
 page.on('console', (m) => { if (m.type() === 'error' && !m.text().includes('ERR_CERT')) fehler.push(m.text()); });
@@ -44,18 +44,25 @@ if (!KAP) {
 }
 
 const gesehen = new Set();
+const herzFoto = new Set(), herzBeimBetreten = {}; // zusätzlich ein Foto pro Karte, sobald dort das erste Herz verdient ist
 let letzteAktion = '', gleichSeit = 0, runden = 0, geladen = false;
 const start = Date.now();
-while (Date.now() - start < 25 * 60 * 1000) {
+while (Date.now() - start < 60 * 60 * 1000) {
   runden++;
   const z = await zustand();
   const szene = z.aktiv.find((a) => ['Geschichte', 'Splash', 'Entscheidung', 'KapitelEnde', 'Flug', 'Abspann', 'Pause'].includes(a)) || (z.aktiv.includes('Welt') ? 'Welt' : z.aktiv[0]);
   const schluessel = szene === 'Welt' ? `welt-${z.karte}` : `${szene}-${z.kapitel}`;
   if (!gesehen.has(schluessel)) {
     gesehen.add(schluessel);
+    if (szene === 'Welt') herzBeimBetreten[z.karte] = z.herzen;
     await page.waitForTimeout(szene === 'Welt' ? 2200 : 900);
     await foto(`k${z.kapitel}-${schluessel}`);
     console.log(`→ Kapitel ${z.kapitel}: ${szene}${szene === 'Welt' ? ` (${z.karte})` : ''} – ${z.herzen} Herzen`);
+  }
+  if (szene === 'Welt' && z.lebt && !herzFoto.has(z.karte) && z.herzen > (herzBeimBetreten[z.karte] ?? 99)) {
+    herzFoto.add(z.karte);
+    await page.waitForTimeout(1200);
+    await foto(`k${z.kapitel}-welt-${z.karte}-mitte`);
   }
   if (szene === 'Abspann') { await page.waitForTimeout(4000); await foto('ende-abspann'); break; }
   if (szene === 'Geschichte') await page.keyboard.press('Space');
@@ -72,7 +79,8 @@ while (Date.now() - start < 25 * 60 * 1000) {
       await page.reload(); await page.waitForTimeout(2500);
       await page.keyboard.press('Space'); await page.waitForTimeout(1000);
       await page.evaluate(() => window.spiel.scene.getScene('Spielstaende').starte(0, JSON.parse(localStorage.getItem('grosser-zwerg-plaetze-v2')).plaetze[0]));
-      await page.waitForTimeout(2500);
+      await page.waitForFunction(() => { const w = window.spiel.scene.getScene('Welt'); return w?.lebt && w.held && window.spiel.scene.isActive('Welt'); }, null, { timeout: 20000 });
+      await page.waitForTimeout(800);
       const nachher = await zustand();
       if (nachher.herzen !== z.herzen || Math.abs(nachher.pos[0] - vorher[0]) > 3) throw new Error(`Spielstand falsch geladen: ${JSON.stringify({ z, nachher })}`);
       console.log('✔ Spielstand gespeichert, neu geladen und am gleichen Ort weitergespielt');

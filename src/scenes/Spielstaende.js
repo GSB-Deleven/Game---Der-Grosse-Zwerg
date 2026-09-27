@@ -23,6 +23,8 @@ export class Spielstaende extends Phaser.Scene {
   constructor() { super('Spielstaende'); }
 
   create() {
+    this.dialog = null;
+    this.namensFeld = null;
     this.cameras.main.fadeIn(300);
     bergKulisse(this);
     this.add.rectangle(480, 270, 960, 540, 0x1b1420, 0.35);

@@ -99,6 +99,7 @@ export class Flug extends Phaser.Scene {
     this.zeit = 0;
     this.ziel = 250;
     this.beendet = false;
+    this.fertig = false;
     landschaften(this);
 
     this.himmel = this.add.graphics();
@@ -116,7 +117,7 @@ export class Flug extends Phaser.Scene {
     // Glutherz mit dem Grossen Zwerg auf dem Rücken
     this.reiter = this.add.container(240, this.ziel);
     this.drache = this.add.image(0, 0, 'flugdrache1').setScale(2.4);
-    this.held = this.add.image(-6, -30, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(2.1);
+    this.held = this.add.image(-10, -8, 'held_seite_jubeln').setOrigin(0.5, 46 / 48).setScale(2.1);
     this.reiter.add([this.held, this.drache]);
     this.reiter.bringToTop(this.held);
     let fl = 0;

@@ -165,11 +165,14 @@ export function maleBoden(scene, key, boden) {
             if (zufall(x, y, 24) > 0.985) c = rgb('#8a5aa8');
           } else if (t === 'schlucht') {
             const kante = abstandZu(tx, ty, px, py, (n) => n && n !== 'schlucht' && n !== 'bruecke');
-            c = rgb('#0e0a12');
-            if (kante < 6) c = rgb('#1e1620');
-            if (kante < 3) c = FARBEN.fels[1];
-            if (kante < 1.5) c = FARBEN.fels[3];
-            if (kante >= 6 && zufall(x, y, 25) > 0.992) c = rgb('#3a3048');
+            // Felswände fallen in die Tiefe ab: aussen hell, innen immer dunkler, mit senkrechten Rissen
+            const riss = (x + Math.floor(rauschen(x / 3, y / 9, 27) * 5)) % 5 === 0;
+            if (kante < 1.5) c = FARBEN.fels[4];
+            else if (kante < 4) c = riss ? FARBEN.fels[1] : FARBEN.fels[3];
+            else if (kante < 8) c = riss ? FARBEN.fels[0] : FARBEN.fels[2];
+            else if (kante < 13) c = riss ? rgb('#2a2430') : FARBEN.fels[1];
+            else if (kante < 20) c = riss ? rgb('#1a1620') : rgb('#342c3a');
+            else c = rauschen(x / 6, y / 6, 28) > 0.6 ? rgb('#241e2a') : rgb('#16121a');
           } else if (t === 'leiter') {
             c = maleFels(x, y, tx, ty, px, py, () => 'fels');
             if (px === 3 || px === 12) c = rgb('#8a6a3a');

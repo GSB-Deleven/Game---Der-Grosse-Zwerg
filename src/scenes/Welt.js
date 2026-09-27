@@ -43,6 +43,13 @@ export class Welt extends Phaser.Scene {
     this.heldPoseBis = 0;
     this.heldRedenBis = 0;
     this.naechstesBlinzeln = 2000;
+    // Die Szene wird bei jedem Kartenwechsel wiederverwendet: alte Verweise löschen
+    this.dunkelSchicht = null;
+    this.maske = null;
+    this.wolken = null;
+    this.startFeld = null;
+    this.letztePos = null;
+    this.laufend = false;
     this.dunkelheit = this.karte.dunkel || 0;
     this.heldLicht = this.karte.heldLicht ?? 60;
     this.fackelAn = true;
@@ -996,7 +1003,7 @@ export class Welt extends Phaser.Scene {
     }
     if (REDE_WUENSCHE.has(d.wunsch)) return this.erfuelle(figur, true);
     if (this.traegt === d.wunsch) {
-      if (d.anzahl > 1) return this.liefereTeil(figur);
+      if (d.anzahl > 1 || figur.baustelle) return this.liefereTeil(figur);
       return this.erfuelle(figur);
     }
     const text = (!figur.gesprochen && d.neckt ? `${d.neckt} ` : '') + d.sagt;
