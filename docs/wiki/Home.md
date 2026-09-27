@@ -20,8 +20,10 @@ ein gelber Pfeil zeigt immer, wohin es geht.
 | [[Neues Level bauen]] | Eltern | Eigene Karten, Figuren, Aufgaben und Drehbücher |
 | [[Technik]] | Entwickler | Aufbau des Codes, Grafik-Baukasten, Musik |
 | [[Entwicklung und Tests]] | Entwickler | Starten, bauen, testen, veröffentlichen |
+| [[Mitarbeit und Planung]] | alle | Ideen, Issues, @claude, Milestones, Project-Board |
 
 ## Links
+- **Spielen:** [gsb-deleven.github.io/Game-Der_Grosse_Zwerg](https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/)
 - Code: [Repository](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg)
 - Aufgaben: [Issues](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues)
 - Ideen & Wünsche: [Discussions](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/discussions)

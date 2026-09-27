@@ -2,9 +2,9 @@
 
 | Aktion | Tastatur | Controller | Tablet / Handy |
 |---|---|---|---|
-| Laufen | Pfeiltasten oder W A S D | Stick oder Steuerkreuz | Steuerkreuz links – oder einfach irgendwo **hintippen** |
-| Helfen / Reden / Aufheben | Leertaste, Enter oder E | A (oder B, X, Y) | grosser **Herz-Knopf** rechts – oder Figur antippen |
-| Menü öffnen / schliessen | Esc oder P | Start | Pause-Knopf ⏸ oben rechts |
+| Laufen | Pfeiltasten oder W A S D | Stick oder Steuerkreuz | Steuerkreuz (Zwergen-Schild, standardmässig rechts) – oder einfach irgendwo **hintippen** |
+| Helfen / Reden / Aufheben | Leertaste, Enter oder E | A (oder B, X, Y) | grosser **Herz-Knopf** gegenüber dem Steuerkreuz – oder Figur antippen |
+| Menü öffnen / schliessen | Esc oder P | Start | Pause-Knopf oben rechts |
 | Vollbild | F | über das Menü | über das Menü |
 | Im Menü wählen | Pfeiltasten + Enter, ←/→ wechselt den Reiter | Steuerkreuz + A | antippen |
 | Geschichte weiterblättern | Leertaste / Enter | beliebiger Knopf | antippen |

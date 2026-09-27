@@ -77,6 +77,26 @@ Wenn etwas Besonderes passiert, gibt es eine Einblendung über den ganzen Bildsc
 
 ---
 
+## 📱 Auf dem Handy und Tablet
+
+Das Spiel füllt jeden Bildschirm aus. **Quer** liegt das Steuerkreuz rechts und der Helfen-Knopf links (im Menü umstellbar).
+**Hochkant** spielt man einhändig: Steuerkreuz unten, Helfen-Knopf direkt darüber, beides mit dem Daumen.
+
+<table>
+<tr>
+<td width="68%"><img src="docs/bilder/handy-quer.png" alt="Handy quer"></td>
+<td width="32%"><img src="docs/bilder/handy-hochkant.png" alt="Handy hochkant, einhändig"></td>
+</tr>
+<tr>
+<td align="center">Quer: Zwergen-Schild als Steuerkreuz</td>
+<td align="center">Hochkant: einhändig</td>
+</tr>
+</table>
+
+**Als App:** Link in Safari öffnen → Teilen → «Zum Home-Bildschirm». Dann startet es im Vollbild und aktualisiert sich von selbst.
+
+---
+
 ## 🗺️ Fünf Kapitel, elf Orte
 
 | Kapitel | Orte | Was passiert |
@@ -117,7 +137,9 @@ Wenn etwas Besonderes passiert, gibt es eine Einblendung über den ganzen Bildsc
 
 💬 **Plappern statt Computerstimme.** Die Figuren «plappern» beim Reden, jede in ihrer eigenen Tonhöhe. Der Text läuft dazu mit.
 
-⚙️ **Menü wie in jedem guten Spiel.** Mit **Esc**: Weiter, Speichern, Musik, Töne, Text-Tempo, Touch-Knöpfe, Vollbild und alle Tasten im Überblick.
+⚙️ **Menü wie in jedem guten Spiel.** Mit **Esc** oder ⏸: Weiter, Speichern, Musik, Töne, Text-Tempo, Touch-Knöpfe, Steuerkreuz links/rechts, Hochkant spielen, Vollbild und alle Tasten im Überblick. Unten steht die Version.
+
+📱 **Für Handy und Tablet gemacht.** Füllt jeden Bildschirm aus. Hochkant spielt man einhändig: Steuerkreuz unten, Helfen-Knopf direkt darüber. Das Steuerkreuz ist ein Zwergen-Schild mit Steinkreuz. Als App auf dem Home-Bildschirm aktualisiert es sich von selbst.
 
 ![Menü](docs/bilder/menue.png)
 

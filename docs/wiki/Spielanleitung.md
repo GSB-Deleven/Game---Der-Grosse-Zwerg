@@ -23,12 +23,22 @@ Es gibt keine Gegner, man kann nichts falsch machen und nichts verlieren.
 - Im **Menü** (Esc oder ⏸ oben rechts) gibt es zusätzlich **Speichern**.
 - Einen Spielstand löschen: auf der Spielstand-Karte das rote **✕** antippen und bestätigen.
 - Ist das Spiel durchgespielt, zeigt die Karte **👑 Geschafft!**
+- Die Spielstände liegen **im Browser des Geräts** und bleiben nach dem Schliessen erhalten.
+  Nicht im privaten Modus spielen und die Websitedaten nicht löschen.
+- Die **App auf dem Home-Bildschirm** hat eigene Spielstände, getrennt von Safari. Das Artefakt in Claude hat ebenfalls eigene.
+
+## Als App auf dem Tablet oder Handy
+1. [Spiel-Link](https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/) in Safari öffnen
+2. Teilen → **«Zum Home-Bildschirm»**
+3. Über das Symbol mit dem Grossen Zwerg starten: Vollbild, ohne Adressleiste
+
+Neue Versionen lädt die App beim Start von selbst. Welche Version läuft, steht unten im Menü (Reiter «Spiel»).
 
 ## Das Menü (Esc)
 | Reiter | Inhalt |
 |---|---|
-| **Spiel** | Weiterspielen · Speichern · Zum Titelbild |
-| **Einstellungen** | Musik · Töne · Text-Tempo · Touch-Knöpfe (automatisch/immer/nie) · Vollbild |
+| **Spiel** | Weiterspielen · Speichern · Zum Titelbild · Versionsanzeige |
+| **Einstellungen** | Musik · Töne · Text-Tempo · Touch-Knöpfe (automatisch/immer/nie) · Steuerkreuz (rechts/links) · Hochkant spielen (einhändig/nein) · Vollbild |
 | **Steuerung** | Übersicht aller Tasten für Tastatur, Controller und Tablet |
 
 **F** schaltet jederzeit in den Vollbildmodus.
