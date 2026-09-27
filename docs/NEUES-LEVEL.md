@@ -1,7 +1,8 @@
 # So baust du ein neues Level
 
-Ein Level ist eine ganz normale Textdatei in `src/levels/`. Die Karte wird mit Buchstaben «gemalt» –
-jeder Buchstabe ist ein Feld (16 × 16 Pixel). Am besten kopierst du `bibliothek.js` und änderst sie.
+Ein Level ist eine Textdatei in `src/levels/`. Die Karte wird mit Zeichen «gemalt» – jedes Zeichen ist ein Feld
+(16 × 16 Pixel). Am einfachsten kopierst du eine bestehende Datei (z. B. `see.js`) und änderst sie.
+Nach jeder Änderung prüft `npm run pruefen`, ob alles erreichbar ist.
 
 ## 1. Karte malen
 ```js
@@ -15,44 +16,86 @@ karte: [
 ```
 Alle Zeilen müssen **gleich lang** sein.
 
+### Böden
 | Zeichen | Bedeutung | Zeichen | Bedeutung |
 |---|---|---|---|
-| `.` | Gras | `M` | Fels / Berg |
-| `,` | Blumenwiese | `W` | Steinmauer |
-| `:` | Pflasterweg | `R` | Mauer mit Rune |
-| `_` | Acker | `~` | Wasser |
-| `#` | Steinboden | `=` | Brücke |
-| `\|` | roter Teppich | `-` | Holzboden |
-| `T` | Tanne | `F` | Obstbaum (gibt **Äpfel**) |
-| `B` | Brunnen (gibt **Wasser**) | `S+` | Marktstand, 2 Felder (gibt **Essen**) |
-| `Q` | Bücherregal (gibt **Bücher**) | `H++` / `+++` | Zwergenhaus, 3 × 2 Felder |
-| `*` | Busch | `^` | Felsbrocken |
-| `J` | Zaun | `!` | Laterne (leuchtet) |
-| `L` | Feuerschale (brennt) | `E` / `A` | Schmiede-Esse / Amboss |
-| `K` / `$` | Fass / Kiste | `%` / `&` | Holzstapel / Heuballen |
-| `?` | Wegweiser | `Y` | Ahnen-Statue |
-| `V+` | Mineneingang, 2 Felder | `P` | Pilze |
-| `@` | Hier startet der Grosse Zwerg | `a`–`z` / `1`–`9` | Figur / Tür (siehe unten) |
+| `.` | Gras | `,` | Blumenwiese |
+| `:` | Pflasterweg | `_` | Acker |
+| `#` | Steinboden | `\|` | roter Teppich |
+| `-` | Holzboden | `=` | Brücke (begehbar) |
+| `"` | Schnee | `;` | Höhlenboden |
+| `~` | Wasser (fest) | `X` | Schlucht (fest) |
+| `M` | Fels / Berg (fest) | `Ö` | Höhlenwand (fest) |
+| `W` | Steinmauer (fest) | `R` | Mauer mit Rune |
+| `G` | Mauer mit Banner | `O` | Trittstein im Wasser (begehbar) |
+| `[` | Strickleiter (begehbar) | `@` | Hier startet der Grosse Zwerg |
 
-Grosse Dinge (Haus, Marktstand, Mine) stehen mit ihrem Buchstaben oben links, die restlichen Felder bekommen ein `+`.
-Neue Zeichen kannst du in `src/levels/legende.js` erfinden.
+### Dinge zum Holen (Quellen)
+| Zeichen | Ding | gibt |
+|---|---|---|
+| `B` | Brunnen | Wasser |
+| `]` | Höhlenquelle | Wasser |
+| `S+` | Marktstand (2 Felder) | Essen |
+| `F` | Obstbaum | Äpfel |
+| `Q` | Bücherregal | Bücher |
+| `C` | Steinhaufen | Steine |
+| `` ` `` | Bretterstapel | Bretter |
+| `/` | Seilkiste | Seil |
+| `D` | Beerenbusch | Beeren |
+| `N` | Heuhaufen | Heu |
+| `(` | Feuerschale | Fackel |
+| `)` | Höhlenpilze | Pilze |
+
+### Gebäude und Deko
+| Zeichen | Bedeutung | Zeichen | Bedeutung |
+|---|---|---|---|
+| `H++` / `+++` | Zwergenhaus (3 × 2) | `U++` / `+++` | Stall (3 × 2) |
+| `>+` / `++` | Burgturm (2 × 2) | `{` + `+` | Schloss (7 × 4) |
+| `V+` | Mineneingang | `Y` | Ahnen-Statue |
+| `Ü+` | Thron | `I` | Säule |
+| `T` | Tanne | `<` | Laubbaum |
+| `*` | Busch | `^` | Felsbrocken |
+| `J` | Zaun | `Z` | Rosen |
+| `!` | Laterne (leuchtet) | `L` | Feuerschale (Deko) |
+| `E` / `A` | Esse / Amboss | `K` / `$` | Fass / Kiste |
+| `%` / `&` | Holzstapel / Heuballen | `?` | Wegweiser |
+| `P` | Pilze (Deko) | `}` | Kristall (leuchtet) |
+| `0` | Auslöse-Feld für ein Ereignis | `a`–`z` | Figur (siehe unten) |
+| `1`–`9` | Tür / Ausgang | | |
+
+Grosse Dinge stehen mit ihrem Zeichen oben links, die restlichen Felder bekommen ein `+`.
+Neue Zeichen lassen sich in `src/levels/legende.js` erfinden.
 
 ## 2. Figuren beschreiben
-Jeder Kleinbuchstabe auf der Karte bekommt einen Eintrag:
+Jeder Kleinbuchstabe auf der Karte bekommt einen Eintrag unter `figuren`:
 ```js
 figuren: {
   a: {
     name: 'Onkel Gimli',
     aussehen: 'gimli',               // Name aus src/grafik/figuren-liste.js
     stimme: { hoehe: 0.7 },          // Tonhöhe beim Plappern: 0.5 = tief, 2 = hoch
-    wunsch: 'wasser',                // essen, wasser, buch oder frucht
-    neckt: 'Hoho, du Riese!',        // (freiwillig) wird nur beim ersten Mal gesagt
+    wunsch: 'wasser',                // essen, wasser, buch, frucht, stein, brett, seil, beeren, heu, fackel, pilze
+    neckt: 'Hoho, du Riese!',        // (freiwillig) nur beim ersten Mal
     sagt: 'Holst du mir bitte Wasser?',
     danke: 'Danke, mein Freund!',
     danach: 'Du bist ein echter Held.',
   },
 },
 ```
+Weitere Möglichkeiten:
+| Eintrag | Wirkung |
+|---|---|
+| `wunsch: 'mut'` | Wird erfüllt, sobald man mit der Figur redet (Herz in der Blase) |
+| `wunsch: 'reden'` + `gespraech: [...]` | Ein Gespräch als Drehbuch (siehe unten), danach erfüllt |
+| `wuensche: [{ wunsch, sagt, danke }, …]` | Mehrere Wünsche nacheinander (wie bei Glutherz) |
+| `anzahl: 3` | Braucht 3 Stück (Blase zeigt «1/3») |
+| `geschenk: 'fackel'` | Gibt nach dem Helfen etwas mit |
+| `versteckt: true` | Erst unsichtbar, erscheint durch ein Ereignis (`zeige`) |
+| `licht: 70`, `lichtNachErfuellt: true` | Leuchtet (in dunklen Karten), optional erst nach dem Helfen |
+| `sprecher: 'held'` | Der Grosse Zwerg spricht die Texte selbst |
+| `aussehen: 'drache'`, `zustand: 'froh'` | Glutherz (belegt 3 × 2 Felder) |
+| `aussehen: 'pony'` | Das Pony |
+
 Das **Aussehen** steht in `src/grafik/figuren-liste.js`, z. B.
 ```js
 gimli: { typ: 'zwerg', haar: 'rot', bart: 'gabel', kleid: 'gruen', kopf: 'hoernerhelm', kopfFarbe: 'stahl', umhang: 'blau' },
@@ -60,29 +103,78 @@ gimli: { typ: 'zwerg', haar: 'rot', bart: 'gabel', kleid: 'gruen', kopf: 'hoerne
 - **typ:** `zwerg`, `zwergin`, `kind`, `koenigin`, `bote`
 - **bart:** `lang`, `gabel`, `zoepfe`, `kurz`, `keiner`
 - **kopf:** `nasenhelm`, `hoernerhelm`, `federhelm`, `kapuze`, `stirnband`, `krone`, `glatze`
-- **Farben** (haar, kleid, kopfFarbe, schuerze, umhang): `rot`, `braun`, `kastanie`, `grau`, `weiss`, `schwarz`, `blond`, `stahl`, `gold`, `kupfer`, `blau`, `gruen`, `moos`, `lila`, `weinrot`, `orange`, `rosa`, `leder`, `beige`
+- **Farben** (haar, kleid, kopfFarbe, schuerze, umhang): `rot`, `braun`, `kastanie`, `grau`, `weiss`, `schwarz`, `blond`,
+  `stahl`, `gold`, `kupfer`, `blau`, `gruen`, `moos`, `lila`, `weinrot`, `orange`, `rosa`, `gelb`, `leder`, `beige`
 - Alle Figuren ansehen: `galerie.html` im Entwicklungsmodus öffnen.
-- Ohne `wunsch` redet die Figur einfach nur.
 
-## 3. Türen verbinden
+## 3. Bauaufgaben (Trittsteine, Brücke, Strickleiter …)
+Eine Bauaufgabe ist eine Figur ohne Aussehen, mit einem Schild. Jede Lieferung verwandelt Felder der Karte:
 ```js
-ausgaenge: {
-  1: { karte: 'dorf', ziel: 1 },   // Tür 1 führt ins Dorf, dort zur Tür 1
+a: {
+  name: 'Brücke',
+  baustelle: { zu: '=', baue: [[[14, 10], [15, 10]], [[16, 10], [17, 10]], [[18, 10], [19, 10]]] },
+  sprecher: 'held',
+  wunsch: 'brett',
+  anzahl: 3,
+  sagt: 'Mit Brettern vom Holzstapel baue ich eine Brücke.',
+  weiter: 'Klong! Noch {rest} Bretter!',
+  danke: 'Die Brücke ist fertig!',
 },
 ```
-Auf der anderen Karte braucht es dann auch eine Tür mit der passenden Nummer.
+`baue` enthält pro Lieferung die Felder `[x, y]`, die zu dem Zeichen `zu` werden (x = Spalte, y = Zeile, ab 0 gezählt).
 
-## 4. Level anmelden
-In `src/levels/index.js` die Datei importieren, bei `KARTEN` eintragen und beim Kapitel unter `karten` hinzufügen.
-Ein Kapitel ist geschafft, wenn **alle Wünsche** auf allen seinen Karten erfüllt sind.
-
-## 5. Tiere, Musik, coole Momente
+## 4. Türen verbinden
 ```js
-musik: 'dorf',                                   // dorf, bibliothek, titel (src/systeme/musik.js)
-leben: { falter: 6, voegel: true, wolken: true, huehner: [[10, 5], [12, 6]] },
+ausgaenge: {
+  1: { karte: 'dorf', ziel: 1 },                                // Tür 1 führt zur Tür 1 im Dorf
+  2: { karte: 'wald', ziel: 1, weiter: true, aussehen: 'weg' }, // offener Weg ohne Tür-Bild
+},
 ```
-Coole Momente mit grosser Einblendung (Splash) stehen beim Kapitel in `src/levels/index.js` unter `meilensteine`.
+`weiter: true` sagt dem Pfeil, dass es hier im Kapitel weitergeht. `aussehen` kann `'weg'` (kein Bild),
+`'hoehleneingang'` oder `'schlosstor'` sein; ohne Angabe wird in Mauern eine Holztür gezeichnet.
 
-## 6. Ausprobieren
-`npm run dev` starten und im Browser öffnen. Tipp: Einen neuen Spielstand anlegen (oder einen löschen),
-damit alle Wünsche wieder offen sind. `node tests/durchlauf.mjs` spielt Kapitel 1 automatisch durch.
+## 5. Ereignisse (Drehbücher)
+```js
+ereignisse: {
+  beimBetreten: [ { sage: ['held', 'Hier ist es aber dunkel!'] } ],   // beim ersten Betreten
+  wennFertig:   [ { splash: { titel: 'Geschafft!', bild: 'herz' } } ], // wenn alle Wünsche der Karte erfüllt sind
+  ausloeser:    [ { fackel: false }, { augen: { figur: 'd' } } ],     // wenn man auf ein Feld "0" tritt
+},
+```
+| Schritt | Wirkung |
+|---|---|
+| `{ sage: ['held' \| 'a' \| 'k', 'Text'] }` | Jemand spricht (Buchstabe der Figur) |
+| `{ splash: { titel, text, bild, farbe } }` | Grosse Einblendung mit Konfetti |
+| `{ entscheidung: { frage, knopf } }` | Grosser Herz-Knopf, der gedrückt werden will |
+| `{ zeige: 'd' }` / `{ verstecke: 'd' }` | Figur erscheint / verschwindet |
+| `{ figurKommt: { aussehen, name, buchstabe, von: [x, y], nach: [x, y] } }` | Eine Figur läuft ins Bild |
+| `{ jubel: ['a', 'b'] }` | Figuren jubeln (mit Konfetti) |
+| `{ licht: 0.5 }` / `{ heldLicht: 40 }` / `{ fackel: false }` | Dunkelheit, Lichtkreis, Fackel aus |
+| `{ augen: { figur: 'd' } }` | Zwei leuchtende Augen im Dunkeln |
+| `{ zustand: ['d', 'froh'] }` | Glutherz schaut froh |
+| `{ gib: 'fackel' }` | Der Grosse Zwerg bekommt etwas |
+| `{ warte: 800 }`, `{ ton: 'fanfare' }`, `{ musik: 'fest' }`, `{ wackeln: 400 }` | Pause, Ton, Musik, Wackeln |
+| `{ kapitelEnde: true }` / `{ kapitelWechsel: 5, szene: 'Flug' }` / `{ szene: 'Abspann' }` | Weiter im Spiel |
+
+## 6. Stimmung der Karte
+```js
+name: 'Der dunkle Wald',     // erscheint als Banner beim ersten Betreten
+musik: 'wald',               // dorf, bibliothek, schloss, reise, wald, hoehle, flug, fest, titel
+dunkel: 0.82,                // 0 = hell, 1 = ganz dunkel
+heldLicht: 58,               // Lichtkreis um den Grossen Zwerg
+hintergrund: '#0e140e',
+leben: {
+  falter: 6, voegel: true, wolken: true, schnee: true,
+  huehner: [[10, 5], [12, 6]], gluehwuermchen: [[5, 10], [9, 8]], dampf: [[13, 3]],
+},
+```
+
+## 7. Level anmelden
+In `src/levels/index.js` die Datei importieren, bei `KARTEN` eintragen und beim passenden Kapitel unter `karten`.
+Ein Kapitel ist geschafft, wenn **alle Wünsche** auf allen seinen Karten erfüllt sind; dann läuft sein `wennFertig`.
+Coole Momente mit Splash stehen unter `meilensteine` (`{ herzen: 1 }`, `{ wunsch: 'frucht' }`, `{ figuren: ['see:a'] }`).
+
+## 8. Ausprobieren
+- `npm run pruefen` – findet Tippfehler und unerreichbare Figuren
+- `npm run dev` und im Browser `?kapitel=3` anhängen, um direkt ins Kapitel zu springen
+- `KAPITEL=3 node tests/durchlauf.mjs` – spielt das Kapitel automatisch durch

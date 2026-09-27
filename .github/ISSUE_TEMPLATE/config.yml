@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🎮 Spiel spielen
+    url: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/
+    about: Das Spiel direkt im Browser, auch auf Tablet und Handy.
+  - name: 💬 Ideen und Wünsche (Discussions)
+    url: https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/discussions
+    about: Lose Ideen, neue Level und Fragen gehören in die Discussions.
+  - name: 📖 Wiki
+    url: https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/wiki
+    about: Spielanleitung, Technik und wie man ein neues Level baut.

@@ -1,0 +1,25 @@
+name: 🗺️ Neues Level / neue Aufgabe
+description: Ein neuer Ort, eine neue Figur oder ein neuer Wunsch.
+title: "Level: "
+labels: [idee, level]
+body:
+  - type: textarea
+    id: ort
+    attributes:
+      label: Wo spielt es?
+      placeholder: z. B. "Ein Bauernhof mit Kühen hinter dem Dorf"
+    validations:
+      required: true
+  - type: textarea
+    id: figuren
+    attributes:
+      label: Wer ist dort und was wünscht sich wer?
+      placeholder: "z. B. Bäuerin Frida will Milch vom Eimer, die Kuh will Heu"
+  - type: dropdown
+    id: kapitel
+    attributes:
+      label: In welches Kapitel?
+      options: [Kapitel 1, Kapitel 2, Kapitel 3, Kapitel 4, Kapitel 5, Neues Kapitel]
+  - type: markdown
+    attributes:
+      value: "Wie ein Level aufgebaut ist, steht im Wiki unter **Neues Level bauen**. Mit **@claude** im Text baut Claude das Level."

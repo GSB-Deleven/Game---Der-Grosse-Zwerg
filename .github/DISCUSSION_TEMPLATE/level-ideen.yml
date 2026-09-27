@@ -1,0 +1,26 @@
+title: "Idee: "
+labels: ["idee"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hier sammeln wir Ideen für neue Orte, Figuren und Aufgaben – gern auch direkt von Liv und ihrem Bruder!
+  - type: input
+    id: ort
+    attributes:
+      label: Wo spielt es?
+      placeholder: "z. B. im Winterwald, in der Mine, am Wasserfall …"
+  - type: textarea
+    id: figuren
+    attributes:
+      label: Wer kommt vor?
+      placeholder: "z. B. ein kleiner Zwerg, der seine Katze sucht"
+  - type: textarea
+    id: aufgabe
+    attributes:
+      label: Was soll der Grosse Zwerg tun?
+      placeholder: "z. B. Schneebälle zum Schneemann bringen, 3 Laternen anzünden …"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Sonst noch etwas? (Zeichnungen gern als Bild anhängen)

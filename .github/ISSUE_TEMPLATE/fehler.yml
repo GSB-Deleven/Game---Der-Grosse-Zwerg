@@ -1,0 +1,44 @@
+name: 🐞 Fehler melden
+description: Etwas funktioniert nicht wie erwartet.
+title: "Fehler: "
+labels: [fehler]
+body:
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert?
+      placeholder: z. B. "Im dunklen Wald bleibt der Zwerg an einem Baum hängen."
+    validations:
+      required: true
+  - type: dropdown
+    id: kapitel
+    attributes:
+      label: Wo im Spiel?
+      options: [Titel / Spielstände, "Kapitel 1: Zwergenfeste", "Kapitel 2: Ruf der Königin", "Kapitel 3: Die grosse Reise", "Kapitel 4: Der Drache", "Kapitel 5: Flug und Fest", Abspann, Menü]
+  - type: textarea
+    id: erwartet
+    attributes:
+      label: Was hättest du erwartet?
+  - type: dropdown
+    id: geraet
+    attributes:
+      label: Gerät
+      options: [PC / Laptop, Tablet, Handy, Anderes]
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: Edge, Chrome, Safari, Firefox …
+  - type: textarea
+    id: bild
+    attributes:
+      label: Screenshot oder Video
+      description: Einfach hier hineinziehen.
+  - type: checkboxes
+    id: claude
+    attributes:
+      label: Automatisch bearbeiten
+      options:
+        - label: "Claude soll versuchen, das zu beheben (im Text \"@claude\" erwähnen oder Label \"claude\" setzen)"

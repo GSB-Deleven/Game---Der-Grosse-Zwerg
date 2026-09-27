@@ -1,0 +1,24 @@
+name: 💡 Idee / neue Funktion
+description: Ein Vorschlag, der umgesetzt werden soll.
+title: "Idee: "
+labels: [idee]
+body:
+  - type: textarea
+    id: idee
+    attributes:
+      label: Was soll es geben?
+      placeholder: z. B. "Im Dorf soll es eine Katze geben, die man streicheln kann."
+    validations:
+      required: true
+  - type: textarea
+    id: warum
+    attributes:
+      label: Warum? Wer hat es sich gewünscht?
+  - type: dropdown
+    id: prio
+    attributes:
+      label: Wie wichtig?
+      options: [Bald, Wäre schön, Irgendwann]
+  - type: markdown
+    attributes:
+      value: "Tipp: Schreib **@claude** in den Text, dann versucht Claude die Idee direkt umzusetzen und macht einen Pull Request."
