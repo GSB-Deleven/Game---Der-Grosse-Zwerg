@@ -34,9 +34,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      # Der Schlüssel aus «claude setup-token» geht im Terminal über zwei Zeilen.
+      # Beim Kopieren rutscht leicht ein Zeilenumbruch mit hinein: hier entfernen.
+      - name: Schlüssel säubern
+        id: schluessel
+        env:
+          ROH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          sauber=$(printf '%s' "$ROH" | tr -d '\r\n\t ')
+          echo "::add-mask::$sauber"
+          echo "token=$sauber" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_code_oauth_token: ${{ steps.schluessel.outputs.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           label_trigger: claude
           # Vorübergehend zur Fehlersuche: zeigt die Antwort von Claude im Log
