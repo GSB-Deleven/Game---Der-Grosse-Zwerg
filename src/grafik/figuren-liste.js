@@ -18,4 +18,16 @@ export const FIGUREN_AUSSEHEN = {
   bote: { typ: 'bote', haar: 'blond', bart: 'kurz', kleid: 'weinrot', kopf: 'federhelm', kopfFarbe: 'stahl' },
   koenigin: { typ: 'koenigin', haar: 'rot', kleid: 'lila', kopf: 'krone', umhang: 'weinrot' },
   wache: { typ: 'zwerg', haar: 'braun', bart: 'zoepfe', kleid: 'blau', kopf: 'hoernerhelm', kopfFarbe: 'stahl', umhang: 'weinrot' },
+  wache2: { typ: 'zwerg', haar: 'rot', bart: 'gabel', kleid: 'blau', kopf: 'nasenhelm', kopfFarbe: 'stahl', umhang: 'weinrot' },
+  // Kapitel 2 – Schloss
+  gaertnerin: { typ: 'zwergin', haar: 'blond', kleid: 'gruen', kopf: 'stirnband', kopfFarbe: 'rosa', schuerze: 'beige' },
+  stalljunge: { typ: 'kind', haar: 'braun', kleid: 'leder', kopf: 'kapuze', kopfFarbe: 'moos' },
+  berater: { typ: 'zwerg', haar: 'grau', bart: 'lang', kleid: 'weinrot', kopf: 'glatze', umhang: 'lila' },
+  beraterin: { typ: 'zwergin', haar: 'schwarz', kleid: 'blau', kopf: 'stirnband', kopfFarbe: 'gold', umhang: 'lila' },
+  // Kapitel 3 – Reise
+  fischerin: { typ: 'zwergin', haar: 'kastanie', kleid: 'blau', kopf: 'kapuze', kopfFarbe: 'gelb', schuerze: 'leder' },
+  wanderer: { typ: 'zwerg', haar: 'weiss', bart: 'lang', kleid: 'moos', kopf: 'kapuze', kopfFarbe: 'braun', umhang: 'braun' },
+  mira: { typ: 'kind', haar: 'blond', kleid: 'moos', kopf: 'kapuze', kopfFarbe: 'weinrot' },
+  angsthase: { typ: 'zwerg', haar: 'braun', bart: 'kurz', kleid: 'orange', kopf: 'nasenhelm', kopfFarbe: 'kupfer' },
+  zitterbart: { typ: 'zwerg', haar: 'rot', bart: 'zoepfe', kleid: 'blau', kopf: 'hoernerhelm', kopfFarbe: 'stahl' },
 };

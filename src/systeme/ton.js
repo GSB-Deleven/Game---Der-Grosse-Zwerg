@@ -57,6 +57,10 @@ const TOENE = {
     [[392, 0], [523, 0.15], [659, 0.3], [784, 0.45], [659, 0.65], [784, 0.8]].forEach(([f, s]) => note(f, s, 0.22, { laut: 0.07 }));
   },
   sieg: () => { [523, 587, 659, 698, 784, 880, 988, 1047].forEach((f, i) => note(f, i * 0.08, 0.2, { typ: 'triangle', laut: 0.1 })); },
+  wind: () => { rauschen(0, 1.2, 0.08, 600); rauschen(0.2, 1.0, 0.05, 1200); },
+  grollen: () => { note(55, 0, 1.4, { typ: 'sawtooth', laut: 0.09, gleiten: 0.8 }); note(62, 0.1, 1.2, { typ: 'triangle', laut: 0.12, gleiten: 0.85 }); rauschen(0, 1.2, 0.04, 200); },
+  zauber: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => note(f, i * 0.06, 0.3, { typ: 'sine', laut: 0.06 })); },
+  stern: () => { note(1319, 0, 0.1, { typ: 'triangle', laut: 0.08 }); note(1976, 0.06, 0.16, { typ: 'triangle', laut: 0.07 }); },
   splash: () => {
     [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.32]].forEach(([f, s]) => note(f, s, 0.35, { typ: 'square', laut: 0.06 }));
     [[262, 0], [330, 0.1], [392, 0.2], [523, 0.32]].forEach(([f, s]) => note(f, s, 0.4, { typ: 'triangle', laut: 0.1 }));

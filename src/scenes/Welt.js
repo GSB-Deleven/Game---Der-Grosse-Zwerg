@@ -3,30 +3,18 @@ import { KARTEN, KAPITEL } from '../levels/index.js';
 import { LEGENDE } from '../levels/legende.js';
 import { KACHEL } from '../grafik/texturen.js';
 import { maleBoden, erzeugeWeltTexturen, OBST_PLAETZE } from '../grafik/welt-grafik.js';
-import { heldTexturen, figurTexturen } from '../grafik/figur-texturen.js';
-import { sprich, verstummen, sprechDauer } from '../systeme/stimme.js';
+import { heldTexturen, figurTexturen, figurMasse } from '../grafik/figur-texturen.js';
+import { sprich, verstummen } from '../systeme/stimme.js';
 import { spiele } from '../systeme/ton.js';
 import { spieleMusik, ducken } from '../systeme/musik.js';
 import { sichere } from '../systeme/speichern.js';
+import { GEGENSTAENDE } from '../texte/de.js';
 
 const TEMPO = 84;          // Lauftempo (Pixel pro Sekunde)
 const SCHRITTWEITE = 30;   // so viele Pixel pro ganzem Laufzyklus
-const HELD = { name: 'Der Grosse Zwerg', hoehe: 0.75, bild: 'held_unten_steh0' };
-
-// Was der Grosse Zwerg sagt, wenn er etwas holt
-const HOLEN_TEXTE = {
-  essen: 'Ein Korb voll Essen!',
-  wasser: 'Ein schwerer Kessel Wasser. Hau ruck!',
-  buch: 'Ein grosses Buch von ganz oben!',
-  frucht: 'Ein schöner Apfel von ganz oben!',
-};
+const HELD = { name: 'Der Grosse Zwerg', hoehe: 0.75 };
 const HOCH_OBEN = new Set(['obstbaum', 'regal']); // hier muss er sich strecken
-
-const BOTE_TEXTE = [
-  ['bote', 'Hört, hört! Eine Nachricht von der Zwergenkönigin!'],
-  ['bote', 'Auf dem höchsten Berg wohnt ein Drache. Alle haben Angst! Die Königin sucht einen mutigen Helden.'],
-  ['held', 'Ich bin gross, ich bin stark, und ich bin mutig. Ich gehe zur Königin!'],
-];
+const REDE_WUENSCHE = new Set(['mut', 'reden']);  // werden durch Reden erfüllt
 
 export class Welt extends Phaser.Scene {
   constructor() { super('Welt'); }
@@ -37,6 +25,8 @@ export class Welt extends Phaser.Scene {
     this.startPos = daten.pos || null;
     this.karte = KARTEN[this.kartenName];
     this.stand = this.registry.get('stand');
+    this.stand.fortschritt = this.stand.fortschritt || {};
+    this.stand.ereignisse = this.stand.ereignisse || [];
     this.kapitel = KAPITEL[this.stand.kapitel] || KAPITEL[1];
     this.pfad = [];
     this.pfadZiel = null;
@@ -53,6 +43,9 @@ export class Welt extends Phaser.Scene {
     this.heldPoseBis = 0;
     this.heldRedenBis = 0;
     this.naechstesBlinzeln = 2000;
+    this.dunkelheit = this.karte.dunkel || 0;
+    this.heldLicht = this.karte.heldLicht ?? 60;
+    this.fackelAn = true;
   }
 
   create() {
@@ -61,12 +54,20 @@ export class Welt extends Phaser.Scene {
     this.dinge = [];
     this.figuren = [];
     this.ausgangsFelder = [];
-    this.lichter = [];
+    this.lichtQuellen = [];
+    this.ausloeserFelder = [];
+    this.zeilen = this.karte.karte.map((z) => z);
+    this.wendeFortschrittAn();
     this.baueKarte();
     this.erzeugeHeld();
     this.richteKameraEin();
     this.richteEingabeEin();
     this.erzeugeLeben();
+    this.erzeugeDunkelheit();
+    // Dauerhafte Folgen schon erlebter Ereignisse wiederherstellen (z.B. Drache sichtbar)
+    for (const [name, schritte] of Object.entries(this.karte.ereignisse || {})) {
+      if (this.ereignisErledigt(name)) this.fuehreAus(schritte, { still: true });
+    }
 
     if (!this.scene.isActive('Oberflaeche')) this.scene.launch('Oberflaeche');
     this.scene.bringToTop('Oberflaeche');
@@ -77,9 +78,9 @@ export class Welt extends Phaser.Scene {
     this.cameras.main.fadeIn(400);
     spieleMusik(this.karte.musik || 'dorf');
 
+    this.lebt = true;
     this.game.events.on('aktion', this.beiAktion, this);
     this.game.events.on('pause', this.oeffnePause, this);
-    this.lebt = true;
     this.events.once('shutdown', () => {
       this.lebt = false;
       this.game.events.off('aktion', this.beiAktion, this);
@@ -88,13 +89,18 @@ export class Welt extends Phaser.Scene {
     });
 
     this.sichern();
-    // Neuer Ort? Dann ein Banner mit dem Namen (wie bei Zelda)
+    this.time.delayedCall(500, () => this.beimBetreten());
+  }
+
+  async beimBetreten() {
     if (!this.stand.orteBesucht.includes(this.kartenName)) {
       this.stand.orteBesucht.push(this.kartenName);
-      this.time.delayedCall(500, () => this.game.events.emit('ortBanner', this.karte.name));
+      this.game.events.emit('ortBanner', this.karte.name);
+      await new Promise((r) => setTimeout(r, 1800));
     }
-    // Falls das Kapitel schon fertig ist (z.B. nach Neuladen), kommt der Bote gleich
-    if (this.kapitelFertig()) this.time.delayedCall(900, () => this.boteKommt());
+    if (!this.lebt) return;
+    await this.starteEreignis('beimBetreten');
+    await this.pruefeFertig();
   }
 
   sichern() {
@@ -106,52 +112,78 @@ export class Welt extends Phaser.Scene {
   // -------------------------------------------------------------------------
   // KARTE
   // -------------------------------------------------------------------------
-  baueKarte() {
-    const zeilen = this.karte.karte;
-    this.breite = zeilen[0].length;
-    this.hoehe = zeilen.length;
-    const figuren = this.karte.figuren || {};
-    const ausgaenge = this.karte.ausgaenge || {};
+  zeichen(x, y) { return this.zeilen[y]?.[x]; }
 
-    // 1. Boden bestimmen (Objekte ohne eigenen Boden nehmen den ihrer Nachbarn)
-    const boden = zeilen.map((z) => [...z].map((c) => LEGENDE[c]?.boden || null));
+  setzeZeichen(x, y, c) {
+    const z = this.zeilen[y];
+    this.zeilen[y] = z.slice(0, x) + c + z.slice(x + 1);
+  }
+
+  // Bereits gebaute Teile von Bauaufgaben (Trittsteine, Brücke …) wieder einsetzen
+  wendeFortschrittAn() {
+    for (const [buchstabe, f] of Object.entries(this.karte.figuren || {})) {
+      if (!f.baustelle) continue;
+      const n = this.stand.fortschritt[`${this.kartenName}:${buchstabe}`] || 0;
+      for (let i = 0; i < n; i++) for (const [x, y] of this.bauFelder(f, i)) this.setzeZeichen(x, y, f.baustelle.zu);
+    }
+  }
+
+  bauFelder(daten, stufe) {
+    const s = daten.baustelle.baue[stufe] || [];
+    return typeof s[0] === 'number' ? [s] : s;
+  }
+
+  berechneBoden() {
+    const boden = this.zeilen.map((z) => [...z].map((c) => LEGENDE[c]?.boden || null));
     for (let runde = 0; runde < 8; runde++) {
       for (let y = 0; y < this.hoehe; y++) {
         for (let x = 0; x < this.breite; x++) {
           if (boden[y][x]) continue;
           const n = [[-1, 0], [1, 0], [0, 1], [0, -1]].map(([dx, dy]) => boden[y + dy]?.[x + dx])
-            .filter((b) => b && !['wasser', 'fels', 'felswand', 'rune'].includes(b));
+            .filter((b) => b && !['wasser', 'fels', 'felswand', 'rune', 'schlucht', 'leiter', 'hoehlenwand'].includes(b));
           if (n.length) boden[y][x] = n.includes('weg') ? 'weg' : n[0];
         }
       }
     }
     for (let y = 0; y < this.hoehe; y++) for (let x = 0; x < this.breite; x++) {
-      if (/[0-9]/.test(zeilen[y][x])) boden[y][x] = 'weg';
-      boden[y][x] = boden[y][x] || 'gras';
+      if (/[0-9]/.test(this.zeilen[y][x])) boden[y][x] = this.karte.ausgangBoden || 'weg';
+      boden[y][x] = boden[y][x] || this.karte.grundBoden || 'gras';
     }
-    this.bodenArt = boden;
-    maleBoden(this, `boden_${this.kartenName}`, boden);
-    this.add.image(0, 0, `boden_${this.kartenName}`).setOrigin(0, 0).setDepth(-100);
+    return boden;
+  }
 
-    // 2. Kollision, Objekte, Figuren, Ausgänge
+  baueKarte() {
+    this.breite = this.zeilen[0].length;
+    this.hoehe = this.zeilen.length;
+    const figuren = this.karte.figuren || {};
+    const ausgaenge = this.karte.ausgaenge || {};
+
+    this.bodenArt = this.berechneBoden();
+    maleBoden(this, `boden_${this.kartenName}`, this.bodenArt);
+    this.bodenBild = this.add.image(0, 0, `boden_${this.kartenName}`).setOrigin(0, 0).setDepth(-100);
+
     this.fest = [];
     const map = this.make.tilemap({ tileWidth: KACHEL, tileHeight: KACHEL, width: this.breite, height: this.hoehe });
     const set = map.addTilesetImage('kacheln', 'kacheln', KACHEL, KACHEL, 0, 0);
     this.sperre = map.createBlankLayer('sperre', set).setVisible(false);
+    this.objekte = {}; // "x,y" -> Liste der Bilder an dieser Stelle
 
+    const spaeter = [];
     for (let y = 0; y < this.hoehe; y++) {
       this.fest.push([]);
       for (let x = 0; x < this.breite; x++) {
-        const z = zeilen[y][x];
+        const z = this.zeilen[y][x];
         const eintrag = LEGENDE[z];
-        let fest = !!eintrag?.fest;
-        if (/[a-z]/.test(z) && figuren[z]) {
-          fest = true;
-          this.erzeugeFigur(z, figuren[z], x, y);
-        } else if (/[0-9]/.test(z)) {
+        const fest = !!eintrag?.fest;
+        if (/[a-z]/.test(z) && figuren[z]) spaeter.push([z, x, y]);
+        else if (/[1-9]/.test(z)) {
+          const a = { x, y, nummer: z, ...(ausgaenge[z] || {}) };
           const inWand = this.istWand(x - 1, y) || this.istWand(x + 1, y);
-          if (inWand) this.add.image(x * KACHEL, y * KACHEL, 'obj_tuer').setOrigin(0, 0).setDepth(-50);
-          this.ausgangsFelder.push({ x, y, nummer: z, ...(ausgaenge[z] || {}) });
+          if (a.aussehen === 'weg') { /* offener Weg, kein Bild */ } else if (a.aussehen) this.add.image(x * KACHEL + 8, (y + 1) * KACHEL, `obj_${a.aussehen}`).setOrigin(0.5, 1).setDepth(-50);
+          else if (inWand) this.add.image(x * KACHEL, y * KACHEL, 'obj_tuer').setOrigin(0, 0).setDepth(-50);
+          this.ausgangsFelder.push(a);
+        } else if (z === '0') {
+          this.ausloeserFelder.push({ x, y });
         } else if (eintrag?.start) {
           this.startFeld = { x, y };
         }
@@ -160,48 +192,78 @@ export class Welt extends Phaser.Scene {
         if (eintrag?.objekt) this.erzeugeObjekt(eintrag, x, y);
       }
     }
+    // Figuren zuletzt (grosse Figuren sperren mehrere Felder)
+    for (const [z, x, y] of spaeter) this.erzeugeFigur(z, figuren[z], x, y);
     this.sperre.setCollisionByExclusion([-1]);
     this.physics.world.setBounds(0, 0, this.breite * KACHEL, this.hoehe * KACHEL);
   }
 
-  istWand(x, y) {
-    const z = this.karte.karte[y]?.[x];
-    return z === 'W' || z === 'R' || z === 'M';
+  setzeFest(x, y, fest) {
+    if (!this.fest[y]) return;
+    this.fest[y][x] = fest;
+    if (fest) this.sperre.putTileAt(0, x, y); else this.sperre.removeTileAt(x, y);
   }
 
-  erzeugeObjekt(eintrag, x, y) {
+  // Eine Kachel verwandeln (z.B. Wasser -> Trittstein) und den Boden neu malen
+  verwandle(felder, zu) {
+    const eintrag = LEGENDE[zu] || {};
+    for (const [x, y] of felder) {
+      this.setzeZeichen(x, y, zu);
+      for (const b of this.objekte[`${x},${y}`] || []) b.destroy();
+      this.objekte[`${x},${y}`] = [];
+      this.setzeFest(x, y, !!eintrag.fest);
+      if (eintrag.objekt) this.erzeugeObjekt(eintrag, x, y, true);
+    }
+    this.bodenArt = this.berechneBoden();
+    maleBoden(this, `boden_${this.kartenName}`, this.bodenArt);
+  }
+
+  istWand(x, y) {
+    const z = this.zeichen(x, y);
+    return z === 'W' || z === 'R' || z === 'M' || z === 'G';
+  }
+
+  merke(x, y, bild) {
+    (this.objekte[`${x},${y}`] = this.objekte[`${x},${y}`] || []).push(bild);
+    return bild;
+  }
+
+  erzeugeObjekt(eintrag, x, y, neu = false) {
     const b = eintrag.breite || 1, h = eintrag.hoehe || 1;
     const px = x * KACHEL + (b * KACHEL) / 2;
     const py = (y + h) * KACHEL;
-    const flach = eintrag.objekt === 'pilze';
-    if (!flach) this.add.image(px, py - 2, 'bodenschatten').setScale((b * KACHEL + 6) / 32, 1).setDepth(-60);
-    const bild = this.add.image(px, py, `obj_${eintrag.objekt}`).setOrigin(0.5, 1).setDepth(flach ? -40 : py);
+    const flach = eintrag.flach;
+    if (!flach && eintrag.schatten !== false) this.merke(x, y, this.add.image(px, py - 2, 'bodenschatten').setScale((b * KACHEL + 6) / 32, 1).setDepth(-60));
+    const bild = this.merke(x, y, this.add.image(px, py, `obj_${eintrag.objekt}`).setOrigin(0.5, 1).setDepth(flach ? -40 : py));
+    if (neu) { bild.setScale(0.2); this.tweens.add({ targets: bild, scale: 1, duration: 350, ease: 'Back.easeOut' }); }
 
-    for (const [lx, ly] of eintrag.licht || []) this.lichtschein(px + (b === 3 ? lx - 24 : lx), py + ly, b === 3 ? 0.5 : 1);
-    if (eintrag.flamme) this.flamme(px + eintrag.flamme[0], py + eintrag.flamme[1], py + 1);
+    for (const [lx, ly] of eintrag.licht || []) this.lichtschein(px + (b === 3 ? lx - 24 : lx), py + ly, b === 3 ? 0.5 : 1, x, y);
+    if (eintrag.flamme) this.flamme(px + eintrag.flamme[0], py + eintrag.flamme[1], py + 1, x, y);
     if (eintrag.rauch) this.kaminrauch(px + (b === 3 ? eintrag.rauch[0] - 24 : eintrag.rauch[0]), py + eintrag.rauch[1]);
     if (eintrag.funken) this.schmiedefunken(px + eintrag.funken[0], py + eintrag.funken[1], py + 1);
+    if (eintrag.leuchtet) this.lichtQuellen.push({ x: px, y: py - 8, r: eintrag.leuchtet });
 
     if (eintrag.gibt) {
       const ding = { typ: 'quelle', gibt: eintrag.gibt, objekt: eintrag.objekt, bild, feld: { x, y, b, h } };
       if (eintrag.objekt === 'obstbaum') {
-        ding.fruechte = OBST_PLAETZE.map(([fx, fy]) =>
-          this.add.image(bild.x - 20 + fx, bild.y - 46 + fy, 'apfel').setDepth(py + 1));
+        ding.fruechte = OBST_PLAETZE.map(([fx, fy]) => this.merke(x, y, this.add.image(bild.x - 20 + fx, bild.y - 46 + fy, 'apfel').setDepth(py + 1)));
       }
       this.dinge.push(ding);
     }
   }
 
-  lichtschein(x, y, skala = 1) {
-    const s = this.add.image(x, y, 'schein').setBlendMode(Phaser.BlendModes.ADD).setDepth(99000).setScale(skala);
+  lichtschein(x, y, skala = 1, tx, ty) {
+    const s = this.add.image(x, y, 'schein').setBlendMode(Phaser.BlendModes.ADD).setDepth(99800).setScale(skala);
     this.tweens.add({ targets: s, alpha: 0.65, scale: skala * 0.92, duration: 400 + Math.random() * 300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.lichter.push(s);
+    this.lichtQuellen.push({ x, y, r: 48 * skala, bild: s });
+    if (tx !== undefined) this.merke(tx, ty, s);
   }
 
-  flamme(x, y, tiefe) {
+  flamme(x, y, tiefe, tx, ty) {
     const f = this.add.image(x, y, 'flamme0').setOrigin(0.5, 1).setDepth(tiefe);
+    if (tx !== undefined) this.merke(tx, ty, f);
     let i = 0;
-    this.time.addEvent({ delay: 110, loop: true, callback: () => { i = (i + 1) % 3; f.setTexture(`flamme${i}`); } });
+    this.time.addEvent({ delay: 110, loop: true, callback: () => { if (f.active) { i = (i + 1) % 3; f.setTexture(`flamme${i}`); } } });
   }
 
   kaminrauch(x, y) {
@@ -228,33 +290,85 @@ export class Welt extends Phaser.Scene {
     });
   }
 
+  // -------------------------------------------------------------------------
+  // FIGUREN (auch Bauaufgaben, Tiere und der Drache)
+  // -------------------------------------------------------------------------
   erzeugeFigur(buchstabe, daten, x, y) {
-    const vorsilbe = figurTexturen(this, daten.aussehen);
-    const px = x * KACHEL + KACHEL / 2;
-    const py = (y + 1) * KACHEL - 1;
-    this.add.image(px, py - 1, 'bodenschatten').setScale(0.7).setDepth(-60);
-    const bild = this.add.image(px, py, `${vorsilbe}steh0`).setOrigin(0.5, 34 / 36).setDepth(py);
     const id = `${this.kartenName}:${buchstabe}`;
     const ding = {
-      typ: 'figur', id, daten, bild, vorsilbe, feld: { x, y, b: 1, h: 1 }, gesprochen: false,
+      typ: 'figur', id, buchstabe, daten, feld: { x, y, b: 1, h: 1 }, gesprochen: false,
       naechstesBlinzeln: 1000 + Math.random() * 3000, blinzelnBis: 0, redenBis: 0, jubelnBis: 0,
       atemVersatz: Math.random() * 1000, hoehe: daten.stimme?.hoehe || 1,
     };
+    const px = x * KACHEL + KACHEL / 2;
+    const py = (y + 1) * KACHEL - 1;
+
+    if (daten.baustelle) {
+      // Bauaufgabe: ein Schild mit Bild zeigt, was fehlt
+      ding.baustelle = true;
+      ding.bild = this.add.image(px, py + 1, `obj_${daten.baustelle.schild || 'schild'}`).setOrigin(0.5, 1).setDepth(py);
+      ding.icon = this.add.image(px, py - 14, daten.wunsch).setScale(0.6).setDepth(py + 1);
+      ding.vorsilbe = null;
+      if (this.istErfuellt(id)) { ding.bild.setVisible(false); ding.icon.setVisible(false); ding.fertig = true; }
+      else this.setzeFest(x, y, true);
+    } else {
+      const masse = figurMasse(daten.aussehen);
+      ding.vorsilbe = figurTexturen(this, daten.aussehen, daten.zustand);
+      ding.masse = masse;
+      ding.feld = { x: x - Math.floor((masse.felderB - 1) / 2), y: y - (masse.felderH - 1), b: masse.felderB, h: masse.felderH };
+      ding.schatten = this.add.image(px, py - 1, 'bodenschatten').setScale(masse.schatten).setDepth(-60);
+      ding.bild = this.add.image(px, py, `${ding.vorsilbe}steh0`).setOrigin(0.5, masse.fussY).setDepth(py);
+      for (let fy = ding.feld.y; fy < ding.feld.y + ding.feld.h; fy++) {
+        for (let fx = ding.feld.x; fx < ding.feld.x + ding.feld.b; fx++) this.setzeFest(fx, fy, true);
+      }
+      if (daten.licht) this.lichtQuellen.push({ x: px, y: py - 16, r: daten.licht, figur: ding, nurWennErfuellt: daten.lichtNachErfuellt });
+      this.figuren.push(ding);
+    }
     this.dinge.push(ding);
-    this.figuren.push(ding);
-    if (daten.wunsch && !this.istErfuellt(id)) this.zeigeWunsch(ding);
+    if (daten.versteckt) this.verstecke(ding, true);
+    this.aktualisiereWunsch(ding);
   }
 
-  zeigeWunsch(ding) {
-    const c = this.add.container(ding.bild.x, ding.bild.y - 42).setDepth(90000);
+  verstecke(ding, versteckt) {
+    ding.versteckt = versteckt;
+    ding.bild.setVisible(!versteckt && !ding.fertig);
+    ding.schatten?.setVisible(!versteckt);
+    if (ding.blase) ding.blase.setVisible(!versteckt);
+    for (let fy = ding.feld.y; fy < ding.feld.y + ding.feld.h; fy++) {
+      for (let fx = ding.feld.x; fx < ding.feld.x + ding.feld.b; fx++) this.setzeFest(fx, fy, !versteckt || ding.baustelle);
+    }
+  }
+
+  // Der gerade aktuelle Wunsch (bei "wuensche" der Reihe nach)
+  wunschVon(ding) {
+    const d = ding.daten || {};
+    if (!d.wuensche) return d;
+    const i = Math.min(this.stand.fortschritt[ding.id] || 0, d.wuensche.length - 1);
+    return { ...d, ...d.wuensche[i] };
+  }
+
+  // Wunsch-Blase über dem Kopf anzeigen/aktualisieren
+  aktualisiereWunsch(ding) {
+    const d = this.wunschVon(ding);
+    ding.blase?.destroy();
+    ding.blase = null;
+    if (!d.wunsch || this.istErfuellt(ding.id)) return;
+    const hoch = ding.baustelle ? ding.bild.height + 16 : ding.bild.height * (ding.masse?.fussY || 1) + 8;
+    const c = this.add.container(ding.bild.x, ding.bild.y - hoch).setDepth(90000);
+    const icon = d.wunsch === 'mut' ? 'herz' : d.wunsch === 'reden' ? 'ausruf' : d.wunsch;
     c.add(this.add.image(0, 0, 'blase').setScale(0.8));
-    c.add(this.add.image(0, -1.5, ding.daten.wunsch).setScale(0.65));
+    c.add(this.add.image(0, -1.5, icon).setScale(0.65));
+    if (d.anzahl > 1) {
+      const n = this.stand.fortschritt[ding.id] || 0;
+      c.add(this.add.text(9, 2, `${n}/${d.anzahl}`, { fontFamily: '"Pixelify Sans", sans-serif', fontSize: '24px', color: '#ffffff', stroke: '#1b1420', strokeThickness: 5 }).setScale(0.25).setOrigin(0, 0));
+    }
     this.tweens.add({ targets: c, y: c.y - 3, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     ding.blase = c;
+    if (ding.versteckt) c.setVisible(false);
   }
 
   // -------------------------------------------------------------------------
-  // LEBEN: Schmetterlinge, Hühner, Vögel, Wolkenschatten, Glitzern
+  // LEBEN: Schmetterlinge, Hühner, Vögel, Wolkenschatten, Glitzern, Glühwürmchen
   // -------------------------------------------------------------------------
   erzeugeLeben() {
     const leben = this.karte.leben || {};
@@ -271,6 +385,15 @@ export class Welt extends Phaser.Scene {
       const s = this.add.image(hx * KACHEL + 8, hy * KACHEL + 12, 'huhn0').setOrigin(0.5, 1).setDepth(hy * KACHEL + 12);
       this.huehner.push({ s, ziel: null, warte: Math.random() * 2000, pickt: 0 });
     }
+    this.gluehwuermchen = [];
+    for (const [gx, gy] of leben.gluehwuermchen || []) {
+      for (let i = 0; i < 3; i++) {
+        const s = this.add.image(gx * KACHEL + 8, gy * KACHEL + 8, 'gluehwurm').setDepth(99900).setBlendMode(Phaser.BlendModes.ADD);
+        const q = { x: s.x, y: s.y, r: 26 };
+        this.lichtQuellen.push(q);
+        this.gluehwuermchen.push({ s, q, ox: gx * KACHEL + 8, oy: gy * KACHEL + 8, phase: Math.random() * 10 });
+      }
+    }
     if (leben.wolken) {
       this.wolken = [];
       for (let i = 0; i < 3; i++) {
@@ -282,6 +405,25 @@ export class Welt extends Phaser.Scene {
     if (leben.voegel) {
       this.time.addEvent({ delay: 9000, loop: true, callback: () => this.vogelschwarm() });
       this.time.delayedCall(3000, () => this.vogelschwarm());
+    }
+    if (leben.dampf) {
+      for (const [dx, dy] of leben.dampf) {
+        this.time.addEvent({
+          delay: 700, loop: true, callback: () => {
+            const r = this.add.image(dx * KACHEL + 8 + Phaser.Math.Between(-4, 4), dy * KACHEL + 8, 'rauch').setDepth(98000).setAlpha(0.5).setTint(0xe8e0a0).setScale(0.6);
+            this.tweens.add({ targets: r, y: r.y - 30, alpha: 0, scale: 2, duration: 2400, onComplete: () => r.destroy() });
+          },
+        });
+      }
+    }
+    if (leben.schnee) {
+      this.time.addEvent({
+        delay: 90, loop: true, callback: () => {
+          const cam = this.cameras.main.worldView;
+          const f = this.add.rectangle(cam.x + Math.random() * cam.width, cam.y - 4, 1.5, 1.5, 0xffffff, 0.9).setDepth(99850);
+          this.tweens.add({ targets: f, y: f.y + cam.height + 10, x: f.x - 30 - Math.random() * 30, duration: 3000 + Math.random() * 1500, onComplete: () => f.destroy() });
+        },
+      });
     }
     // Glitzern auf dem Wasser
     const wasser = [];
@@ -334,6 +476,13 @@ export class Welt extends Phaser.Scene {
       f.s.y += Math.sin(w) * 18 * dt + Math.sin(zeit / 120 + f.zeit) * 0.3;
       f.s.setTexture(Math.floor(zeit / 110) % 2 ? 'falter1' : 'falter0');
     }
+    for (const g of this.gluehwuermchen) {
+      g.phase += dt;
+      g.s.x = g.ox + Math.sin(g.phase * 1.3) * 10 + Math.cos(g.phase * 0.7) * 5;
+      g.s.y = g.oy + Math.cos(g.phase * 1.1) * 6 - 6;
+      g.s.setAlpha(0.6 + Math.sin(g.phase * 5) * 0.4);
+      g.q.x = g.s.x; g.q.y = g.s.y;
+    }
     for (const h of this.huehner) {
       h.warte -= delta;
       if (h.ziel) {
@@ -359,6 +508,37 @@ export class Welt extends Phaser.Scene {
         w.s.x += w.v * dt; w.s.y += w.v * 0.3 * dt;
         if (w.s.x > this.breite * KACHEL + 200) { w.s.x = -200; w.s.y = Math.random() * this.hoehe * KACHEL; }
       }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // DUNKELHEIT: eine dunkle Schicht, in die Lichtkreise "gestanzt" werden
+  // -------------------------------------------------------------------------
+  erzeugeDunkelheit() {
+    if (!this.karte.dunkel && !this.karte.kannDunkelWerden) return;
+    this.dunkelSchicht = this.add.renderTexture(0, 0, this.breite * KACHEL, this.hoehe * KACHEL).setOrigin(0, 0).setDepth(99700);
+    this.maske = this.make.image({ key: 'lichtmaske', add: false }).setOrigin(0.5);
+  }
+
+  zeichneDunkelheit(zeit) {
+    if (!this.dunkelSchicht) return;
+    const rt = this.dunkelSchicht;
+    rt.clear();
+    if (this.dunkelheit <= 0.01) return;
+    rt.fill(0x07040c, this.dunkelheit);
+    const flackern = 1 + Math.sin(zeit / 90) * 0.03 + Math.sin(zeit / 37) * 0.02;
+    const stanze = (x, y, r) => {
+      if (r <= 0) return;
+      this.maske.setScale((r * 2) / 64);
+      rt.erase(this.maske, x, y);
+    };
+    let r = this.heldLicht;
+    if (this.traegt === 'fackel') r = Math.max(r, 95);
+    if (this.fackelAn || this.traegt === 'fackel') stanze(this.held.x, this.held.y - 16, r * flackern);
+    for (const q of this.lichtQuellen) {
+      if (q.bild && !q.bild.active) continue;
+      if (q.figur && (q.figur.versteckt || (q.nurWennErfuellt && !this.istErfuellt(q.figur.id)))) continue;
+      stanze(q.x, q.y, q.r * flackern);
     }
   }
 
@@ -446,13 +626,11 @@ export class Welt extends Phaser.Scene {
       else if (knopf.index <= 3) this.beiAktion();
     });
 
-    // Antippen / Klicken: dorthin laufen (und dort helfen)
     this.input.on('pointerdown', (zeiger) => {
       const ui = this.registry.get('istSteuerung');
       if (ui && ui(zeiger)) return;
       if (this.zwischenszene) return;
       const p = this.cameras.main.getWorldPoint(zeiger.x, zeiger.y);
-      // Huhn angetippt? Gack!
       const huhn = this.huehner.find((h) => Phaser.Math.Distance.Between(h.s.x, h.s.y - 6, p.x, p.y) < 10);
       if (huhn) { spiele('gack'); this.tweens.add({ targets: huhn.s, y: huhn.s.y - 6, duration: 120, yoyo: true }); return; }
       this.laufeZu(p.x, p.y);
@@ -463,7 +641,7 @@ export class Welt extends Phaser.Scene {
     if (this.zwischenszene || !this.scene.isActive()) return;
     this.sichern();
     this.scene.pause();
-    this.scene.launch('Pause');
+    this.scene.launch('Pause', { von: 'Welt' });
     this.scene.bringToTop('Pause');
   }
 
@@ -474,7 +652,6 @@ export class Welt extends Phaser.Scene {
     if (t.RIGHT.isDown || t.D.isDown) dx += 1;
     if (t.UP.isDown || t.W.isDown) dy -= 1;
     if (t.DOWN.isDown || t.S.isDown) dy += 1;
-
     const pad = this.input.gamepad?.pad1;
     if (pad) {
       if (pad.left) dx -= 1;
@@ -484,10 +661,8 @@ export class Welt extends Phaser.Scene {
       if (Math.abs(pad.leftStick.x) > 0.3) dx += pad.leftStick.x;
       if (Math.abs(pad.leftStick.y) > 0.3) dy += pad.leftStick.y;
     }
-
     const touch = this.registry.get('touchRichtung');
     if (touch && (touch.x || touch.y)) { dx += touch.x; dy += touch.y; }
-
     const laenge = Math.hypot(dx, dy);
     if (laenge > 1) { dx /= laenge; dy /= laenge; }
     return { dx, dy };
@@ -497,21 +672,17 @@ export class Welt extends Phaser.Scene {
   // WEG FINDEN (für Antippen)
   // -------------------------------------------------------------------------
   laufeZu(wx, wy) {
-    // Vorrang: 1. genau das Feld getroffen, 2. eine Figur, 3. ein Bild (z.B. Baumkrone)
+    const sichtbar = this.dinge.filter((d) => !d.versteckt && !d.fertig);
     const tx0 = Math.floor(wx / KACHEL), ty0 = Math.floor(wy / KACHEL);
-    const aufFeld = this.dinge.find((d) => tx0 >= d.feld.x && tx0 < d.feld.x + d.feld.b && ty0 >= d.feld.y && ty0 < d.feld.y + d.feld.h);
-    const imBild = this.dinge.filter((d) => d.bild.getBounds().contains(wx, wy))
+    const aufFeld = sichtbar.find((d) => tx0 >= d.feld.x && tx0 < d.feld.x + d.feld.b && ty0 >= d.feld.y && ty0 < d.feld.y + d.feld.h);
+    const imBild = sichtbar.filter((d) => d.bild.getBounds().contains(wx, wy))
       .sort((a, b) => (a.typ === 'figur' ? 0 : 1) - (b.typ === 'figur' ? 0 : 1) || b.bild.depth - a.bild.depth);
     const getroffen = aufFeld || imBild[0];
 
     let ziele;
-    if (getroffen) {
-      ziele = this.felderUm(getroffen.feld);
-    } else if (this.istFrei(tx0, ty0)) {
-      ziele = [{ x: tx0, y: ty0 }];
-    } else {
-      ziele = this.felderUm({ x: tx0, y: ty0, b: 1, h: 1 });
-    }
+    if (getroffen) ziele = this.felderUm(getroffen.feld);
+    else if (this.istFrei(tx0, ty0)) ziele = [{ x: tx0, y: ty0 }];
+    else ziele = this.felderUm({ x: tx0, y: ty0, b: 1, h: 1 });
     const pfad = this.sucheWeg(ziele);
     if (!pfad) return;
     this.pfad = pfad;
@@ -546,7 +717,6 @@ export class Welt extends Phaser.Scene {
     return { x: Math.floor(this.held.x / KACHEL), y: Math.floor((this.held.y - 3) / KACHEL) };
   }
 
-  // Breitensuche auf dem Kachelraster – gibt die Liste der Felder bis zum Ziel zurück
   sucheWeg(ziele) {
     if (!ziele.length) return null;
     const start = this.heldFeld();
@@ -589,7 +759,6 @@ export class Welt extends Phaser.Scene {
       ({ dx, dy } = this.folgePfad(delta));
     }
 
-    // sanftes Beschleunigen und Abbremsen
     const weich = Math.min(1, dt * (dx || dy ? 14 : 18));
     this.tempo.x += (dx * TEMPO - this.tempo.x) * weich;
     this.tempo.y += (dy * TEMPO - this.tempo.y) * weich;
@@ -600,16 +769,17 @@ export class Welt extends Phaser.Scene {
     this.animiereHeld(zeit, dt, dx, dy);
     this.animiereFiguren(zeit);
     this.aktualisiereLeben(zeit, delta);
+    this.zeichneDunkelheit(zeit);
 
     this.held.setDepth(this.held.y);
     this.heldSchatten.setPosition(this.held.x, this.held.y - 1);
     this.getragen.setPosition(this.held.x, this.held.y - 50 + (this.laufend ? Math.round(Math.abs(Math.sin(this.laufPhase * Math.PI * 2))) * -1 : 0));
 
     this.pruefeAusgang();
+    this.pruefeAusloeser();
     this.aktualisierePfeil(zeit);
   }
 
-  // Läuft Feld für Feld: zuerst quer ausrichten, dann gerade weiter – so bleibt er nirgends hängen
   folgePfad(delta) {
     const f = this.pfad[0];
     const vorher = this.pfadLetztes || this.heldFeld();
@@ -655,7 +825,6 @@ export class Welt extends Phaser.Scene {
     const warLaufend = this.laufend;
     this.laufend = v > 8;
     if (dx || dy) {
-      // Blickrichtung: seitlich bei (fast) waagrechter Bewegung
       if (Math.abs(dx) > Math.abs(dy) * 0.9) { this.blick = 'seite'; this.held.setFlipX(dx < 0); }
       else { this.blick = dy < 0 ? 'oben' : 'unten'; this.held.setFlipX(false); }
     }
@@ -691,6 +860,7 @@ export class Welt extends Phaser.Scene {
 
   animiereFiguren(zeit) {
     for (const f of this.figuren) {
+      if (f.versteckt || !f.vorsilbe) continue;
       let bild;
       const nah = Phaser.Math.Distance.Between(f.bild.x, f.bild.y, this.held.x, this.held.y) < 70;
       const seite = !nah || Math.abs(this.held.x - f.bild.x) < 10 ? '' : this.held.x < f.bild.x ? 'links' : 'rechts';
@@ -719,9 +889,17 @@ export class Welt extends Phaser.Scene {
     spiele('tuer');
     this.held.setVelocity(0, 0);
     this.stand.ort = null;
+    this.stand.traegt = this.traegt || null;
     sichere(this.registry);
     this.cameras.main.fadeOut(300);
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart({ karte: a.karte, ziel: a.ziel }));
+  }
+
+  pruefeAusloeser() {
+    if (this.zwischenszene || !this.ausloeserFelder.length || !this.karte.ereignisse?.ausloeser) return;
+    if (this.ereignisErledigt('ausloeser')) return;
+    const f = this.heldFeld();
+    if (this.ausloeserFelder.some((a) => a.x === f.x && a.y === f.y)) this.starteEreignis('ausloeser');
   }
 
   // -------------------------------------------------------------------------
@@ -740,6 +918,7 @@ export class Welt extends Phaser.Scene {
     const fx = this.held.x, fy = this.held.y - 5;
     let bestes = null, beste = 22;
     for (const d of this.dinge) {
+      if (d.versteckt || d.fertig) continue;
       const r = new Phaser.Geom.Rectangle(d.feld.x * KACHEL, d.feld.y * KACHEL, d.feld.b * KACHEL, d.feld.h * KACHEL);
       const nx = Phaser.Math.Clamp(fx, r.left, r.right), ny = Phaser.Math.Clamp(fy, r.top, r.bottom);
       const dist = Math.hypot(fx - nx, fy - ny);
@@ -749,25 +928,24 @@ export class Welt extends Phaser.Scene {
   }
 
   interagiere(ding) {
-    if (this.zwischenszene || this.aktionGesperrt) return;
+    if (this.zwischenszene || this.aktionGesperrt || ding.versteckt || ding.fertig) return;
     this.aktionGesperrt = true;
     this.time.delayedCall(350, () => { this.aktionGesperrt = false; });
     if (ding.typ === 'quelle') this.hole(ding);
     else this.redeMit(ding);
   }
 
-  // Eine Figur (oder der Held) sagt etwas
+  // wer: 'held', ein Buchstabe einer Figur, ein Figur-Objekt oder { name, aussehen, hoehe }
   sage(wer, text) {
-    let name, hoehe, bild;
+    let name, hoehe, bild, figur = null;
     if (wer === 'held') {
       ({ name, hoehe } = HELD); bild = 'held_unten_steh0';
       this.heldRedenBis = this.time.now + text.length * 32;
-    } else if (wer === 'bote') {
-      name = 'Bote der Königin'; hoehe = 1.2; bild = `${figurTexturen(this, 'bote')}steh0`;
-      if (this.boteFigur) this.boteFigur.redenBis = this.time.now + text.length * 32;
     } else {
-      name = wer.daten.name; hoehe = wer.hoehe; bild = `${wer.vorsilbe}steh0`;
-      wer.redenBis = this.time.now + text.length * 32;
+      figur = typeof wer === 'string' ? this.figuren.find((f) => f.buchstabe === wer || f.name === wer) : wer;
+      if (!figur) return Promise.resolve();
+      name = figur.daten.name; hoehe = figur.hoehe; bild = figur.vorsilbe ? `${figur.vorsilbe}steh0` : 'held_unten_steh0';
+      figur.redenBis = this.time.now + text.length * 32;
     }
     this.game.events.emit('sprechen', { name, text, bild });
     ducken(true);
@@ -777,7 +955,6 @@ export class Welt extends Phaser.Scene {
   hole(quelle) {
     if (this.traegt === quelle.gibt) return;
     let startX = quelle.bild.x, startY = quelle.bild.y - quelle.bild.height + 8;
-
     if (quelle.fruechte) {
       const haengend = quelle.fruechte.filter((f) => f.visible);
       if (!haengend.length) return;
@@ -786,15 +963,14 @@ export class Welt extends Phaser.Scene {
       frucht.setVisible(false);
       if (haengend.length === 1) {
         this.time.delayedCall(2500, () => quelle.fruechte.forEach((f) => {
+          if (!f.active) return;
           f.setVisible(true).setScale(0);
           this.tweens.add({ targets: f, scale: 1, duration: 300, ease: 'Back.easeOut' });
         }));
       }
     }
-
     const hochOben = HOCH_OBEN.has(quelle.objekt);
     if (hochOben) {
-      // Der Grosse Zwerg streckt sich – nur er kommt so weit hinauf!
       this.heldPose = 'strecken';
       this.heldPoseBis = this.time.now + 450;
       spiele('strecken');
@@ -805,41 +981,80 @@ export class Welt extends Phaser.Scene {
       delay: hochOben ? 200 : 0, ease: 'Quad.easeOut',
       onComplete: () => { flug.destroy(); this.nimm(quelle.gibt); },
     });
-    this.sage('held', HOLEN_TEXTE[quelle.gibt] || '');
+    this.sage('held', GEGENSTAENDE[quelle.gibt]?.holen || '');
   }
 
-  redeMit(figur) {
-    const d = figur.daten;
-    if (!d.wunsch) return this.sage(figur, d.sagt);
-    if (this.istErfuellt(figur.id)) return this.sage(figur, d.danach || d.danke);
-    if (this.traegt === d.wunsch) return this.erfuelle(figur);
-
+  async redeMit(figur) {
+    const d = this.wunschVon(figur);
+    const sprecher = d.sprecher === 'held' ? 'held' : figur;
+    if (!d.wunsch) return this.sage(sprecher, d.sagt);
+    if (this.istErfuellt(figur.id)) return this.sage(sprecher, d.danach || d.danke);
+    if (d.gespraech) {
+      await this.starteEreignis(`gespraech_${figur.buchstabe}`, d.gespraech);
+      if (REDE_WUENSCHE.has(d.wunsch) && this.lebt) return this.erfuelle(figur, true, true);
+      return;
+    }
+    if (REDE_WUENSCHE.has(d.wunsch)) return this.erfuelle(figur, true);
+    if (this.traegt === d.wunsch) {
+      if (d.anzahl > 1) return this.liefereTeil(figur);
+      return this.erfuelle(figur);
+    }
     const text = (!figur.gesprochen && d.neckt ? `${d.neckt} ` : '') + d.sagt;
     figur.gesprochen = true;
     this.letzterWunsch = figur;
-    this.tweens.add({ targets: figur.blase, scale: 1.3, duration: 150, yoyo: true });
-    return this.sage(figur, text);
+    if (figur.blase) this.tweens.add({ targets: figur.blase, scale: 1.3, duration: 150, yoyo: true });
+    return this.sage(sprecher, text);
   }
 
-  async erfuelle(figur) {
+  // Ein Teil einer Bauaufgabe abliefern (z.B. 1 von 3 Steinen)
+  async liefereTeil(figur) {
     const d = figur.daten;
     this.gibAb();
-    this.stand.erfuellt.push(figur.id);
-    this.stand.herzen += 1;
+    const n = (this.stand.fortschritt[figur.id] || 0) + 1;
+    this.stand.fortschritt[figur.id] = n;
+    if (figur.baustelle) {
+      this.heldPose = 'strecken';
+      this.heldPoseBis = this.time.now + 400;
+      spiele('kling');
+      this.cameras.main.shake(120, 0.002);
+      this.verwandle(this.bauFelder(d, n - 1), d.baustelle.zu);
+      for (const [x, y] of this.bauFelder(d, n - 1)) this.konfetti(x * KACHEL + 8, y * KACHEL + 8, 12);
+    }
     this.sichern();
-    if (this.letzterWunsch === figur) this.letzterWunsch = null;
+    if (n >= d.anzahl) return this.erfuelle(figur);
+    this.letzterWunsch = figur;
+    this.aktualisiereWunsch(figur);
+    const rest = d.anzahl - n;
+    return this.sage(figur.baustelle ? 'held' : figur, (d.weiter || 'Super! Noch {rest}!').replace('{rest}', rest));
+  }
 
-    // Freude! Blase weg, Jubel, Herz und Konfetti
+  async erfuelle(figur, durchReden = false, ohneDanke = false) {
+    const d = this.wunschVon(figur);
+    if (!durchReden && !(d.anzahl > 1)) this.gibAb();
+    const alle = figur.daten.wuensche;
+    const nochMehr = alle && (this.stand.fortschritt[figur.id] || 0) < alle.length - 1;
+    if (alle) this.stand.fortschritt[figur.id] = (this.stand.fortschritt[figur.id] || 0) + 1;
+    if (!nochMehr) this.stand.erfuellt.push(figur.id);
+    this.stand.herzen += 1;
+    if (this.letzterWunsch === figur) this.letzterWunsch = null;
+    this.sichern();
+
     figur.blase?.destroy();
     figur.blase = null;
     figur.jubelnBis = this.time.now + 1600;
     this.heldPose = 'jubeln';
     this.heldPoseBis = this.time.now + 900;
-    const y0 = figur.bild.y;
-    this.tweens.add({ targets: figur.bild, y: y0 - 6, duration: 170, yoyo: true, repeat: 3, ease: 'Quad.easeOut' });
+    if (figur.baustelle) {
+      figur.fertig = true;
+      this.tweens.add({ targets: [figur.bild, figur.icon], alpha: 0, y: '-=8', duration: 500, onComplete: () => { figur.bild.setVisible(false); figur.icon.setVisible(false); } });
+      this.setzeFest(figur.feld.x, figur.feld.y, false);
+    } else {
+      const y0 = figur.bild.y;
+      this.tweens.add({ targets: figur.bild, y: y0 - 6, duration: 170, yoyo: true, repeat: 3, ease: 'Quad.easeOut' });
+    }
     this.konfetti(figur.bild.x, figur.bild.y - 24);
     spiele('herz');
-    const herz = this.add.image(figur.bild.x, figur.bild.y - 30, 'herz').setDepth(99000).setScale(0.3);
+    const herz = this.add.image(figur.bild.x, figur.bild.y - 30, 'herz').setDepth(99950).setScale(0.3);
     this.tweens.add({
       targets: herz, y: herz.y - 20, scale: 1.2, duration: 500, ease: 'Back.easeOut',
       onComplete: () => {
@@ -850,16 +1065,28 @@ export class Welt extends Phaser.Scene {
       },
     });
 
-    await this.sage(figur, d.danke);
+    if (!ohneDanke) await this.sage(figur.baustelle ? 'held' : figur, d.danke);
     if (!this.lebt) return;
+    if (nochMehr) {
+      this.aktualisiereWunsch(figur);
+      this.letzterWunsch = figur;
+      const naechster = this.wunschVon(figur);
+      if (naechster.sagt) await this.sage(figur, naechster.sagt);
+      return;
+    }
+    if (d.geschenk) {
+      await this.sage(figur, d.geschenkText || `Hier, nimm das mit!`);
+      this.nimm(d.geschenk);
+      this.sichern();
+    }
     await this.pruefeMeilensteine();
-    if (this.kapitelFertig()) this.time.delayedCall(500, () => this.boteKommt());
+    await this.pruefeFertig();
   }
 
   konfetti(x, y, anzahl = 30) {
     const farben = [0xf2c94c, 0xe05a8a, 0x7aa6e0, 0x6cc46a, 0xffffff, 0xf08a4b];
     for (let i = 0; i < anzahl; i++) {
-      const s = this.add.rectangle(x, y, 2, 2, Phaser.Utils.Array.GetRandom(farben)).setDepth(99500);
+      const s = this.add.rectangle(x, y, 2, 2, Phaser.Utils.Array.GetRandom(farben)).setDepth(99950);
       const winkel = Math.random() * Math.PI * 2, weite = 14 + Math.random() * 30;
       this.tweens.add({
         targets: s, x: x + Math.cos(winkel) * weite, y: y + Math.sin(winkel) * weite + 16,
@@ -870,16 +1097,18 @@ export class Welt extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
-  // SPLASH-SCREENS & MEILENSTEINE
+  // SPLASH, ENTSCHEIDUNG, MEILENSTEINE
   // -------------------------------------------------------------------------
-  zeigeSplash(daten) {
+  zeigeUeberlagerung(szene, daten, ereignis) {
     return new Promise((fertig) => {
-      this.game.events.once('splashFertig', fertig);
+      this.game.events.once(ereignis, fertig);
       this.scene.pause();
-      this.scene.launch('Splash', daten);
-      this.scene.bringToTop('Splash');
+      this.scene.launch(szene, daten);
+      this.scene.bringToTop(szene);
     });
   }
+
+  zeigeSplash(daten) { return this.zeigeUeberlagerung('Splash', daten, 'splashFertig'); }
 
   async pruefeMeilensteine() {
     for (const m of this.kapitel.meilensteine || []) {
@@ -897,6 +1126,115 @@ export class Welt extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
+  // EREIGNISSE (kleine Drehbücher aus den Level-Daten)
+  // -------------------------------------------------------------------------
+  ereignisSchluessel(name) { return name.startsWith('kapitel') ? name : `${this.kartenName}:${name}`; }
+  ereignisErledigt(name) { return this.stand.ereignisse.includes(this.ereignisSchluessel(name)); }
+
+  async starteEreignis(name, schritte = this.karte.ereignisse?.[name]) {
+    if (!schritte || this.ereignisErledigt(name) || this.zwischenszene) return;
+    this.zwischenszene = true;
+    this.pfad = [];
+    this.tempo = { x: 0, y: 0 };
+    this.held.setVelocity(0, 0);
+    this.pfeil.setVisible(false);
+    const weiter = await this.fuehreAus(schritte);
+    if (!this.lebt) return;
+    this.stand.ereignisse.push(this.ereignisSchluessel(name));
+    this.sichern();
+    if (weiter !== 'verlassen') this.zwischenszene = false;
+  }
+
+  // Führt Schritte aus. still = nur dauerhafte Änderungen (beim Neuladen), ohne Reden/Warten.
+  async fuehreAus(schritte, { still = false } = {}) {
+    for (const s of schritte) {
+      if (!this.lebt && !still) return 'verlassen';
+      if (s.zeige) for (const b of [].concat(s.zeige)) { const f = this.figuren.find((x) => x.buchstabe === b); if (f) { this.verstecke(f, false); if (!still) this.erscheine(f); } }
+      if (s.verstecke) for (const b of [].concat(s.verstecke)) { const f = this.figuren.find((x) => x.buchstabe === b); if (f) this.verstecke(f, true); }
+      if (s.licht !== undefined) { if (still) this.dunkelheit = s.licht; else this.tweens.add({ targets: this, dunkelheit: s.licht, duration: 1200 }); }
+      if (s.heldLicht !== undefined) { if (still) this.heldLicht = s.heldLicht; else this.tweens.add({ targets: this, heldLicht: s.heldLicht, duration: 600 }); }
+      if (s.fackel === false) { this.fackelAn = false; if (this.traegt === 'fackel') this.gibAb(); if (!still) spiele('wind'); }
+      if (s.zustand) { const f = this.figuren.find((x) => x.buchstabe === s.zustand[0]); if (f) f.vorsilbe = figurTexturen(this, f.daten.aussehen, s.zustand[1]); }
+      if (s.gib && !still) this.nimm(s.gib);
+      if (still) continue;
+      if (s.sage) await this.sage(s.sage[0], s.sage[1]);
+      if (s.warte) await new Promise((r) => setTimeout(r, s.warte));
+      if (s.ton) spiele(s.ton);
+      if (s.wackeln) this.cameras.main.shake(s.wackeln, 0.006);
+      if (s.musik) spieleMusik(s.musik);
+      if (s.augen) await this.zeigeAugen(s.augen);
+      if (s.jubel) for (const b of [].concat(s.jubel)) { const f = this.figuren.find((x) => x.buchstabe === b); if (f) { f.jubelnBis = this.time.now + 2000; this.konfetti(f.bild.x, f.bild.y - 30, 40); } }
+      if (s.splash) await this.zeigeSplash(s.splash);
+      if (s.entscheidung) await this.zeigeUeberlagerung('Entscheidung', s.entscheidung, 'entscheidungFertig');
+      if (s.figurKommt) await this.figurKommt(s.figurKommt);
+      if (s.kapitelEnde) { this.verlasse(() => this.scene.start('KapitelEnde', { kapitel: this.stand.kapitel })); return 'verlassen'; }
+      if (s.kapitelWechsel) {
+        this.stand.kapitel = s.kapitelWechsel; this.stand.ort = null; this.stand.traegt = null; this.registry.set('traegt', null);
+        sichere(this.registry);
+        this.verlasse(() => this.scene.start(s.szene || 'Welt', s.daten || { karte: KAPITEL[s.kapitelWechsel].start }));
+        return 'verlassen';
+      }
+      if (s.szene) { this.verlasse(() => this.scene.start(s.szene, s.daten)); return 'verlassen'; }
+    }
+    return 'ok';
+  }
+
+  verlasse(danach) {
+    this.cameras.main.fadeOut(900);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.stop('Oberflaeche');
+      danach();
+    });
+  }
+
+  erscheine(f) {
+    const y = f.bild.y;
+    f.bild.setAlpha(0).setY(y - 30);
+    this.tweens.add({ targets: f.bild, alpha: 1, y, duration: 700, ease: 'Bounce.easeOut' });
+    this.konfetti(f.bild.x, y - 20, 20);
+  }
+
+  // Zwei leuchtende Augen im Dunkeln (für den Drachen)
+  async zeigeAugen({ figur, dauer = 2500 }) {
+    const f = this.figuren.find((x) => x.buchstabe === figur);
+    const x = f ? f.bild.x : this.held.x, y = f ? f.bild.y - f.bild.height * 0.7 : this.held.y - 60;
+    const augen = this.add.image(x, y, 'drachenaugen').setDepth(99990).setAlpha(0).setScale(0.6);
+    this.tweens.add({ targets: augen, alpha: 1, scale: 1, duration: 900 });
+    this.time.addEvent({ delay: 1400, repeat: 2, callback: () => { augen.setScale(1, 0.1); this.time.delayedCall(120, () => augen.setScale(1)); } });
+    spiele('grollen');
+    this.cameras.main.shake(700, 0.004);
+    await new Promise((r) => setTimeout(r, dauer));
+    this.tweens.add({ targets: augen, alpha: 0, duration: 800, delay: 1500, onComplete: () => augen.destroy() });
+  }
+
+  // Eine Figur läuft ins Bild (für Zwischenszenen)
+  figurKommt({ aussehen, name, hoehe = 1, von, nach, dauer = 1600, buchstabe }) {
+    if (!von || !nach) {
+      // neben dem Grossen Zwerg auftauchen
+      const f = this.heldFeld();
+      const platz = [[-2, 0], [2, 0], [0, 2], [-1, 1], [1, 1], [0, -2], [-2, 1], [2, 1]].map(([dx, dy]) => ({ x: f.x + dx, y: f.y + dy }))
+        .find((p) => this.istFrei(p.x, p.y)) || f;
+      nach = [platz.x, platz.y];
+      von = [platz.x, platz.y - 3];
+      dauer = 700;
+    }
+    return new Promise((fertig) => {
+      const vorsilbe = figurTexturen(this, aussehen);
+      const masse = figurMasse(aussehen);
+      const [vx, vy] = von, [nx, ny] = nach;
+      const bild = this.add.image(vx * KACHEL + 8, (vy + 1) * KACHEL - 1, `${vorsilbe}steh0`).setOrigin(0.5, masse.fussY).setDepth((vy + 1) * KACHEL);
+      const f = { buchstabe: buchstabe || name, name, bild, vorsilbe, daten: { name, aussehen }, hoehe, naechstesBlinzeln: 0, blinzelnBis: 0, redenBis: 0, jubelnBis: 0, atemVersatz: 0, feld: { x: nx, y: ny, b: 1, h: 1 } };
+      this.figuren.push(f);
+      this.tweens.add({
+        targets: bild, x: nx * KACHEL + 8, y: (ny + 1) * KACHEL - 1, duration: dauer,
+        onUpdate: () => bild.setDepth(bild.y),
+        onComplete: () => { this.setzeFest(nx, ny, true); fertig(); },
+      });
+      this.tweens.add({ targets: bild, scaleY: 0.94, duration: 140, yoyo: true, repeat: Math.floor(dauer / 280) });
+    });
+  }
+
+  // -------------------------------------------------------------------------
   // WÜNSCHE & KAPITEL
   // -------------------------------------------------------------------------
   istErfuellt(id) { return this.stand.erfuellt.includes(id); }
@@ -907,50 +1245,74 @@ export class Welt extends Phaser.Scene {
       const k = KARTEN[name];
       const zeilen = k.karte.join('');
       for (const [b, f] of Object.entries(k.figuren || {})) {
-        if (f.wunsch && zeilen.includes(b)) liste.push({ id: `${name}:${b}`, karte: name, wunsch: f.wunsch });
+        if ((f.wunsch || f.wuensche) && zeilen.includes(b)) liste.push({ id: `${name}:${b}`, karte: name, wunsch: f.wunsch || f.wuensche.at(-1).wunsch });
       }
     }
     return liste;
+  }
+
+  karteFertig() {
+    return this.figuren.concat(this.dinge.filter((d) => d.baustelle)).filter((d) => (d.daten?.wunsch || d.daten?.wuensche) && d.id).every((d) => this.istErfuellt(d.id));
   }
 
   kapitelFertig() {
     return this.alleWuensche().every((w) => this.istErfuellt(w.id));
   }
 
+  async pruefeFertig() {
+    if (!this.lebt || this.zwischenszene) return;
+    if (this.karte.ereignisse?.wennFertig && this.karteFertig() && !this.ereignisErledigt('wennFertig')) {
+      await this.starteEreignis('wennFertig');
+    }
+    if (!this.lebt) return;
+    const schluessel = `kapitel${this.stand.kapitel}:fertig`;
+    if (this.kapitel.wennFertig && this.kapitelFertig() && !this.stand.ereignisse.includes(schluessel) && (!this.kapitel.fertigAuf || this.kapitel.fertigAuf === this.kartenName)) {
+      await this.starteEreignis(schluessel, this.kapitel.wennFertig);
+    }
+  }
+
   // Wohin soll der Hilfe-Pfeil zeigen?
   pfeilZiel() {
     if (this.zwischenszene) return null;
-    const offen = this.figuren.filter((d) => d.daten.wunsch && !this.istErfuellt(d.id));
+    const offen = this.figuren.filter((d) => this.wunschVon(d).wunsch && d.id && !d.versteckt && !this.istErfuellt(d.id))
+      .concat(this.dinge.filter((d) => d.baustelle && !d.fertig && !d.versteckt));
     const naechste = (liste) => liste.sort((a, b) =>
       Phaser.Math.Distance.Between(this.held.x, this.held.y, a.bild.x, a.bild.y) -
       Phaser.Math.Distance.Between(this.held.x, this.held.y, b.bild.x, b.bild.y))[0];
-    const ziel = (d) => ({ x: d.bild.x, y: d.bild.y, hoch: d.typ === 'figur' ? 44 : Math.min(d.bild.height, 40) });
+    const ziel = (d) => ({ x: d.bild.x, y: d.bild.y, hoch: d.typ === 'figur' && !d.baustelle ? d.bild.height * (d.masse?.fussY || 1) + 4 : Math.min(d.bild.height, 40), ding: d });
 
-    if (this.traegt) {
-      if (this.letzterWunsch && this.letzterWunsch.daten.wunsch === this.traegt && !this.istErfuellt(this.letzterWunsch.id)) return ziel(this.letzterWunsch);
-      const passend = naechste(offen.filter((d) => d.daten.wunsch === this.traegt));
+    if (this.traegt && (this.traegt !== 'fackel' || offen.some((d) => this.wunschVon(d).wunsch === 'fackel'))) {
+      if (this.letzterWunsch && this.wunschVon(this.letzterWunsch).wunsch === this.traegt && !this.istErfuellt(this.letzterWunsch.id)) return ziel(this.letzterWunsch);
+      const passend = naechste(offen.filter((d) => this.wunschVon(d).wunsch === this.traegt));
       if (passend) return ziel(passend);
       return this.ausgangZu((w) => w.wunsch === this.traegt);
     }
-    if (this.letzterWunsch && !this.istErfuellt(this.letzterWunsch.id)) {
-      const quelle = naechste(this.dinge.filter((d) => d.typ === 'quelle' && d.gibt === this.letzterWunsch.daten.wunsch));
+    const lw = this.letzterWunsch && this.wunschVon(this.letzterWunsch).wunsch;
+    if (lw && !this.istErfuellt(this.letzterWunsch.id) && !REDE_WUENSCHE.has(lw)) {
+      const quelle = naechste(this.dinge.filter((d) => d.typ === 'quelle' && d.gibt === lw));
       if (quelle) return ziel(quelle);
-      return this.ausgangZu(null, this.letzterWunsch.daten.wunsch);
+      return this.ausgangZu(null, lw);
     }
     const n = naechste(offen);
     if (n) return ziel(n);
-    return this.ausgangZu(() => true);
+    // Noch ein Ereignis-Feld offen (z.B. tiefer in die Höhle)?
+    if (this.ausloeserFelder.length && this.karte.ereignisse?.ausloeser && !this.ereignisErledigt('ausloeser')) {
+      const a = this.ausloeserFelder[0];
+      return { x: a.x * KACHEL + 8, y: (a.y + 1) * KACHEL, hoch: 14, feld: a };
+    }
+    return this.ausgangZu(() => true) || this.ausgangZu(null, null, true);
   }
 
   // Tür zu einer Karte, auf der es einen passenden Wunsch (oder eine Quelle) gibt
-  ausgangZu(passt, quelleFuer) {
+  ausgangZu(passt, quelleFuer, weiterImKapitel = false) {
     for (const a of this.ausgangsFelder) {
       if (!a.karte) continue;
       const k = KARTEN[a.karte];
       let treffer = false;
-      if (quelleFuer) treffer = k.karte.some((z) => [...z].some((c) => LEGENDE[c]?.gibt === quelleFuer));
+      if (weiterImKapitel) treffer = a.weiter === true;
+      else if (quelleFuer) treffer = k.karte.some((z) => [...z].some((c) => LEGENDE[c]?.gibt === quelleFuer));
       else treffer = this.alleWuensche().some((w) => w.karte === a.karte && !this.istErfuellt(w.id) && passt(w));
-      if (treffer) return { x: a.x * KACHEL + KACHEL / 2, y: (a.y + 1) * KACHEL, hoch: 16 };
+      if (treffer) return { x: a.x * KACHEL + KACHEL / 2, y: (a.y + 1) * KACHEL, hoch: 16, feld: a };
     }
     return null;
   }
@@ -973,45 +1335,5 @@ export class Welt extends Phaser.Scene {
       const puls = 1 + Math.sin(zeit / 150) * 0.08;
       this.pfeil.setPosition(px, py).setRotation(winkel - Math.PI / 2).setScale(0.9 * puls).setAlpha(0.9);
     }
-  }
-
-  // -------------------------------------------------------------------------
-  // ZWISCHENSZENE: Der Bote der Königin
-  // -------------------------------------------------------------------------
-  async boteKommt() {
-    if (this.zwischenszene) return;
-    this.zwischenszene = true;
-    this.pfad = [];
-    this.tempo = { x: 0, y: 0 };
-    this.held.setVelocity(0, 0);
-    this.pfeil.setVisible(false);
-
-    const f = this.heldFeld();
-    const platz = [[-2, 0], [2, 0], [0, 2], [-1, 1], [1, 1], [0, -2]].map(([dx, dy]) => ({ x: f.x + dx, y: f.y + dy }))
-      .find((p) => this.istFrei(p.x, p.y)) || f;
-    const px = platz.x * KACHEL + KACHEL / 2, py = (platz.y + 1) * KACHEL - 1;
-    const vorsilbe = figurTexturen(this, 'bote');
-    const bild = this.add.image(px, py - 80, `${vorsilbe}steh0`).setOrigin(0.5, 34 / 36).setDepth(py).setAlpha(0);
-    this.boteFigur = { bild, vorsilbe, naechstesBlinzeln: 0, blinzelnBis: 0, redenBis: 0, jubelnBis: 0, atemVersatz: 0, daten: { name: 'Bote' } };
-    this.figuren.push(this.boteFigur);
-    this.tweens.add({ targets: bild, y: py, alpha: 1, duration: 700, ease: 'Bounce.easeOut' });
-    this.konfetti(px, py - 20, 40);
-    this.schaueZu({ bild });
-    spiele('fanfare');
-    await new Promise((r) => setTimeout(r, 900));
-    if (!this.lebt) return;
-    await this.zeigeSplash({ titel: 'Eine Nachricht!', text: 'Der Bote der Königin ist da!', bild: `${vorsilbe}jubeln`, farbe: 0x7c52a6 });
-
-    for (const [wer, text] of BOTE_TEXTE) {
-      if (!this.lebt) return;
-      await this.sage(wer, text);
-      await new Promise((r) => setTimeout(r, 350));
-    }
-    if (!this.lebt) return;
-    this.cameras.main.fadeOut(900);
-    this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.stop('Oberflaeche');
-      this.scene.start('KapitelEnde', { kapitel: this.stand.kapitel });
-    });
   }
 }

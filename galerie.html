@@ -18,6 +18,7 @@
   <script type="module">
     import { baueHeld, baueFigur, alsCanvas } from './src/grafik/figuren-baukasten.js';
     import { FIGUREN_AUSSEHEN } from './src/grafik/figuren-liste.js';
+    import { baueDrache, baueTier, baueAugen, baueFlugDrache } from './src/grafik/drache.js';
     const f = +(new URLSearchParams(location.search).get('f') || 4);
     const inhalt = document.getElementById('inhalt');
     const gruppe = (titel, bilder) => {
@@ -29,6 +30,13 @@
         r.append(fig);
       }
     };
+    const nur = new URLSearchParams(location.search).get('nur');
+    if (!nur || nur === 'drache') {
+      gruppe('Glutherz – ernst', baueDrache('ernst'));
+      gruppe('Glutherz – froh', baueDrache('froh'));
+      gruppe('Glutherz – Flug', { oben: baueFlugDrache(0), mitte: baueFlugDrache(1), unten: baueFlugDrache(2), augen: baueAugen() });
+      gruppe('Pony', baueTier('pony'));
+    }
     const held = baueHeld();
     for (const richtung of ['unten', 'oben', 'seite']) {
       gruppe(`Grosser Zwerg – ${richtung}`, Object.fromEntries(Object.entries(held).filter(([k]) => k.startsWith(`held_${richtung}`))));

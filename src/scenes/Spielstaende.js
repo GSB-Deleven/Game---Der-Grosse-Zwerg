@@ -7,6 +7,7 @@ import {
   ANZAHL_PLAETZE, PLATZ_BILDER, allePlaetze, leererSpielstand, loeschePlatz, speicherePlatz, spielzeitText,
 } from '../systeme/speichern.js';
 import { KAPITEL } from '../levels/index.js';
+import { starteKapitel } from '../systeme/kapitel.js';
 import { figurTexturen } from '../grafik/figur-texturen.js';
 import { stoppeMusik } from '../systeme/musik.js';
 
@@ -59,6 +60,7 @@ export class Spielstaende extends Phaser.Scene {
       this.tweens.add({ targets: bild, y: bild.y - 5, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       c.add(bild);
       c.add(this.add.text(0, 30, stand.name, stil(34, '#ffffff')).setOrigin(0.5));
+      if (stand.fertig) c.add(this.add.text(0, -150, '👑 Geschafft!', stil(22, '#f2c94c')).setOrigin(0.5));
       const kapitel = KAPITEL[stand.kapitel]?.name || `Kapitel ${stand.kapitel}`;
       c.add(this.add.text(0, 72, `Kapitel ${stand.kapitel}: ${kapitel}`, stil(18, '#f2c94c', { align: 'center', wordWrap: { width: 240 } })).setOrigin(0.5));
       c.add(this.add.image(-40, 112, 'herz').setScale(2));
@@ -192,13 +194,8 @@ export class Spielstaende extends Phaser.Scene {
     this.registry.set('traegt', stand.traegt || null);
     spiele('fanfare');
     stoppeMusik();
-    const kapitel = KAPITEL[stand.kapitel] || KAPITEL[1];
-    const ort = stand.ort && kapitel.karten.includes(stand.ort.karte) ? stand.ort : null;
-    const weiter = { szene: 'Welt', daten: { karte: ort ? ort.karte : kapitel.start, pos: ort } };
     this.cameras.main.fadeOut(400);
-    this.cameras.main.once('camerafadeoutcomplete', () => {
-      if (!stand.introGesehen) this.scene.start('Geschichte', { seiten: 'intro', weiter });
-      else this.scene.start(weiter.szene, weiter.daten);
-    });
+    this.cameras.main.once('camerafadeoutcomplete', () => starteKapitel(this));
   }
+
 }

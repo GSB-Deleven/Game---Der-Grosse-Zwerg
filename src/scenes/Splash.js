@@ -14,8 +14,12 @@ export class Splash extends Phaser.Scene {
   create() {
     const { titel, text, bild, farbe = 0xe0a030 } = this.daten;
     const cx = 480, cy = 250;
-    const figur = /^fig_(.+)_([a-z_0-9]+)$/.exec(bild || '');
-    if (figur && !this.textures.exists(bild)) figurTexturen(this, figur[1]);
+    if (bild && !this.textures.exists(bild)) {
+      const drache = /^fig_drache_([a-z]+)_/.exec(bild);
+      const figur = /^fig_([a-z]+)_/.exec(bild);
+      if (drache) figurTexturen(this, 'drache', drache[1]);
+      else if (figur) figurTexturen(this, figur[1]);
+    }
     this.add.rectangle(480, 270, 960, 540, 0x0d0a14, 0.72);
 
     // drehende Strahlen

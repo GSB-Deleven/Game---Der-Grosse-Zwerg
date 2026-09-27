@@ -35,11 +35,26 @@ export class Titel extends Phaser.Scene {
     this.spielenKnopf = knopf(this, 480, 210, { text: TEXTE.spielen, breite: 280, hoehe: 86, groesse: 44, icon: 'herz', iconScale: 3 }, () => this.starte());
     this.tweens.add({ targets: this.spielenKnopf, scale: 1.06, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
+    // Menü-Knopf (Einstellungen, Steuerung) oben rechts
+    const menue = this.add.container(920, 40);
+    const mg = this.add.graphics();
+    mg.fillStyle(0x1b1420, 0.7).fillRoundedRect(-26, -26, 52, 52, 12);
+    mg.fillStyle(0xffffff, 1).fillRect(-14, -12, 28, 5).fillRect(-14, -2, 28, 5).fillRect(-14, 8, 28, 5);
+    menue.add(mg).setSize(52, 52).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.oeffneMenue());
+
     // Musik startet beim ersten Berühren (Browser erlauben Ton erst nach einer Berührung)
     this.input.once('pointerdown', () => { tonStart(); spieleMusik('titel'); });
+    this.input.keyboard.on('keydown-ESC', () => this.oeffneMenue());
     this.input.keyboard.on('keydown-SPACE', () => this.starte());
     this.input.keyboard.on('keydown-ENTER', () => this.starte());
     this.input.gamepad?.on('down', () => this.starte());
+  }
+
+  oeffneMenue() {
+    if (this.scene.isActive('Pause')) return;
+    this.scene.pause();
+    this.scene.launch('Pause', { von: 'Titel' });
+    this.scene.bringToTop('Pause');
   }
 
   starte() {

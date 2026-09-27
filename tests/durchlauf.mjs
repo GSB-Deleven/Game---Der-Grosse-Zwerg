@@ -1,142 +1,100 @@
-// Automatischer Durchlauf: spielt Kapitel 1 komplett durch (wie ein Kind mit Antippen)
-// und prüft, dass es keine Sackgassen gibt. Start: erst "npm run dev", dann "node tests/durchlauf.mjs"
+// Automatischer Durchlauf: spielt das Spiel wie ein Kind – immer dem gelben Pfeil nach.
+//   node tests/durchlauf.mjs              -> ganzes Spiel: Titel, Spielstand, Kapitel 1–5, Abspann
+//   KAPITEL=3 node tests/durchlauf.mjs    -> nur ab Kapitel 3
+// Vorher "npm run dev" starten (oder SPIEL_URL setzen). Bildschirmfotos landen in test-bilder/.
 import { chromium } from 'playwright';
+import fs from 'node:fs';
 
-const URL = process.env.SPIEL_URL || 'http://localhost:5173/Game---Der-Grosse-Zwerg/';
+const BASIS = process.env.SPIEL_URL || 'http://localhost:5173/Game-Der_Grosse_Zwerg/';
 const BILDER = process.env.BILDER || 'test-bilder';
-const fs = await import('node:fs');
+const KAP = process.env.KAPITEL;
 fs.mkdirSync(BILDER, { recursive: true });
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: true });
 const fehler = [];
-page.on('pageerror', (e) => fehler.push(e.message));
+page.on('pageerror', (e) => fehler.push(e.message + '\n' + (e.stack || '').split('\n').slice(0, 3).join('\n')));
 page.on('console', (m) => { if (m.type() === 'error' && !m.text().includes('ERR_CERT')) fehler.push(m.text()); });
 await page.addInitScript(() => { if (!sessionStorage.getItem('gestartet')) { localStorage.clear(); sessionStorage.setItem('gestartet', '1'); } });
-await page.goto(URL);
+const trenner = BASIS.includes('?') ? '&' : '?';
+await page.goto(`${BASIS}${trenner}schnell${KAP ? `&kapitel=${KAP}` : ''}`);
 await page.waitForTimeout(2500);
-await page.screenshot({ path: `${BILDER}/01-titel.png` });
 
-const warteAuf = async (bedingung, ms = 20000) => {
-  const start = Date.now();
-  while (Date.now() - start < ms) {
-    if (await page.evaluate(bedingung)) return true;
-    await page.waitForTimeout(200);
-  }
-  const zustand = await page.evaluate(() => {
-    const w = window.spiel.scene.getScene('Welt');
-    return w && w.held ? JSON.stringify({ karte: w.kartenName, x: w.held.x, y: w.held.y, feld: w.heldFeld(), pfad: w.pfad, ziel: w.pfadZiel?.feld, traegt: w.traegt }) : 'keine Welt';
-  });
-  await page.screenshot({ path: `${BILDER}/fehler.png` });
-  throw new Error('Zeitüberschreitung: ' + bedingung.toString() + '\nZustand: ' + zustand);
-};
+const foto = async (name) => { await page.screenshot({ path: `${BILDER}/${name}.png` }); };
+const zustand = () => page.evaluate(() => {
+  const sp = window.spiel;
+  const aktiv = sp.scene.getScenes(true).map((s) => s.scene.key);
+  const w = sp.scene.getScene('Welt');
+  return {
+    aktiv, kapitel: sp.registry.get('stand')?.kapitel,
+    karte: w?.kartenName, lebt: w?.lebt, zw: w?.zwischenszene, herzen: sp.registry.get('stand')?.herzen,
+    pos: w?.held ? [Math.round(w.held.x), Math.round(w.held.y)] : null,
+  };
+});
 
-// Splash-Screens automatisch wegtippen (wie ein ungeduldiges Kind)
-let splashes = 0;
-const splashWeg = setInterval(async () => {
-  try {
-    const weg = await page.evaluate(() => {
-      const sc = window.spiel.scene.getScene('Splash');
-      if (window.spiel.scene.isActive('Splash') && !sc.fertig) { sc.schliessen(); return true; }
-      return false;
-    });
-    if (weg) splashes++;
-  } catch (e) { /* Seite lädt gerade neu */ }
-}, 1500);
-
-const spielstandStarten = async (neu) => {
+if (!KAP) {
+  await foto('01-titel');
   await page.keyboard.press('Space');
-  await warteAuf(() => window.spiel.scene.isActive('Spielstaende'));
-  await page.waitForTimeout(600);
-  await page.screenshot({ path: `${BILDER}/02-spielstaende.png` });
-  await page.evaluate((neu) => {
+  await page.waitForTimeout(1200);
+  await foto('02-spielstaende');
+  await page.evaluate(() => {
     const s = window.spiel.scene.getScene('Spielstaende');
-    const gespeichert = JSON.parse(localStorage.getItem('grosser-zwerg-plaetze-v2') || '{}').plaetze?.[0];
-    const stand = neu ? { name: 'Liv', bild: 'held', kapitel: 1, erfuellt: [], herzen: 0, introGesehen: false, meilensteine: [], orteBesucht: [], ort: null, traegt: null, spielzeit: 0 } : gespeichert;
-    s.starte(0, stand);
-  }, neu);
-};
+    s.starte(0, { name: 'Liv', bild: 'held', kapitel: 1, erfuellt: [], herzen: 0, introGesehen: false, geschichten: [], fortschritt: {}, ereignisse: [], sterne: 0, fertig: false, meilensteine: [], orteBesucht: [], ort: null, traegt: null, spielzeit: 0 });
+  });
+}
 
-// Spielen drücken -> Spielstand wählen -> Geschichte
-await spielstandStarten(true);
-await warteAuf(() => window.spiel.scene.isActive('Geschichte'));
-await page.waitForTimeout(900);
-await page.screenshot({ path: `${BILDER}/02b-geschichte.png` });
-for (let i = 0; i < 4; i++) { await page.waitForTimeout(500); await page.keyboard.press('Space'); }
-await warteAuf(() => window.spiel.scene.isActive('Welt'));
-await page.waitForTimeout(1500);
-await page.screenshot({ path: `${BILDER}/03-dorf-start.png` });
-
-// Tippt auf ein Ding (Figur oder Quelle) und wartet, bis der Held dort ist
-const tippeAuf = async (filter) => {
-  const punkt = await page.evaluate((f) => {
-    const w = window.spiel.scene.getScene('Welt');
-    const d = w.dinge.find((x) => (x.typ === 'figur' ? x.id.endsWith(':' + f) : x.gibt === f));
-    if (!d) return null;
-    w.laufeZu(d.bild.x, d.bild.y - 4);
-    return true;
-  }, filter);
-  if (!punkt) throw new Error('Nicht gefunden: ' + filter);
-  await warteAuf(() => { const w = window.spiel.scene.getScene('Welt'); return w.pfad.length === 0 && !w.pfadZiel && !window.spiel.scene.isActive('Splash'); }, 40000);
-  await page.waitForTimeout(700);
-};
-
-const traegt = () => page.evaluate(() => window.spiel.scene.getScene('Welt').traegt || null);
-const herzen = () => page.evaluate(() => window.spiel.registry.get('stand').herzen);
-
-// Aufgaben im Dorf: [Figur, Gegenstand]
-const dorf = [['a', 'essen'], ['b', 'essen'], ['c', 'frucht'], ['e', 'wasser'], ['f', 'wasser'], ['h', 'frucht'], ['j', 'frucht']];
-let n = 0;
-for (const [figur, ding] of dorf) {
-  await tippeAuf(figur); // Wunsch anhören
-  if (n === 0) await page.screenshot({ path: `${BILDER}/04-wunsch.png` });
-  await tippeAuf(ding); // holen
-  if ((await traegt()) !== ding) throw new Error(`Trägt nicht ${ding}, sondern ${await traegt()}`);
-  if (n === 0) await page.screenshot({ path: `${BILDER}/05-traegt.png` });
-  await tippeAuf(figur); // bringen
-  n++;
-  if ((await herzen()) !== n) throw new Error(`Erwartet ${n} Herzen, habe ${await herzen()}`);
-  console.log(`✔ ${figur} bekommt ${ding} – ${n} Herzen`);
-  if (n === 3) {
-    // Neu laden und im Spielstand weiterspielen
-    await page.waitForTimeout(2500);
-    const vorher = await page.evaluate(() => { const w = window.spiel.scene.getScene('Welt'); return { x: Math.round(w.held.x), y: Math.round(w.held.y) }; });
-    await page.evaluate(() => window.spiel.scene.getScene('Welt').sichern());
-    await page.reload();
-    await page.waitForTimeout(2500);
-    await spielstandStarten(false);
-    await warteAuf(() => window.spiel.scene.isActive('Welt') && window.spiel.scene.getScene('Welt').held);
-    await page.waitForTimeout(1200);
-    const nachher = await page.evaluate(() => { const w = window.spiel.scene.getScene('Welt'); return { x: Math.round(w.held.x), y: Math.round(w.held.y), herzen: w.stand.herzen }; });
-    if (nachher.herzen !== 3 || Math.abs(nachher.x - vorher.x) > 2 || Math.abs(nachher.y - vorher.y) > 2) throw new Error(`Spielstand falsch geladen: ${JSON.stringify({ vorher, nachher })}`);
-    console.log('✔ Spielstand gespeichert und am gleichen Ort weitergespielt');
+const gesehen = new Set();
+let letzteAktion = '', gleichSeit = 0, runden = 0, geladen = false;
+const start = Date.now();
+while (Date.now() - start < 25 * 60 * 1000) {
+  runden++;
+  const z = await zustand();
+  const szene = z.aktiv.find((a) => ['Geschichte', 'Splash', 'Entscheidung', 'KapitelEnde', 'Flug', 'Abspann', 'Pause'].includes(a)) || (z.aktiv.includes('Welt') ? 'Welt' : z.aktiv[0]);
+  const schluessel = szene === 'Welt' ? `welt-${z.karte}` : `${szene}-${z.kapitel}`;
+  if (!gesehen.has(schluessel)) {
+    gesehen.add(schluessel);
+    await page.waitForTimeout(szene === 'Welt' ? 2200 : 900);
+    await foto(`k${z.kapitel}-${schluessel}`);
+    console.log(`→ Kapitel ${z.kapitel}: ${szene}${szene === 'Welt' ? ` (${z.karte})` : ''} – ${z.herzen} Herzen`);
   }
+  if (szene === 'Abspann') { await page.waitForTimeout(4000); await foto('ende-abspann'); break; }
+  if (szene === 'Geschichte') await page.keyboard.press('Space');
+  else if (szene === 'Splash') await page.evaluate(() => { const s = window.spiel.scene.getScene('Splash'); if (!s.fertig) s.schliessen(); });
+  else if (szene === 'Entscheidung') await page.keyboard.press('Space');
+  else if (szene === 'KapitelEnde') await page.evaluate(() => window.spiel.scene.getScene('KapitelEnde').weiter());
+  else if (szene === 'Flug') { await page.waitForTimeout(5000); await foto(`k5-flug-mitte`); await page.evaluate(() => window.spiel.scene.getScene('Flug').ende()); await page.waitForTimeout(1500); }
+  else if (szene === 'Welt' && z.lebt && !z.zw) {
+    // Einmal mitten im Spiel neu laden und im Spielstand weiterspielen
+    if (!KAP && !geladen && z.herzen >= 3) {
+      geladen = true;
+      await page.evaluate(() => window.spiel.scene.getScene('Welt').sichern());
+      const vorher = z.pos;
+      await page.reload(); await page.waitForTimeout(2500);
+      await page.keyboard.press('Space'); await page.waitForTimeout(1000);
+      await page.evaluate(() => window.spiel.scene.getScene('Spielstaende').starte(0, JSON.parse(localStorage.getItem('grosser-zwerg-plaetze-v2')).plaetze[0]));
+      await page.waitForTimeout(2500);
+      const nachher = await zustand();
+      if (nachher.herzen !== z.herzen || Math.abs(nachher.pos[0] - vorher[0]) > 3) throw new Error(`Spielstand falsch geladen: ${JSON.stringify({ z, nachher })}`);
+      console.log('✔ Spielstand gespeichert, neu geladen und am gleichen Ort weitergespielt');
+      continue;
+    }
+    const aktion = await page.evaluate(() => {
+      const w = window.spiel.scene.getScene('Welt');
+      if (!w.held || w.wechselt || w.pfad.length || w.pfadZiel || w.aktionGesperrt) return 'warte';
+      const ziel = w.pfeilZiel();
+      if (!ziel) return 'kein Ziel';
+      const f = ziel.ding ? ziel.ding.feld : ziel.feld;
+      w.laufeZu(f.x * 16 + 8, f.y * 16 + 8);
+      return `${w.kartenName}:${ziel.ding ? (ziel.ding.id || ziel.ding.gibt) : `feld ${f.x},${f.y}`}`;
+    });
+    if (aktion === letzteAktion && aktion !== 'warte') gleichSeit++; else gleichSeit = 0;
+    if (aktion !== 'warte') letzteAktion = aktion;
+    if (gleichSeit > 25) { await foto('fehler'); throw new Error(`Hänger bei ${aktion}: ${JSON.stringify(z)}`); }
+  }
+  await page.waitForTimeout(350);
 }
-await page.screenshot({ path: `${BILDER}/06-dorf-geholfen.png` });
-
-// In die Bibliothek
-await page.evaluate(() => { const w = window.spiel.scene.getScene('Welt'); const a = w.ausgangsFelder[0]; w.laufeZu(a.x * 16 + 8, a.y * 16 + 8); });
-await warteAuf(() => { const w = window.spiel.scene.getScene('Welt'); return w.kartenName === 'bibliothek' && w.held && !w.wechselt && w.scene.isActive(); });
-await page.waitForTimeout(1000);
-await page.screenshot({ path: `${BILDER}/07-bibliothek.png` });
-for (const figur of ['c', 'd']) {
-  await tippeAuf(figur);
-  await tippeAuf('buch');
-  await tippeAuf(figur);
-  n++;
-  if ((await herzen()) !== n) throw new Error(`Erwartet ${n} Herzen, habe ${await herzen()}`);
-  console.log(`✔ Bibliothek ${figur} bekommt buch – ${n} Herzen`);
-}
-// Der Bote kommt
-await warteAuf(() => window.spiel.scene.getScene('Welt').zwischenszene === true);
-await page.waitForTimeout(2500);
-await page.screenshot({ path: `${BILDER}/08-bote.png` });
-await warteAuf(() => window.spiel.scene.isActive('KapitelEnde'), 90000);
-await page.waitForTimeout(2500);
-await page.screenshot({ path: `${BILDER}/09-kapitel-ende.png` });
-
-clearInterval(splashWeg);
-console.log(`Splash-Screens gesehen: ${splashes}`);
+const ende = await zustand();
 await browser.close();
+if (!ende.aktiv.includes('Abspann')) { console.error('Nicht bis zum Abspann gekommen:', JSON.stringify(ende)); process.exit(1); }
 if (fehler.length) { console.error('Fehler im Spiel:\n' + fehler.join('\n')); process.exit(1); }
-console.log(`Kapitel 1 komplett durchgespielt: ${n} Herzen, keine Fehler.`);
+console.log(`\n✔ Bis zum Abspann durchgespielt: ${ende.herzen} Herzen, ${runden} Schritte, ${Math.round((Date.now() - start) / 1000)} s, keine Fehler.`);

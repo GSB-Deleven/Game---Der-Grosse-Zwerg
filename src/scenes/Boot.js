@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { erzeugeAlleTexturen } from '../grafik/texturen.js';
 import { ladeEinstellungen, leererSpielstand } from '../systeme/speichern.js';
 import { heldTexturen } from '../grafik/figur-texturen.js';
+import { starteKapitel } from '../systeme/kapitel.js';
 import { erzeugeWeltTexturen } from '../grafik/welt-grafik.js';
 import { setzeMusikLautstaerke } from '../systeme/musik.js';
 import { setzeTonLautstaerke } from '../systeme/ton.js';
@@ -20,7 +21,21 @@ export class Boot extends Phaser.Scene {
     setzeTonLautstaerke(einst.toene ?? 1);
 
     // Auf die Schrift warten (höchstens 2 Sekunden), dann Titelbild
-    const weiter = () => this.scene.start('Titel');
+    const weiter = () => {
+      // Entwickler-Abkürzung: ?kapitel=3 startet direkt in Kapitel 3 (Speicherplatz 3)
+      const k = Number(new URLSearchParams(location.search).get('kapitel'));
+      if (k) {
+        const stand = leererSpielstand('Test', 'held');
+        stand.kapitel = k;
+        stand.introGesehen = true;
+        stand.geschichten = ['intro', 'kapitel2', 'kapitel3', 'kapitel4'];
+        this.registry.set('platz', 2);
+        this.registry.set('stand', stand);
+        starteKapitel(this, { mitIntro: false });
+        return;
+      }
+      this.scene.start('Titel');
+    };
     if (document.fonts && document.fonts.load) {
       Promise.race([
         document.fonts.load(`32px ${SCHRIFT.split(',')[0]}`),

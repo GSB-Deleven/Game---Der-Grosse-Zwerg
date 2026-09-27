@@ -22,6 +22,11 @@ export function leererSpielstand(name = 'Zwerg', bild = 'held') {
     erfuellt: [],
     herzen: 0,
     introGesehen: false,
+    geschichten: [],
+    fortschritt: {},
+    ereignisse: [],
+    sterne: 0,
+    fertig: false,
     meilensteine: [],
     orteBesucht: [],
     ort: null, // { karte, x, y }

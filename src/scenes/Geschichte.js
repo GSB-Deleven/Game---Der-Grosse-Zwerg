@@ -41,6 +41,50 @@ const BILDER = {
       s.add.image(380, 402, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(6);
     },
   ],
+  kapitel2: [
+    (s) => {
+      s.add.image(700, 405, 'obj_schloss').setOrigin(0.5, 1).setScale(2.6);
+      const h = s.add.image(300, 402, 'held_seite_lauf0').setOrigin(0.5, 46 / 48).setScale(5);
+      let i = 0;
+      s.time.addEvent({ delay: 110, loop: true, callback: () => { i = (i + 1) % 6; h.setTexture(`held_seite_lauf${i}`); } });
+      s.tweens.add({ targets: h, x: 420, duration: 4000 });
+    },
+    (s) => {
+      s.add.image(480, 405, 'obj_schloss').setOrigin(0.5, 1).setScale(2.2).setAlpha(0.5);
+      s.add.image(380, 402, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(6);
+      dekoZwerg(s, 580, 400, 'koenigin', 6, 'reden');
+    },
+  ],
+  kapitel3: [
+    (s) => {
+      s.add.image(480, 402, 'held_unten_jubeln').setOrigin(0.5, 46 / 48).setScale(6);
+      ['stein', 'brett', 'seil', 'beeren', 'fackel'].forEach((g, i) => {
+        const b = s.add.image(250 + i * 115, 190, g).setScale(0);
+        s.tweens.add({ targets: b, scale: 3.5, delay: 200 + i * 250, duration: 400, ease: 'Back.easeOut' });
+      });
+    },
+    (s) => {
+      s.add.image(200, 400, 'obj_laubbaum').setOrigin(0.5, 1).setScale(4);
+      s.add.image(760, 400, 'obj_tanne').setOrigin(0.5, 1).setScale(4);
+      s.add.image(480, 402, 'held_seite_steh0').setOrigin(0.5, 46 / 48).setScale(6);
+      s.add.image(620, 390, 'obj_trittstein').setScale(4);
+    },
+  ],
+  kapitel4: [
+    (s) => {
+      s.add.image(480, 330, 'obj_hoehleneingang').setOrigin(0.5, 1).setScale(4);
+      s.add.image(480, 402, 'held_oben_steh0').setOrigin(0.5, 46 / 48).setScale(5.5);
+    },
+    (s) => {
+      s.add.rectangle(480, 250, 960, 500, 0x05030a, 0.85);
+      const schein = s.add.image(420, 300, 'schein').setScale(5).setBlendMode(Phaser.BlendModes.ADD);
+      s.tweens.add({ targets: schein, alpha: 0.6, duration: 300, yoyo: true, repeat: -1 });
+      s.add.image(420, 402, 'held_seite_tragen_steh0').setOrigin(0.5, 46 / 48).setScale(5.5);
+      s.add.image(420, 402 - 48 * 5.5 + 10, 'fackel').setScale(4);
+      const augen = s.add.image(700, 200, 'drachenaugen').setScale(5).setAlpha(0);
+      s.tweens.add({ targets: augen, alpha: 1, delay: 2500, duration: 1500 });
+    },
+  ],
 };
 
 export class Geschichte extends Phaser.Scene {
@@ -101,7 +145,10 @@ export class Geschichte extends Phaser.Scene {
     this.beendet = true;
     verstummen();
     const stand = this.registry.get('stand');
-    if (this.name === 'intro') { stand.introGesehen = true; sichere(this.registry); }
+    stand.geschichten = stand.geschichten || [];
+    if (!stand.geschichten.includes(this.name)) stand.geschichten.push(this.name);
+    if (this.name === 'intro') stand.introGesehen = true;
+    sichere(this.registry);
     this.cameras.main.fadeOut(400);
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start(this.weiter.szene, this.weiter.daten));
   }

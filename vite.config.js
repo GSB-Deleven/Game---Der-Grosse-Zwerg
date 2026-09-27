@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     };
   }
   return {
-    base: '/Game---Der-Grosse-Zwerg/',
+    base: '/Game-Der_Grosse_Zwerg/',
     build: { outDir: 'dist', chunkSizeWarningLimit: 5000 },
   };
 });

@@ -35,6 +35,62 @@ const LIEDER = {
         A2:4 A2:4 G2:4 E2:4 F2:4 D2:4 E2:4 A2:4`) },
     ],
   },
+  schloss: {
+    tempo: 110,
+    stimmen: [
+      { typ: 'square', laut: 0.04, noten: lies(`
+        G4:2 C5:1 D5:1 E5:2 G5:2  F5:1 E5:1 D5:1 C5:1 D5:4
+        E5:2 F5:1 G5:1 A5:2 G5:2  F5:1 E5:1 D5:2 C5:4`) },
+      { typ: 'triangle', laut: 0.12, noten: lies(`
+        C3:4 G2:4 F2:4 G2:4 C3:4 F2:4 G2:4 C3:4`) },
+    ],
+  },
+  reise: {
+    tempo: 140,
+    stimmen: [
+      { typ: 'square', laut: 0.042, noten: lies(`
+        D5:1 F5:1 A5:2 G5:1 F5:1 E5:2  D5:1 E5:1 F5:1 A5:1 G5:4
+        A5:1 C6:1 A5:2 G5:1 F5:1 E5:2  D5:1 C5:1 E5:1 F5:1 D5:4`) },
+      { typ: 'triangle', laut: 0.12, noten: lies(`
+        D3:2 A2:2 D3:2 A2:2  C3:2 G2:2 C3:2 G2:2  A2:2 E3:2 A2:2 E3:2  D3:2 A2:2 D3:4`) },
+    ],
+  },
+  wald: {
+    tempo: 80,
+    stimmen: [
+      { typ: 'sine', laut: 0.07, noten: lies(`
+        E5:2 -:1 G5:1 F#5:2 E5:2  H4:3 -:1 D5:4
+        C5:2 -:1 E5:1 D5:2 C5:2  H4:6 -:2`) },
+      { typ: 'triangle', laut: 0.1, noten: lies(`E2:8 D2:8 C2:8 H1:8`) },
+    ],
+  },
+  hoehle: {
+    tempo: 64,
+    stimmen: [
+      { typ: 'sine', laut: 0.07, noten: lies(`A4:3 C5:1 H4:4 G4:3 A4:1 E4:4 F4:3 A4:1 G4:4 E4:8`) },
+      { typ: 'triangle', laut: 0.11, noten: lies(`A1:8 G1:8 F1:8 E1:8`) },
+    ],
+  },
+  flug: {
+    tempo: 150,
+    stimmen: [
+      { typ: 'square', laut: 0.04, noten: lies(`
+        C5:1 E5:1 G5:1 C6:1 H5:2 G5:2  A5:1 G5:1 F5:1 E5:1 D5:4
+        E5:1 G5:1 C6:1 E6:1 D6:2 C6:2  H5:1 C6:1 D6:1 H5:1 C6:4`) },
+      { typ: 'triangle', laut: 0.12, noten: lies(`
+        C3:2 G3:2 C3:2 G3:2  F2:2 C3:2 G2:2 D3:2  C3:2 G3:2 A2:2 E3:2  F2:2 G2:2 C3:4`) },
+    ],
+  },
+  fest: {
+    tempo: 150,
+    stimmen: [
+      { typ: 'square', laut: 0.045, noten: lies(`
+        G5:1 G5:1 A5:1 G5:1 C6:2 H5:2  G5:1 G5:1 A5:1 G5:1 D6:2 C6:2
+        G5:1 G5:1 G6:2 E6:2 C6:1 H5:1 A5:2  F6:1 F6:1 E6:2 C6:2 D6:2 C6:4`) },
+      { typ: 'triangle', laut: 0.12, noten: lies(`
+        C3:2 G3:2 C3:2 G3:2  G2:2 D3:2 C3:2 G3:2  C3:2 E3:2 F2:2 A2:2  G2:2 G2:2 C3:4`) },
+    ],
+  },
   titel: {
     tempo: 100,
     stimmen: [

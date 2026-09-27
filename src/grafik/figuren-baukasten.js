@@ -27,6 +27,7 @@ export const RAMPEN = {
   weinrot: ['#4e1422', '#8a2a3c', '#c05468'],
   orange: ['#8a4a12', '#d9822b', '#f5b25a'],
   rosa: ['#8a2c52', '#d85a8a', '#f59ac0'],
+  gelb: ['#a8862b', '#e8c040', '#fff0a0'],
   leder: ['#3f2716', '#6b4428', '#98683e'],
   hose: ['#33261e', '#54402f', '#7a604a'],
   stiefel: ['#1f1510', '#3b2a1f', '#5e4533'],

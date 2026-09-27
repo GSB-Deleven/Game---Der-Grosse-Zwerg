@@ -32,7 +32,6 @@ export const LEGENDE = {
 
   // Gebäude
   'H': { fest: true, objekt: 'haus', breite: 3, hoehe: 2, rauch: [37, -40], licht: [[11, -18], [38, -18]] },
-  'V': { boden: 'fels', fest: true, objekt: 'mine', breite: 2 },
   'Y': { fest: true, objekt: 'statue' },
 
   // Deko
@@ -40,8 +39,8 @@ export const LEGENDE = {
   '*': { fest: true, objekt: 'busch' },
   '^': { fest: true, objekt: 'fels' },
   'J': { fest: true, objekt: 'zaun' },
-  '!': { fest: true, objekt: 'laterne', licht: [[0, -24]] },
-  'L': { fest: true, objekt: 'feuerschale', flamme: [0, -18], licht: [[0, -20]] },
+  '!': { fest: true, objekt: 'laterne', licht: [[0, -24]], leuchtet: 45 },
+  'L': { fest: true, objekt: 'feuerschale', flamme: [0, -18], licht: [[0, -20]], leuchtet: 50 },
   'E': { fest: true, objekt: 'esse', funken: [0, -12], licht: [[0, -10]], rauch: [0, -34] },
   'A': { fest: true, objekt: 'amboss' },
   'K': { fest: true, objekt: 'fass' },
@@ -49,5 +48,31 @@ export const LEGENDE = {
   '%': { fest: true, objekt: 'holzstapel' },
   '&': { fest: true, objekt: 'heuballen' },
   '?': { fest: true, objekt: 'wegweiser' },
-  'P': { objekt: 'pilze' },
+  'P': { objekt: 'pilze', flach: true },
+
+  // Reise, Schloss und Höhle
+  '"': { boden: 'schnee' },
+  ';': { boden: 'hoehle' },
+  'O': { boden: 'wasser', objekt: 'trittstein', flach: true, schatten: false }, // Trittstein – begehbar
+  'X': { boden: 'schlucht', fest: true },
+  '[': { boden: 'leiter' },                                                  // Strickleiter – begehbar
+  'C': { fest: true, objekt: 'steinhaufen', gibt: 'stein' },
+  'D': { fest: true, objekt: 'beerenbusch', gibt: 'beeren' },
+  '/': { fest: true, objekt: 'seilkiste', gibt: 'seil' },
+  'N': { fest: true, objekt: 'heuhaufen', gibt: 'heu' },
+  '(': { fest: true, objekt: 'feuerschale', gibt: 'fackel', flamme: [0, -18], licht: [[0, -20]], leuchtet: 50 },
+  'Z': { fest: true, objekt: 'rosen' },
+  'U': { fest: true, objekt: 'stall', breite: 3, hoehe: 2 },
+  '>': { fest: true, objekt: 'turm', breite: 2, hoehe: 2 },
+  '<': { fest: true, objekt: 'laubbaum' },
+  'I': { boden: 'steinboden', fest: true, objekt: 'saeule' },
+  'G': { boden: 'felswand', fest: true, objekt: 'banner', schatten: false },
+  'V': { boden: 'fels', fest: true, objekt: 'mine', breite: 2 },
+  '}': { fest: true, objekt: 'kristall', leuchtet: 38 },
+  ')': { fest: true, objekt: 'hoehlenpilze', gibt: 'pilze' },
+  ']': { fest: true, objekt: 'quelle', gibt: 'wasser' },
+  '{': { fest: true, objekt: 'schloss', breite: 7, hoehe: 4 },
+  'Ü': { fest: true, objekt: 'thron', breite: 2 },
+  'Ö': { boden: 'hoehlenwand', fest: true },
+  '`': { fest: true, objekt: 'holzstapel', gibt: 'brett' },
 };

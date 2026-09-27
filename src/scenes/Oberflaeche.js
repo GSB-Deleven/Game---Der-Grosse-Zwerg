@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { stil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
-import { ZEICHEN_MS, sprechDauer } from '../systeme/stimme.js';
+import { zeichenMs, sprechDauer, setzeTextTempo } from '../systeme/stimme.js';
+import { ladeEinstellungen } from '../systeme/speichern.js';
 
 // Alles, was über der Spielwelt liegt: Herzen, Sprechtext, Touch-Knöpfe.
 export class Oberflaeche extends Phaser.Scene {
@@ -15,12 +16,14 @@ export class Oberflaeche extends Phaser.Scene {
     this.baueSprechfeld();
     this.baueMenueKnopf();
 
-    this.zeigeTouch = this.sys.game.device.input.touch;
+    this.einstellungen = ladeEinstellungen();
+    setzeTextTempo(this.einstellungen.textTempo);
+    this.zeigeTouch = this.einstellungen.touch === 'an' || (this.einstellungen.touch !== 'aus' && this.sys.game.device.input.touch);
     this.baueTouchSteuerung();
     if (!this.zeigeTouch) this.touchTeile.forEach((t) => t.setVisible(false));
     // Sobald jemand den Bildschirm berührt, erscheinen die Touch-Knöpfe
     this.input.on('pointerdown', (p) => {
-      if (p.wasTouch && !this.zeigeTouch) { this.zeigeTouch = true; this.touchTeile.forEach((t) => t.setVisible(true)); }
+      if (p.wasTouch && !this.zeigeTouch && this.einstellungen.touch !== 'aus') { this.zeigeTouch = true; this.touchTeile.forEach((t) => t.setVisible(true)); }
     });
 
     this.registry.set('touchRichtung', { x: 0, y: 0 });
@@ -32,15 +35,24 @@ export class Oberflaeche extends Phaser.Scene {
     ev.on('sprechen', this.zeigeText, this);
     ev.on('traegt', this.zeigeGetragen, this);
     ev.on('ortBanner', this.zeigeOrt, this);
+    ev.on('einstellungen', this.neueEinstellungen, this);
     this.events.once('shutdown', () => {
       ev.off('herzen', this.setzeHerzen, this);
       ev.off('herzFliegt', this.herzFliegt, this);
       ev.off('sprechen', this.zeigeText, this);
       ev.off('traegt', this.zeigeGetragen, this);
       ev.off('ortBanner', this.zeigeOrt, this);
+      ev.off('einstellungen', this.neueEinstellungen, this);
       this.registry.set('istSteuerung', null);
       this.registry.set('touchRichtung', { x: 0, y: 0 });
     });
+  }
+
+  neueEinstellungen(einst) {
+    this.einstellungen = einst;
+    setzeTextTempo(einst.textTempo);
+    this.zeigeTouch = einst.touch === 'an' || (einst.touch !== 'aus' && this.sys.game.device.input.touch);
+    this.touchTeile.forEach((t) => t.setVisible(this.zeigeTouch));
   }
 
   // ---- Herzen oben links ----------------------------------------------------
@@ -100,7 +112,7 @@ export class Oberflaeche extends Phaser.Scene {
     this.tweens.killTweensOf(this.sprechfeld);
     let i = 0;
     this.schreiber = this.time.addEvent({
-      delay: ZEICHEN_MS, repeat: text.length - 1,
+      delay: zeichenMs(), repeat: text.length - 1,
       callback: () => { i++; this.sprechText.setText(text.slice(0, i)); },
     });
     this.textZeit = this.time.delayedCall(sprechDauer(text) + 400, () => {
