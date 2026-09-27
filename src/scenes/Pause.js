@@ -17,7 +17,7 @@ const TEXT = [{ name: 'Langsam', wert: 1.5 }, { name: 'Normal', wert: 1 }, { nam
 const BELEGUNG = [
   ['Laufen', 'Pfeiltasten / W A S D', 'Stick / Steuerkreuz', 'Steuerkreuz oder hintippen'],
   ['Helfen / Reden', 'Leertaste / Enter / E', 'A (oder B, X, Y)', 'Herz-Knopf'],
-  ['Menü', 'Esc / P', 'Start', 'Pause-Knopf ⏸'],
+  ['Menü', 'Esc / P', 'Start', 'Pause-Knopf oben'],
   ['Vollbild', 'F', 'im Menü', 'im Menü'],
   ['Im Menü wählen', 'Pfeiltasten + Enter', 'Steuerkreuz + A', 'antippen'],
 ];
@@ -43,8 +43,6 @@ export class Pause extends Phaser.Scene {
     this.reiterKnoepfe = ['Spiel', 'Einstellungen', 'Steuerung'].map((name, i) =>
       knopf(this, 300 + i * 180, 130, { text: name, breite: 170, hoehe: 48, groesse: 22, farbe: 0x5c5460 }, () => this.zeigeReiter(i)));
     this.inhalt = this.add.container(0, 0);
-    // Versions-Stempel unten im Menü-Fenster (zeigt, ob die neueste Version läuft)
-    this.add.text(480, 494, `Version ${typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'Entwicklung'}`, stil(14, '#8a8098')).setOrigin(0.5);
     this.zeigeReiter(0);
 
     this.input.keyboard.on('keydown-ESC', () => this.weiter());
@@ -100,6 +98,8 @@ export class Pause extends Phaser.Scene {
   }
 
   reiterSpiel() {
+    // Versions-Stempel unten im Menü-Fenster (zeigt, ob die neueste Version läuft)
+    this.inhalt.add(this.add.text(480, 490, `Version ${typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'Entwicklung'}`, stil(14, '#8a8098')).setOrigin(0.5));
     const stand = this.registry.get('stand');
     if (this.imSpiel && stand) this.inhalt.add(this.add.text(480, 185, `${stand.name} · Kapitel ${stand.kapitel} · ${stand.herzen} Herzen`, stil(22, '#cccccc')).setOrigin(0.5));
     const weiter = () => this.weiter();
@@ -153,11 +153,11 @@ export class Pause extends Phaser.Scene {
   }
 
   reiterSteuerung() {
-    const x = [175, 330, 510, 660];
+    const x = [170, 318, 486, 636];
     const kopf = ['', 'Tastatur', 'Controller', 'Tablet / Handy'];
-    kopf.forEach((t, i) => this.inhalt.add(this.add.text(x[i], 185, t, stil(20, '#f2c94c'))));
+    kopf.forEach((t, i) => this.inhalt.add(this.add.text(x[i], 185, t, stil(18, '#f2c94c'))));
     BELEGUNG.forEach((zeile, j) => {
-      zeile.forEach((t, i) => this.inhalt.add(this.add.text(x[i], 225 + j * 52, t, stil(i === 0 ? 20 : 17, i === 0 ? '#ffffff' : '#dddddd', { wordWrap: { width: i === 3 ? 140 : 160 } }))));
+      zeile.forEach((t, i) => this.inhalt.add(this.add.text(x[i], 225 + j * 52, t, stil(i === 0 ? 20 : 17, i === 0 ? '#ffffff' : '#dddddd', { wordWrap: { width: i === 3 ? 150 : 160 } }))));
     });
     this.inhalt.add(this.add.text(480, 490, 'Tipp: Einfach auf eine Figur tippen – der Zwerg läuft hin und hilft.', stil(17, '#8fd46c')).setOrigin(0.5));
   }

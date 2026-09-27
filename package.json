@@ -11,6 +11,8 @@
     "pruefen": "node scripts/pruefe-karten.mjs"
   },
   "dependencies": {
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "@fontsource/press-start-2p": "^5.3.0",
     "phaser": "^3.90.0"
   },
   "devDependencies": {

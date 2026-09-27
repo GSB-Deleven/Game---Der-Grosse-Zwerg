@@ -11,3 +11,11 @@ export function stil(groesse = 28, farbe = '#ffffff', extra = {}) {
     ...extra,
   };
 }
+
+// Zahlen (Herzen, Sterne): eigene Pixel-Schrift mit gut unterscheidbaren Ziffern
+// (in Pixelify Sans sieht die 5 fast wie ein S aus)
+export const ZAHLEN_SCHRIFT = '"Press Start 2P", "Pixelify Sans", monospace';
+
+export function zahlStil(groesse = 28, farbe = '#ffffff') {
+  return { ...stil(groesse, farbe), fontFamily: ZAHLEN_SCHRIFT };
+}

@@ -40,7 +40,7 @@ export class Boot extends Phaser.Scene {
     };
     if (document.fonts && document.fonts.load) {
       Promise.race([
-        document.fonts.load(`32px ${SCHRIFT.split(',')[0]}`),
+        Promise.all([document.fonts.load(`32px ${SCHRIFT.split(',')[0]}`), document.fonts.load('32px "Press Start 2P"')]),
         new Promise((r) => setTimeout(r, 2000)),
       ]).then(weiter, weiter);
     } else weiter();

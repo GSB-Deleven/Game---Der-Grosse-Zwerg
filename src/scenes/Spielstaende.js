@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { mittig } from '../systeme/bildschirm.js';
-import { stil } from '../systeme/schrift.js';
+import { stil, zahlStil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
 import { spiele } from '../systeme/ton.js';
 import { bergKulisse } from '../systeme/kulisse.js';
@@ -68,7 +68,7 @@ export class Spielstaende extends Phaser.Scene {
       const kapitel = KAPITEL[stand.kapitel]?.name || `Kapitel ${stand.kapitel}`;
       c.add(this.add.text(0, 72, `Kapitel ${stand.kapitel}: ${kapitel}`, stil(18, '#f2c94c', { align: 'center', wordWrap: { width: 240 } })).setOrigin(0.5));
       c.add(this.add.image(-40, 112, 'herz').setScale(2));
-      c.add(this.add.text(-18, 112, `${stand.herzen}`, stil(26)).setOrigin(0, 0.5));
+      c.add(this.add.text(-18, 113, `${stand.herzen}`, zahlStil(20)).setOrigin(0, 0.5));
       c.add(this.add.text(30, 112, spielzeitText(stand.spielzeit), stil(18, '#cccccc')).setOrigin(0, 0.5));
 
       // Löschen (klein, oben rechts)
@@ -177,19 +177,28 @@ export class Spielstaende extends Phaser.Scene {
       border: '4px solid #f2c94c', background: '#1b1420', color: '#fff', width: '260px', textAlign: 'center',
     });
     document.body.appendChild(feld);
+    // Das Spiel reserviert Tasten wie W, A, S, D und die Leertaste für die Steuerung.
+    // Solange das Namensfeld offen ist, gehören alle Tasten dem Feld.
+    const tastatur = this.input.keyboard;
+    tastatur.disableGlobalCapture();
+    const lassDurch = (e) => e.stopPropagation();
+    feld.addEventListener('keydown', lassDurch);
+    feld.addEventListener('keyup', lassDurch);
+    feld.addEventListener('keypress', lassDurch);
     feld.focus();
     feld.select();
     this.namensFeld = feld;
     const ende = () => {
       if (!this.namensFeld) return;
       const wert = feld.value.trim();
+      tastatur.enableGlobalCapture();
       feld.remove();
       this.namensFeld = null;
       fertig(wert);
     };
     feld.addEventListener('keydown', (e) => { if (e.key === 'Enter') ende(); });
     feld.addEventListener('blur', ende);
-    this.events.once('shutdown', () => feld.remove());
+    this.events.once('shutdown', () => { tastatur.enableGlobalCapture(); feld.remove(); });
   }
 
   starte(nummer, stand) {

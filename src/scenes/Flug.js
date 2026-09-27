@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { mittig, beiGroesse, rand } from '../systeme/bildschirm.js';
-import { stil } from '../systeme/schrift.js';
+import { stil, zahlStil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 import { spieleMusik } from '../systeme/musik.js';
 import { sprich, verstummen } from '../systeme/stimme.js';
@@ -130,14 +130,14 @@ export class Flug extends Phaser.Scene {
 
     // Anzeige
     this.sternBild = this.add.image(40, 40, 'stern').setScale(3);
-    this.sternText = this.add.text(70, 40, '0', stil(36)).setOrigin(0, 0.5);
+    this.sternText = this.add.text(70, 42, '0', zahlStil(26)).setOrigin(0, 0.5);
     // Auf breiten/hohen Bildschirmen: Boden an den unteren Rand, Sternzähler in die Ecke
     beiGroesse(this, () => {
       const r = rand(this);
       this.r = r;
       for (const t of Object.values(this.boeden)) t.y = 540 + r.y;
       this.sternBild.setPosition(40 - r.x, 40 - r.y);
-      this.sternText.setPosition(70 - r.x, 40 - r.y);
+      this.sternText.setPosition(70 - r.x, 42 - r.y);
     });
     this.bannerText = this.add.text(480, 100, '', stil(30, '#ffffff', { align: 'center', wordWrap: { width: 860 } })).setOrigin(0.5).setAlpha(0);
     this.hinweis = this.add.text(480, 510, 'Tippe oben oder unten, um zu steuern', stil(20, '#ffffff')).setOrigin(0.5);

@@ -1,4 +1,8 @@
 import Phaser from 'phaser';
+// Schriften direkt im Spiel (funktioniert auch offline und im Artefakt)
+import '@fontsource/pixelify-sans/latin-400.css';
+import '@fontsource/pixelify-sans/latin-700.css';
+import '@fontsource/press-start-2p/latin-400.css';
 import { Boot } from './scenes/Boot.js';
 import { vollbildUmschalten } from './systeme/vollbild.js';
 import { passeFormAn } from './systeme/bildschirm.js';

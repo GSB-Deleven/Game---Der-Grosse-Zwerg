@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { stil } from '../systeme/schrift.js';
+import { stil, zahlStil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 import { zeichenMs, sprechDauer, setzeTextTempo } from '../systeme/stimme.js';
 import { ladeEinstellungen } from '../systeme/speichern.js';
@@ -99,16 +99,18 @@ export class Oberflaeche extends Phaser.Scene {
   // ---- Herzen oben links ----------------------------------------------------
   baueHerzen() {
     this.herzBox = this.add.container(0, 0);
-    const g = this.add.graphics();
-    g.fillStyle(0x1b1420, 0.7).fillRoundedRect(12, 12, 150, 64, 16);
+    this.herzHintergrund = this.add.graphics();
     this.herzBild = this.add.image(50, 44, 'herz').setScale(3);
-    this.herzText = this.add.text(88, 44, '0', stil(40)).setOrigin(0, 0.5);
-    this.herzBox.add([g, this.herzBild, this.herzText]);
+    this.herzText = this.add.text(86, 46, '0', zahlStil(28)).setOrigin(0, 0.5);
+    this.herzBox.add([this.herzHintergrund, this.herzBild, this.herzText]);
   }
 
   setzeHerzen(n) {
     this.herzAnzahl = n;
     this.herzText.setText(String(n));
+    // Kasten wächst mit der Zahl (1, 12, 123 Herzen)
+    const breite = Math.max(128, 86 + this.herzText.width + 18);
+    this.herzHintergrund.clear().fillStyle(0x1b1420, 0.7).fillRoundedRect(12, 12, breite - 12, 64, 16);
   }
 
   herzFliegt({ x, y, herzen }) {
