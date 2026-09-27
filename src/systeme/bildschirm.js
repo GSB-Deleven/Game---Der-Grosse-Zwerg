@@ -5,8 +5,8 @@ export const BREITE = 960;
 export const HOEHE = 540;
 
 // Hochkant (einhändig) ist das Spielfeld schmaler als 960: Menüs werden dann verkleinert
-export function zoomFuer(scene) {
-  return Math.min(1, scene.scale.width / BREITE, scene.scale.height / HOEHE);
+export function zoomFuer(scene, breite = BREITE) {
+  return Math.min(1, scene.scale.width / breite, scene.scale.height / HOEHE);
 }
 
 // Zusätzlicher sichtbarer Rand links/rechts/oben/unten gegenüber 960 x 540 (in Welt-Punkten der Szene)
@@ -15,11 +15,12 @@ export function rand(scene) {
   return { x: (scene.scale.width / z - BREITE) / 2, y: (scene.scale.height / z - HOEHE) / 2 };
 }
 
-// Hält die 960 x 540 grosse Gestaltung einer Szene in der Bildschirmmitte
-export function mittig(scene) {
+// Hält die 960 x 540 grosse Gestaltung einer Szene in der Bildschirmmitte.
+// breite: wie breit der wichtige Teil ist (z. B. nur das Menü-Fenster), damit er hochkant grösser bleibt
+export function mittig(scene, breite = BREITE) {
   const setze = () => {
     const cam = scene.cameras.main;
-    cam.setZoom(zoomFuer(scene));
+    cam.setZoom(zoomFuer(scene, breite));
     cam.centerOn(BREITE / 2, HOEHE / 2);
   };
   setze();

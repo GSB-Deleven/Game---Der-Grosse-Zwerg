@@ -65,15 +65,17 @@ export class Oberflaeche extends Phaser.Scene {
     const B = this.scale.width, H = this.scale.height;
     const r = sichererRand(this);
     const l = Math.max(0, r.links * 0.8), re = Math.max(0, r.rechts * 0.8), u = Math.max(0, r.unten * 0.5);
+    // Oben: unter der Statusleiste bleiben (iPhone hochkant), dort kommen Berührungen nicht an
+    const o = Math.max(0, r.oben, H > B ? 60 : 0);
     const rechts = this.einstellungen?.kreuz !== 'links'; // Standard: Steuerkreuz rechts
     const hochkant = H > B;
-    this.herzBox.setPosition(l, 0);
-    this.menueKnopf.setPosition(B - 30 - re, 40);
+    this.herzBox.setPosition(l, o);
+    this.menueKnopf.setPosition(B - 30 - re, 40 + o);
 
     // Sprechfeld: neben den Herzen, hochkant darunter und verkleinert
     const skala = Math.min(1, (B - 20) / 760);
     this.sprechfeld.setScale(skala);
-    this.sprechfeld.setPosition(hochkant ? B / 2 : Math.max(540 + l, B / 2), hochkant ? 90 : 12);
+    this.sprechfeld.setPosition(hochkant ? B / 2 : Math.max(540 + l, B / 2), (hochkant ? 90 : 12) + o);
 
     let kreuzX, kreuzY, knopfX, knopfY;
     if (hochkant) {
@@ -112,7 +114,7 @@ export class Oberflaeche extends Phaser.Scene {
   herzFliegt({ x, y, herzen }) {
     const h = this.add.image(x, y, 'herz').setScale(3);
     this.tweens.add({
-      targets: h, x: this.herzBox.x + this.herzBild.x, y: this.herzBild.y, scale: 3, duration: 700, ease: 'Cubic.easeIn',
+      targets: h, x: this.herzBox.x + this.herzBild.x, y: this.herzBox.y + this.herzBild.y, scale: 3, duration: 700, ease: 'Cubic.easeIn',
       onComplete: () => {
         h.destroy();
         this.setzeHerzen(herzen);

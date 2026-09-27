@@ -33,7 +33,7 @@ export class Pause extends Phaser.Scene {
   }
 
   create() {
-    mittig(this);
+    mittig(this, 680); // nur das Menü-Fenster muss hineinpassen
     this.add.rectangle(480, 270, 4000, 3000, 0x0d0a14, 0.78).setInteractive();
     const g = this.add.graphics();
     g.fillStyle(0x2a2236, 0.98).fillRoundedRect(150, 30, 660, 480, 24);
