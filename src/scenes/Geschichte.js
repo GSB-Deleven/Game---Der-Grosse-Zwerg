@@ -128,6 +128,8 @@ export class Geschichte extends Phaser.Scene {
     this.zeitgeber?.remove();
     if (this.seite >= this.texte.length) return this.fertig();
 
+    // Animationen des vorigen Bildes anhalten, bevor es gelöscht wird
+    this.time.removeAllEvents();
     this.inhalt.removeAll(true);
     const vorher = new Set(this.children.list);
     this.bilder[this.seite]?.(this);
