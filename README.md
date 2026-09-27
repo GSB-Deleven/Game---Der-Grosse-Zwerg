@@ -1,7 +1,8 @@
 # 🧔 Der Grosse Zwerg 🐉
 
+## 🎮 Jetzt spielen: **[gsb-deleven.github.io/Game-Der_Grosse_Zwerg](https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/)**
+
 > [!NOTE]
-> ### 🎮 Direkt spielen: [gsb-deleven.github.io/Game-Der_Grosse_Zwerg](https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/)
 > Läuft im Browser auf **PC, Tablet und Handy**. Auf dem Tablet: Seite öffnen, «Zum Home-Bildschirm», dann startet es wie eine App.
 >
 > | | 💻 PC / Laptop | 📱 Tablet / Handy |
