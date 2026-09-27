@@ -61,9 +61,9 @@ export function sichererRand(scene) {
 }
 
 // Hochkant spielen: das Spielfeld dreht sich mit (540 x 960), statt «Bitte drehen» zu zeigen.
-// Nur auf Handys (schmaler als 600 Punkte) und nur, wenn es in den Einstellungen eingeschaltet ist.
+// Nur auf Handys (schmaler als 600 Punkte). Standardmässig an, im Menü abschaltbar.
 export function passeFormAn(spiel, einstellungen) {
-  const erlaubt = einstellungen?.hochkant === 'ja';
+  const erlaubt = einstellungen?.hochkant !== 'nein'; // Standard: hochkant einhändig spielen
   document.body.classList.toggle('hochkant-ok', erlaubt);
   const hochkant = erlaubt && window.innerHeight > window.innerWidth && window.innerWidth <= 600;
   const [b, h] = hochkant ? [HOEHE, BREITE] : [BREITE, HOEHE];

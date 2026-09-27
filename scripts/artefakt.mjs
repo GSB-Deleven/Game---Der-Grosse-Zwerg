@@ -8,6 +8,7 @@ const titel = nimm(/<title>[\s\S]*?<\/title>/g);
 const links = nimm(/<link[^>]*fonts\.(googleapis|gstatic)[^>]*>/g);
 const stile = nimm(/<style[\s\S]*?<\/style>/g);
 const skripte = nimm(/<script[\s\S]*?<\/script>/g);
-const inhalt = `${titel}\n${links}\n${stile}\n<div id="spiel"></div>\n${skripte}\n`;
+const drehen = nimm(/<div id="drehen">[\s\S]*?<\/button><\/div>/g);
+const inhalt = `${titel}\n${links}\n${stile}\n<div id="spiel"></div>\n${drehen}\n${skripte}\n`;
 writeFileSync('dist-artefakt/spiel.html', inhalt);
 console.log(`dist-artefakt/spiel.html geschrieben (${Math.round(inhalt.length / 1024)} KB)`);
