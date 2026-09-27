@@ -216,7 +216,7 @@ node tests/durchlauf.mjs # spielt das ganze Spiel automatisch durch (folgt dem g
 | 💬 [Discussions](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/discussions) | lose Ideen und Wünsche, z. B. neue Level von Liv |
 | ✅ [Issues](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues) | konkrete Aufgaben und Fehler, mit Vorlagen |
 | 🗂️ [Project-Board](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/projects) und [Milestones](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/milestones) | Überblick, was als Nächstes kommt |
-| 🤖 **@claude** | in einem Issue erwähnen oder Label «claude» setzen: Claude setzt die Aufgabe um und schlägt einen Pull Request vor |
+| 🤖 **@claude** | in einem Issue erwähnen oder Label «claude» setzen: Claude setzt die Aufgabe um und schlägt einen Pull Request vor. Schritt für Schritt: [Wiki → Mitarbeit und Planung](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/wiki/Mitarbeit-und-Planung) |
 | 📖 [Wiki](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/wiki) | alle Anleitungen an einem Ort |
 
 ---
