@@ -22,7 +22,7 @@ Im Menü (⏸) unter **Einstellungen**:
 
 | Einstellung | Wirkung |
 |---|---|
-| **Steuerkreuz: Links / Rechts** | Handy quer: Steuerkreuz auf der gewählten Seite, Helfen-Knopf gegenüber |
+| **Steuerkreuz: Rechts / Links** | Standard ist rechts. Handy quer: Steuerkreuz auf der gewählten Seite, Helfen-Knopf gegenüber |
 | **Hochkant spielen: Einhändig** | Das Spiel dreht sich mit, wenn das Handy hochkant gehalten wird. Steuerkreuz unten, der Helfen-Knopf direkt darüber, beides mit einem Daumen erreichbar. Mit «Steuerkreuz: Rechts» für die rechte Hand, mit «Links» für die linke. |
 
 Ist «Hochkant spielen» aus, erscheint hochkant der Hinweis «Bitte das Handy drehen», mit einem Knopf, um direkt einhändig zu spielen.

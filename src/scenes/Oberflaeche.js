@@ -65,7 +65,7 @@ export class Oberflaeche extends Phaser.Scene {
     const B = this.scale.width, H = this.scale.height;
     const r = sichererRand(this);
     const l = Math.max(0, r.links * 0.8), re = Math.max(0, r.rechts * 0.8), u = Math.max(0, r.unten * 0.5);
-    const rechts = this.einstellungen?.kreuz === 'rechts';
+    const rechts = this.einstellungen?.kreuz !== 'links'; // Standard: Steuerkreuz rechts
     const hochkant = H > B;
     this.herzBox.setPosition(l, 0);
     this.menueKnopf.setPosition(B - 30 - re, 40);

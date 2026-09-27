@@ -10,7 +10,7 @@ import { vollbildUmschalten, istVollbild } from '../systeme/vollbild.js';
 
 const STUFEN = [{ name: 'Aus', wert: 0 }, { name: 'Leise', wert: 0.3 }, { name: 'Mittel', wert: 0.6 }, { name: 'Laut', wert: 1 }];
 const TOUCH = [{ name: 'Automatisch', wert: 'auto' }, { name: 'Immer', wert: 'an' }, { name: 'Nie', wert: 'aus' }];
-const SEITE = [{ name: 'Links', wert: 'links' }, { name: 'Rechts', wert: 'rechts' }];
+const SEITE = [{ name: 'Rechts', wert: 'rechts' }, { name: 'Links', wert: 'links' }];
 const HOCHKANT = [{ name: 'Nein', wert: 'nein' }, { name: 'Einhändig', wert: 'ja' }];
 const TEXT = [{ name: 'Langsam', wert: 1.5 }, { name: 'Normal', wert: 1 }, { name: 'Schnell', wert: 0.6 }];
 
@@ -124,9 +124,11 @@ export class Pause extends Phaser.Scene {
 
   reiterEinstellungen() {
     const einst = ladeEinstellungen();
+    // Nächster Wert in der Liste: Text-Werte genau vergleichen, Zahlen (Lautstärke, Tempo) mit Toleranz
     const naechste = (liste, wert) => {
-      const i = liste.reduce((b, s, j) => (Math.abs((typeof s.wert === 'number' ? s.wert : 0) - (typeof wert === 'number' ? wert : 0)) < 1e-6 || s.wert === wert ? j : b), 0);
-      return (i + 1) % liste.length;
+      let i = liste.findIndex((s) => s.wert === wert);
+      if (i < 0 && typeof wert === 'number') i = liste.findIndex((s) => typeof s.wert === 'number' && Math.abs(s.wert - wert) < 1e-6);
+      return (Math.max(i, 0) + 1) % liste.length;
     };
     const name = (liste, wert) => (liste.find((s) => s.wert === wert) || liste.reduce((b, s) => (Math.abs(s.wert - wert) < Math.abs(b.wert - wert) ? s : b))).name;
     const zeile = (y, beschriftung, wertText, aendern) => {
@@ -143,7 +145,7 @@ export class Pause extends Phaser.Scene {
     zeile(y(1), 'Töne', () => name(STUFEN, einst.toene ?? 1), () => { einst.toene = STUFEN[naechste(STUFEN, einst.toene ?? 1)].wert; setzeTonLautstaerke(einst.toene); spiele('herz'); });
     zeile(y(2), 'Text-Tempo', () => name(TEXT, einst.textTempo ?? 1), () => { einst.textTempo = TEXT[naechste(TEXT, einst.textTempo ?? 1)].wert; neu(); });
     zeile(y(3), 'Touch-Knöpfe', () => name(TOUCH, einst.touch || 'auto'), () => { einst.touch = TOUCH[naechste(TOUCH, einst.touch || 'auto')].wert; neu(); });
-    zeile(y(4), 'Steuerkreuz', () => name(SEITE, einst.kreuz || 'links'), () => { einst.kreuz = SEITE[naechste(SEITE, einst.kreuz || 'links')].wert; neu(); });
+    zeile(y(4), 'Steuerkreuz', () => name(SEITE, einst.kreuz || 'rechts'), () => { einst.kreuz = SEITE[naechste(SEITE, einst.kreuz || 'rechts')].wert; neu(); });
     zeile(y(5), 'Hochkant spielen', () => name(HOCHKANT, einst.hochkant || 'nein'), () => { einst.hochkant = HOCHKANT[naechste(HOCHKANT, einst.hochkant || 'nein')].wert; neu(); });
     zeile(y(6), 'Vollbild (F)', () => (istVollbild(this) ? 'An' : 'Aus'), () => { vollbildUmschalten(this.game); });
   }
