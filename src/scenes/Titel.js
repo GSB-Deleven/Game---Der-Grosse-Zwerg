@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { TEXTE } from '../texte/de.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
@@ -11,6 +12,7 @@ export class Titel extends Phaser.Scene {
   constructor() { super('Titel'); }
 
   create() {
+    mittig(this);
     this.gestartet = false;
     this.cameras.main.fadeIn(400);
     bergKulisse(this);

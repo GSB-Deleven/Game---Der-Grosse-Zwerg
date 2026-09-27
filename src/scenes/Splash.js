@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 import { sprich } from '../systeme/stimme.js';
@@ -12,6 +13,7 @@ export class Splash extends Phaser.Scene {
   init(daten) { this.daten = daten; this.fertig = false; }
 
   create() {
+    mittig(this);
     const { titel, text, bild, farbe = 0xe0a030 } = this.daten;
     const cx = 480, cy = 250;
     if (bild && !this.textures.exists(bild)) {
@@ -20,7 +22,7 @@ export class Splash extends Phaser.Scene {
       if (drache) figurTexturen(this, 'drache', drache[1]);
       else if (figur) figurTexturen(this, figur[1]);
     }
-    this.add.rectangle(480, 270, 960, 540, 0x0d0a14, 0.72);
+    this.add.rectangle(480, 270, 4000, 3000, 0x0d0a14, 0.72);
 
     // drehende Strahlen
     const strahlen = this.add.graphics({ x: cx, y: cy });

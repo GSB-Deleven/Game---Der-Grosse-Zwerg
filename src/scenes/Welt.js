@@ -9,6 +9,7 @@ import { spiele } from '../systeme/ton.js';
 import { spieleMusik, ducken } from '../systeme/musik.js';
 import { sichere } from '../systeme/speichern.js';
 import { GEGENSTAENDE } from '../texte/de.js';
+import { beiGroesse } from '../systeme/bildschirm.js';
 
 const TEMPO = 84;          // Lauftempo (Pixel pro Sekunde)
 const SCHRITTWEITE = 30;   // so viele Pixel pro ganzem Laufzyklus
@@ -67,7 +68,8 @@ export class Welt extends Phaser.Scene {
     this.wendeFortschrittAn();
     this.baueKarte();
     this.erzeugeHeld();
-    this.richteKameraEin();
+    // Auf breiten Handys oder hohen Tablets zeigt die Kamera einfach mehr von der Welt
+    beiGroesse(this, () => this.richteKameraEin());
     this.richteEingabeEin();
     this.erzeugeLeben();
     this.erzeugeDunkelheit();

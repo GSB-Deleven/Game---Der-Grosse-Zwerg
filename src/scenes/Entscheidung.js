@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 
@@ -10,8 +11,9 @@ export class Entscheidung extends Phaser.Scene {
   init(daten) { this.daten = daten; this.fertig = false; }
 
   create() {
+    mittig(this);
     const { frage, knopf } = this.daten;
-    this.add.rectangle(480, 270, 960, 540, 0x05030a, 0.55);
+    this.add.rectangle(480, 270, 4000, 3000, 0x05030a, 0.55);
     if (frage) this.add.text(480, 90, frage, stil(30, '#ffffff', { align: 'center', wordWrap: { width: 820 } })).setOrigin(0.5);
 
     const c = this.add.container(480, 300);

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig, beiGroesse, rand } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 import { spieleMusik } from '../systeme/musik.js';
@@ -93,6 +94,7 @@ export class Flug extends Phaser.Scene {
   constructor() { super('Flug'); }
 
   create() {
+    mittig(this);
     this.stand = this.registry.get('stand');
     this.sterne = 0;
     this.abschnitt = -1;
@@ -104,10 +106,10 @@ export class Flug extends Phaser.Scene {
 
     this.himmel = this.add.graphics();
     this.sonne = this.add.circle(800, 90, 40, 0xfff4b0).setAlpha(0.9);
-    this.ferne = this.add.tileSprite(480, 320, 960, 200, 'flug_ferne').setTileScale(1, 1).setOrigin(0.5, 1);
+    this.ferne = this.add.tileSprite(480, 320, 3600, 200, 'flug_ferne').setTileScale(1, 1).setOrigin(0.5, 1);
     this.boeden = {};
     for (const a of ABSCHNITTE) {
-      this.boeden[a.name] = this.add.tileSprite(480, 540, 960, 220, `flug_${a.name}`).setOrigin(0.5, 1).setAlpha(0);
+      this.boeden[a.name] = this.add.tileSprite(480, 540, 3600, 220, `flug_${a.name}`).setOrigin(0.5, 1).setAlpha(0);
     }
     this.wolken = [];
     for (let i = 0; i < 6; i++) this.neueWolke(Math.random() * 960, i % 2 === 0);
@@ -127,15 +129,23 @@ export class Flug extends Phaser.Scene {
     this.time.addEvent({ delay: 900, loop: true, callback: () => { if (!this.beendet && this.abschnitt < ABSCHNITTE.length - 1) this.neuerStern(); } });
 
     // Anzeige
-    this.add.image(40, 40, 'stern').setScale(3);
+    this.sternBild = this.add.image(40, 40, 'stern').setScale(3);
     this.sternText = this.add.text(70, 40, '0', stil(36)).setOrigin(0, 0.5);
+    // Auf breiten/hohen Bildschirmen: Boden an den unteren Rand, Sternzähler in die Ecke
+    beiGroesse(this, () => {
+      const r = rand(this);
+      this.r = r;
+      for (const t of Object.values(this.boeden)) t.y = 540 + r.y;
+      this.sternBild.setPosition(40 - r.x, 40 - r.y);
+      this.sternText.setPosition(70 - r.x, 40 - r.y);
+    });
     this.bannerText = this.add.text(480, 100, '', stil(30, '#ffffff', { align: 'center', wordWrap: { width: 860 } })).setOrigin(0.5).setAlpha(0);
     this.hinweis = this.add.text(480, 510, 'Tippe oben oder unten, um zu steuern', stil(20, '#ffffff')).setOrigin(0.5);
     this.tweens.add({ targets: this.hinweis, alpha: 0, delay: 5000, duration: 800 });
 
     this.tasten = this.input.keyboard.addKeys('UP,DOWN,W,S');
-    this.input.on('pointerdown', (p) => { this.ziel = Phaser.Math.Clamp(p.y, 130, 420); });
-    this.input.on('pointermove', (p) => { if (p.isDown) this.ziel = Phaser.Math.Clamp(p.y, 130, 420); });
+    this.input.on('pointerdown', (p) => { this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); });
+    this.input.on('pointermove', (p) => { if (p.isDown) this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); });
 
     spieleMusik('flug');
     this.cameras.main.fadeIn(800);
@@ -149,7 +159,7 @@ export class Flug extends Phaser.Scene {
   }
 
   neuerStern() {
-    const s = this.add.image(1000, 140 + Math.random() * 270, 'stern').setScale(2.4).setDepth(5);
+    const s = this.add.image(1000 + (this.r?.x || 0), 140 + Math.random() * 270, 'stern').setScale(2.4).setDepth(5);
     this.tweens.add({ targets: s, angle: 360, duration: 2000, repeat: -1 });
     this.sternGruppe.push(s);
   }
@@ -161,12 +171,12 @@ export class Flug extends Phaser.Scene {
     for (const [name, t] of Object.entries(this.boeden)) this.tweens.add({ targets: t, alpha: name === a.name ? 1 : 0, duration: 1500 });
     const h = this.himmel;
     h.clear();
-    h.fillGradientStyle(a.himmel[0], a.himmel[0], a.himmel[1], a.himmel[1], 1).fillRect(0, 0, 960, 540);
+    h.fillGradientStyle(a.himmel[0], a.himmel[0], a.himmel[1], a.himmel[1], 1).fillRect(-1400, -1400, 3760, 3340);
     this.bannerText.setText(a.text).setAlpha(0);
     this.tweens.add({ targets: this.bannerText, alpha: 1, duration: 500, hold: 3500, yoyo: true });
     sprich(a.text, { hoehe: 0.75 });
     if (a.name === 'schloss') {
-      this.schloss.setVisible(true).setX(1300);
+      this.schloss.setVisible(true).setX(1300 + (this.r?.x || 0));
       this.tweens.add({ targets: this.schloss, x: 700, duration: 5000, ease: 'Sine.easeOut' });
       this.time.delayedCall(5200, () => this.landen());
     } else {
@@ -193,12 +203,12 @@ export class Flug extends Phaser.Scene {
     for (const t of Object.values(this.boeden)) t.tilePositionX += tempo * dt;
     for (const w of this.wolken) {
       w.w.x -= w.v * dt * (tempo / 180);
-      if (w.w.x < -150) { w.w.x = 1100; w.w.y = 60 + Math.random() * 300; }
+      if (w.w.x < -150 - (this.r?.x || 0)) { w.w.x = 1100 + (this.r?.x || 0); w.w.y = 60 + Math.random() * 300; }
     }
     for (const s of [...this.sternGruppe]) {
       s.x -= tempo * 1.4 * dt;
       if (Phaser.Math.Distance.Between(s.x, s.y, this.reiter.x + 40, this.reiter.y - 10) < 70) this.sammle(s);
-      else if (s.x < -30) { s.destroy(); this.sternGruppe.splice(this.sternGruppe.indexOf(s), 1); }
+      else if (s.x < -30 - (this.r?.x || 0)) { s.destroy(); this.sternGruppe.splice(this.sternGruppe.indexOf(s), 1); }
     }
   }
 
@@ -207,7 +217,7 @@ export class Flug extends Phaser.Scene {
     this.sterne++;
     this.sternText.setText(String(this.sterne));
     spiele('stern');
-    this.tweens.add({ targets: s, x: 40, y: 40, scale: 1, duration: 400, onComplete: () => s.destroy() });
+    this.tweens.add({ targets: s, x: this.sternBild.x, y: this.sternBild.y, scale: 1, duration: 400, onComplete: () => s.destroy() });
   }
 
   landen() {

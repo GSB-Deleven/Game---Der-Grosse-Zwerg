@@ -7,6 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1b1420">
   <meta name="apple-mobile-web-app-title" content="Grosser Zwerg">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Der Grosse Zwerg</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icon-192.png">
@@ -20,10 +21,20 @@
       touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
     #spiel { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+    /* Handy hochkant: freundlich bitten, das Gerät zu drehen */
+    #drehen { display: none; position: fixed; inset: 0; z-index: 10; background: #1b1420; color: #f2c94c;
+      font-family: 'Pixelify Sans', sans-serif; text-align: center; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+    #drehen .handy { width: 70px; height: 120px; border: 6px solid #f2c94c; border-radius: 14px; position: relative;
+      animation: drehen 2.4s ease-in-out infinite; }
+    #drehen .handy::after { content: ''; position: absolute; left: 50%; bottom: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #f2c94c; }
+    #drehen p { font-size: 26px; margin: 0; line-height: 1.3; color: #fff; }
+    @keyframes drehen { 0%, 25% { transform: rotate(0); } 55%, 100% { transform: rotate(-90deg); } }
+    @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) { #drehen { display: flex; } }
   </style>
 </head>
 <body>
   <div id="spiel"></div>
+  <div id="drehen"><div class="handy"></div><p>Bitte das Handy drehen<br>🧔 ↻</p></div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

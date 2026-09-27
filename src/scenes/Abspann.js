@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
 import { spiele } from '../systeme/ton.js';
@@ -13,6 +14,7 @@ export class Abspann extends Phaser.Scene {
   constructor() { super('Abspann'); }
 
   create() {
+    mittig(this);
     this.knopfDa = false;
     const stand = this.registry.get('stand');
     stand.fertig = true;
@@ -65,7 +67,7 @@ export class Abspann extends Phaser.Scene {
       ['Ende', 64, '#f2c94c'],
     ];
     const text = this.add.container(480, 420);
-    const maskenForm = this.make.graphics({ add: false }).fillRect(0, 0, 960, 420);
+    const maskenForm = this.make.graphics({ add: false }).fillRect(-1200, -1200, 3360, 1620);
     text.setMask(maskenForm.createGeometryMask());
     let y = 0;
     for (const [z, g, f] of zeilen) {

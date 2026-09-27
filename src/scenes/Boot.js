@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { erzeugeAlleTexturen } from '../grafik/texturen.js';
 import { ladeEinstellungen, leererSpielstand } from '../systeme/speichern.js';
 import { heldTexturen } from '../grafik/figur-texturen.js';
@@ -12,6 +13,7 @@ export class Boot extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   create() {
+    mittig(this);
     erzeugeAlleTexturen(this);
     heldTexturen(this);
     erzeugeWeltTexturen(this);

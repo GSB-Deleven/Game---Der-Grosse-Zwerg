@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
 import { spiele } from '../systeme/ton.js';
@@ -23,11 +24,12 @@ export class Spielstaende extends Phaser.Scene {
   constructor() { super('Spielstaende'); }
 
   create() {
+    mittig(this);
     this.dialog = null;
     this.namensFeld = null;
     this.cameras.main.fadeIn(300);
     bergKulisse(this);
-    this.add.rectangle(480, 270, 960, 540, 0x1b1420, 0.35);
+    this.add.rectangle(480, 270, 4000, 3000, 0x1b1420, 0.35);
     this.add.text(480, 50, 'Wer spielt?', stil(52, '#f2c94c', { strokeThickness: 9 })).setOrigin(0.5);
     this.karten = this.add.container(0, 0);
     this.zeigePlaetze();
@@ -100,7 +102,7 @@ export class Spielstaende extends Phaser.Scene {
 
   dialogRahmen(breite, hoehe) {
     const c = this.dialog = this.add.container(480, 280);
-    c.add(this.add.rectangle(0, 0, 960, 540, 0x000000, 0.55).setInteractive());
+    c.add(this.add.rectangle(0, 0, 4000, 3000, 0x000000, 0.55).setInteractive());
     const g = this.add.graphics();
     g.fillStyle(0x2a2236, 0.98).fillRoundedRect(-breite / 2, -hoehe / 2, breite, hoehe, 20);
     g.lineStyle(5, 0xf2c94c).strokeRoundedRect(-breite / 2, -hoehe / 2, breite, hoehe, 20);

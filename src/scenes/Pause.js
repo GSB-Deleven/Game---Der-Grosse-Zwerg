@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
 import { sichere, ladeEinstellungen, speichereEinstellungen } from '../systeme/speichern.js';
@@ -30,7 +31,8 @@ export class Pause extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(480, 270, 960, 540, 0x0d0a14, 0.78).setInteractive();
+    mittig(this);
+    this.add.rectangle(480, 270, 4000, 3000, 0x0d0a14, 0.78).setInteractive();
     const g = this.add.graphics();
     g.fillStyle(0x2a2236, 0.98).fillRoundedRect(150, 30, 660, 480, 24);
     g.lineStyle(6, 0xf2c94c).strokeRoundedRect(150, 30, 660, 480, 24);

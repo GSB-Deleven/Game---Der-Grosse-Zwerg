@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { TEXTE } from '../texte/de.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
@@ -76,7 +77,7 @@ const BILDER = {
       s.add.image(480, 402, 'held_oben_steh0').setOrigin(0.5, 46 / 48).setScale(5.5);
     },
     (s) => {
-      s.add.rectangle(480, 250, 960, 500, 0x05030a, 0.85);
+      s.add.rectangle(480, 250, 4000, 500, 0x05030a, 0.85);
       const schein = s.add.image(420, 300, 'schein').setScale(5).setBlendMode(Phaser.BlendModes.ADD);
       s.tweens.add({ targets: schein, alpha: 0.6, duration: 300, yoyo: true, repeat: -1 });
       s.add.image(420, 402, 'held_seite_tragen_steh0').setOrigin(0.5, 46 / 48).setScale(5.5);
@@ -102,6 +103,7 @@ export class Geschichte extends Phaser.Scene {
   }
 
   create() {
+    mittig(this);
     this.cameras.main.fadeIn(400);
     bergKulisse(this);
     this.inhalt = this.add.container(0, 0);

@@ -30,7 +30,8 @@ const spiel = new Phaser.Game({
   backgroundColor: '#1b1420',
   pixelArt: true,
   roundPixels: true,
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  // EXPAND: füllt jeden Bildschirm aus, 960 x 540 bleibt immer sichtbar (siehe systeme/bildschirm.js)
+  scale: { mode: Phaser.Scale.EXPAND, autoCenter: Phaser.Scale.CENTER_BOTH },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { gamepad: controllerErlaubt, activePointers: 3 },
   scene: [Boot, Titel, Spielstaende, Geschichte, Welt, Oberflaeche, Pause, Splash, Entscheidung, Flug, Abspann, KapitelEnde],

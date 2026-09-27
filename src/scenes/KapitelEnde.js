@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { mittig } from '../systeme/bildschirm.js';
 import { TEXTE } from '../texte/de.js';
 import { stil } from '../systeme/schrift.js';
 import { knopf } from '../systeme/knopf.js';
@@ -18,6 +19,7 @@ export class KapitelEnde extends Phaser.Scene {
   init(daten) { this.nummer = daten.kapitel || this.registry.get('stand').kapitel; this.los = false; }
 
   create() {
+    mittig(this);
     stoppeMusik();
     this.cameras.main.fadeIn(600);
     bergKulisse(this, { nacht: true });
