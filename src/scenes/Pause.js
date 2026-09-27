@@ -43,6 +43,8 @@ export class Pause extends Phaser.Scene {
     this.reiterKnoepfe = ['Spiel', 'Einstellungen', 'Steuerung'].map((name, i) =>
       knopf(this, 300 + i * 180, 130, { text: name, breite: 170, hoehe: 48, groesse: 22, farbe: 0x5c5460 }, () => this.zeigeReiter(i)));
     this.inhalt = this.add.container(0, 0);
+    // Versions-Stempel unten im Menü-Fenster (zeigt, ob die neueste Version läuft)
+    this.add.text(480, 494, `Version ${typeof __VERSION__ !== 'undefined' ? __VERSION__ : 'Entwicklung'}`, stil(14, '#8a8098')).setOrigin(0.5);
     this.zeigeReiter(0);
 
     this.input.keyboard.on('keydown-ESC', () => this.weiter());

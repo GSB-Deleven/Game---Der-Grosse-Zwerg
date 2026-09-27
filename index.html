@@ -19,7 +19,8 @@
     :root { color-scheme: dark; }
     html, body { margin: 0; padding: 0; height: 100%; background: #1b1420; overflow: hidden;
       touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-    #spiel { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    /* fixed + inset 0: füllt auch in der Home-Bildschirm-App den ganzen Bildschirm (bis unter die Statusleiste) */
+    #spiel { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
     canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
     /* Handy hochkant: freundlich bitten, das Gerät zu drehen */
     #drehen { display: none; position: fixed; inset: 0; z-index: 10; background: #1b1420; color: #f2c94c;

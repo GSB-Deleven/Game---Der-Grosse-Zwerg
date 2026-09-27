@@ -52,6 +52,24 @@ document.getElementById('einhaendig')?.addEventListener('click', () => {
   spiel.events.emit('einstellungen', e);
 });
 
+// Automatisch aktualisieren: Die App auf dem Home-Bildschirm merkt sonst nicht, dass es eine neue Version gibt.
+// Beim Start und beim Zurückkehren in die App die Seite frisch holen und das Skript vergleichen.
+const meinSkript = document.querySelector('script[type="module"][src]')?.getAttribute('src');
+async function pruefeNeueVersion() {
+  if (!meinSkript) return; // Artefakt (alles in einer Datei): nichts zu tun
+  try {
+    const html = await (await fetch(location.pathname, { cache: 'no-store' })).text();
+    const neu = html.match(/<script[^>]+type="module"[^>]+src="([^"]+)"/)?.[1];
+    // Nur einmal pro neuer Version neu laden (falls der Browser hartnäckig die alte Seite liefert)
+    if (neu && neu !== meinSkript && sessionStorage.getItem('neuGeladen') !== neu) {
+      sessionStorage.setItem('neuGeladen', neu);
+      location.reload();
+    }
+  } catch (e) { /* offline – dann eben später */ }
+}
+pruefeNeueVersion();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pruefeNeueVersion(); });
+
 // Taste F: Vollbild – überall im Spiel (ausser beim Namen eintippen)
 window.addEventListener('keydown', (e) => {
   if ((e.key === 'f' || e.key === 'F') && !(e.target instanceof HTMLInputElement)) vollbildUmschalten(spiel);
