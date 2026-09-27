@@ -49,5 +49,3 @@ jobs:
           claude_code_oauth_token: ${{ steps.schluessel.outputs.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           label_trigger: claude
-          # Vorübergehend zur Fehlersuche: zeigt die Antwort von Claude im Log
-          show_full_output: true
