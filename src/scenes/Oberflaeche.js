@@ -4,6 +4,7 @@ import { spiele } from '../systeme/ton.js';
 import { zeichenMs, sprechDauer, setzeTextTempo } from '../systeme/stimme.js';
 import { ladeEinstellungen } from '../systeme/speichern.js';
 import { beiGroesse, sichererRand } from '../systeme/bildschirm.js';
+import { baueSteuerTexturen } from '../grafik/knoepfe.js';
 
 // Alles, was über der Spielwelt liegt: Herzen, Sprechtext, Touch-Knöpfe.
 export class Oberflaeche extends Phaser.Scene {
@@ -191,19 +192,13 @@ export class Oberflaeche extends Phaser.Scene {
   // ---- Touch: Steuerkreuz links, Helfen-Knopf rechts ----------------------
   baueTouchSteuerung() {
     this.touchTeile = [];
-    const kr = 95, kx = 0, ky = 0;
+    const kr = 95;
     const kreuz = this.kreuz = { x: 130, y: 420 };
 
-    const basis = this.kreuzTeil = this.add.graphics().setAlpha(0.55).setPosition(kreuz.x, kreuz.y);
-    basis.fillStyle(0x1b1420, 1).fillCircle(kx, ky, kr);
-    basis.lineStyle(4, 0xffffff, 0.8).strokeCircle(kx, ky, kr);
-    basis.fillStyle(0xffffff, 0.9);
-    const d = kr - 22;
-    basis.fillTriangle(kx, ky - d - 14, kx - 14, ky - d + 6, kx + 14, ky - d + 6);
-    basis.fillTriangle(kx, ky + d + 14, kx - 14, ky + d - 6, kx + 14, ky + d - 6);
-    basis.fillTriangle(kx - d - 14, ky, kx - d + 6, ky - 14, kx - d + 6, ky + 14);
-    basis.fillTriangle(kx + d + 14, ky, kx + d - 6, ky - 14, kx + d - 6, ky + 14);
-    const knauf = this.kreuzKnauf = this.add.circle(kreuz.x, kreuz.y, 34, 0xf2c94c, 0.9).setStrokeStyle(4, 0x1b1420);
+    // Zwergen-Schild mit Steinkreuz, Knauf als goldener Schildbuckel (siehe grafik/knoepfe.js)
+    baueSteuerTexturen(this);
+    const basis = this.kreuzTeil = this.add.image(kreuz.x, kreuz.y, 'kreuz_basis').setScale(3).setAlpha(0.9);
+    const knauf = this.kreuzKnauf = this.add.image(kreuz.x, kreuz.y, 'kreuz_knauf').setScale(2.5);
     this.touchTeile.push(basis, knauf);
 
     let zeigerId = null;
