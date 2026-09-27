@@ -15,7 +15,7 @@ const JUBLER = { 1: 'bote', 2: 'koenigin', 3: 'mira', 4: 'koenigin' };
 export class KapitelEnde extends Phaser.Scene {
   constructor() { super('KapitelEnde'); }
 
-  init(daten) { this.nummer = daten.kapitel || this.registry.get('stand').kapitel; }
+  init(daten) { this.nummer = daten.kapitel || this.registry.get('stand').kapitel; this.los = false; }
 
   create() {
     stoppeMusik();
