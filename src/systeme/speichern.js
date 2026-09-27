@@ -57,7 +57,18 @@ function lies() {
   return { plaetze: Array(ANZAHL_PLAETZE).fill(null), einstellungen: {} };
 }
 
+// Den Browser bitten, die Spielstände nie von selbst zu löschen (z. B. wenn der Speicher knapp wird)
+let dauerhaftGefragt = false;
+function bitteUmDauerhaftenSpeicher() {
+  if (dauerhaftGefragt) return;
+  dauerhaftGefragt = true;
+  // Firefox fragt dafür mit einem Fenster nach, das würde Kinder nur verwirren
+  if (/Firefox/.test(navigator.userAgent)) return;
+  try { navigator.storage?.persist?.().catch(() => {}); } catch (e) { /* egal */ }
+}
+
 function schreibe(daten) {
+  bitteUmDauerhaftenSpeicher();
   try { localStorage.setItem(SCHLUESSEL, JSON.stringify(daten)); return true; } catch (e) { return false; }
 }
 

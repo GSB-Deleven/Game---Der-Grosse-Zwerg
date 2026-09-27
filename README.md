@@ -138,6 +138,7 @@ Die Figuren setzt ein **Baukasten** aus Teilen zusammen (Stiefel, Rumpf, Bart, H
 | 🎮 Optional | Ein Controller (Xbox, PlayStation, Switch Pro) wird automatisch erkannt. |
 | 📦 Installation | Keine. Link öffnen und spielen. |
 | 🌐 Internet | nur beim ersten Laden |
+| 💾 Spielstände | bleiben auf dem Gerät im Browser gespeichert, auch nach dem Schliessen. Nicht im privaten Modus spielen und die Websitedaten nicht löschen. |
 | 💰 Kosten | Keine Werbung, keine Käufe, keine Anmeldung |
 
 ---
