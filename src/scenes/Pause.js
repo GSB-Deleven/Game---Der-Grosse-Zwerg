@@ -34,7 +34,10 @@ export class Pause extends Phaser.Scene {
 
   create() {
     mittig(this, 680); // nur das Menü-Fenster muss hineinpassen
-    this.add.rectangle(480, 270, 4000, 3000, 0x0d0a14, 0.78).setInteractive();
+    // Klick neben das Menü-Fenster schliesst das Menü (wie «Weiterspielen»)
+    const fenster = new Phaser.Geom.Rectangle(150, 30, 660, 480);
+    this.add.rectangle(480, 270, 4000, 3000, 0x0d0a14, 0.78).setInteractive()
+      .on('pointerdown', (p) => { if (!fenster.contains(p.worldX, p.worldY)) this.weiter(); });
     const g = this.add.graphics();
     g.fillStyle(0x2a2236, 0.98).fillRoundedRect(150, 30, 660, 480, 24);
     g.lineStyle(6, 0xf2c94c).strokeRoundedRect(150, 30, 660, 480, 24);
