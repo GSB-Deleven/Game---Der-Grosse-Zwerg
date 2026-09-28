@@ -158,11 +158,12 @@ function horn(e, punkte, rampe) {
 export const HELD_B = 32;
 export const HELD_H = 48;
 
-const HELD_FARBEN = {
+const HELD_GRUND = {
   haut: RAMPEN.haut, bart: RAMPEN.rot, helm: RAMPEN.stahl, rand: RAMPEN.gold, horn: RAMPEN.horn,
   tunika: RAMPEN.blau, hose: RAMPEN.hose, stiefel: RAMPEN.stiefel, gurt: RAMPEN.leder,
   kette: RAMPEN.kette, rucksack: RAMPEN.leder, rolle: RAMPEN.beige,
 };
+let HELD_FARBEN = HELD_GRUND;
 
 // phase: 0..1 im Laufzyklus, laufen: bool, pose: 'normal' | 'tragen' | 'strecken' | 'jubeln'
 function heldVorne(bild, { phase = 0, laufen = false, pose = 'normal', augen = 'offen', mund = false, atmen = 0 }) {
@@ -451,7 +452,10 @@ const HELD_ANSICHT = { unten: heldVorne, oben: heldHinten, seite: heldSeite };
 
 // Alle Bilder des Grossen Zwergs erzeugen: { name: Ebene }
 export const LAUF_PHASEN = 6;
-export function baueHeld() {
+// kleid: Farben, die anders sein sollen, z.B. { tunika: 'weinrot', helm: 'gold' } (Namen aus RAMPEN)
+export function baueHeld(kleid = {}) {
+  HELD_FARBEN = { ...HELD_GRUND };
+  for (const [teil, farbe] of Object.entries(kleid)) if (RAMPEN[farbe]) HELD_FARBEN[teil] = RAMPEN[farbe];
   const bilder = {};
   const neu = () => new Ebene(HELD_B, HELD_H);
   for (const [richtung, malen] of Object.entries(HELD_ANSICHT)) {

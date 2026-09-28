@@ -178,7 +178,20 @@ In `src/levels/index.js` die Datei importieren, bei `KARTEN` eintragen und beim 
 Ein Kapitel ist geschafft, wenn **alle Wünsche** auf allen seinen Karten erfüllt sind; dann läuft sein `wennFertig`.
 Coole Momente mit Splash stehen unter `meilensteine` (`{ herzen: 1 }`, `{ wunsch: 'frucht' }`, `{ figuren: ['see:a'] }`).
 
-## 8. Ausprobieren
+## 8. Neue Mission für die Ehrengarde (Kapitel 6)
+Nach dem Abspann wählt man Missionen am Missionsbrett. So kommt eine neue dazu:
+1. **Karte** anlegen wie `src/levels/damm.js` – mit Figuren, Wünschen, Bauaufgaben. Am Ende von `ereignisse.wennFertig`
+   steht `{ missionFertig: 'meine-id' }`: Dann geht es nach Hause, und die Belohnung wird gezeigt.
+   Praktisch dafür: `{ verwandle: { von: 'Ç', zu: '.' } }` wandelt alle Kacheln mit einem Zeichen um (z. B. Wasser weg).
+2. In `src/levels/index.js` bei `KARTEN` und bei `KAPITEL[6].karten` eintragen.
+3. In `src/levels/missionen.js` unter `MISSIONEN` eintragen: `titel`, `text` (wird vorgelesen), `bild`, `karte`,
+   `belohnung: { haus: 2 }` (nächste Ausbaustufe, siehe `HAUS`) oder `belohnung: { kleid: 'name' }` (siehe `KLEIDER`).
+   Eine Flug-Mission geht mit `szene: 'Flug', daten: { mission: 'id' }` (siehe `POST` in `src/scenes/Flug.js`).
+4. Neue Kleider: in `KLEIDER` Farben aus `RAMPEN` angeben (z. B. `{ tunika: 'gruen', helm: 'gold' }`).
+   Neue Ausbaustufe: Bild `zuhauseN` in `src/grafik/welt-grafik.js` malen und bei `HAUS` eintragen.
+5. `KAPITEL=6 node tests/durchlauf.mjs` spielt alle Missionen automatisch durch.
+
+## 9. Ausprobieren
 - `npm run pruefen` – findet Tippfehler und unerreichbare Figuren
 - `npm run dev` und im Browser `?kapitel=3` anhängen, um direkt ins Kapitel zu springen
 - `KAPITEL=3 node tests/durchlauf.mjs` – spielt das Kapitel automatisch durch

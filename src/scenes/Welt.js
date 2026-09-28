@@ -10,6 +10,8 @@ import { spieleMusik, ducken } from '../systeme/musik.js';
 import { sichere } from '../systeme/speichern.js';
 import { GEGENSTAENDE, WEGWEISER } from '../texte/de.js';
 import { beiGroesse } from '../systeme/bildschirm.js';
+import { MISSIONEN, KLEIDER, belohnungVon } from '../levels/missionen.js';
+import { schliesseMissionAb } from '../systeme/missionen.js';
 
 const TEMPO = 84;          // Lauftempo (Pixel pro Sekunde)
 const SCHRITTWEITE = 30;   // so viele Pixel pro ganzem Laufzyklus
@@ -60,7 +62,7 @@ export class Welt extends Phaser.Scene {
   }
 
   create() {
-    heldTexturen(this);
+    heldTexturen(this, this.stand.kleid || 'standard');
     erzeugeWeltTexturen(this);
     this.dinge = [];
     this.figuren = [];
@@ -68,6 +70,7 @@ export class Welt extends Phaser.Scene {
     this.lichtQuellen = [];
     this.ausloeserFelder = [];
     this.zeilen = this.karte.karte.map((z) => z);
+    this.zuhauseBild = null;
     this.wendeFortschrittAn();
     this.baueKarte();
     this.erzeugeHeld();
@@ -112,6 +115,7 @@ export class Welt extends Phaser.Scene {
     }
     if (!this.lebt) return;
     await this.starteEreignis('beimBetreten');
+    if (this.lebt && this.karte.zuhause && this.stand.neu) await this.zeigeBelohnung();
     await this.pruefeFertig();
   }
 
@@ -241,6 +245,11 @@ export class Welt extends Phaser.Scene {
   }
 
   erzeugeObjekt(eintrag, x, y, neu = false) {
+    if (eintrag.objekt === 'zuhause') {
+      // Das Zuhause: Bild je nach Ausbaustufe, ab der Holzhütte raucht der Kamin
+      const stufe = Math.min(this.stand.haus || 0, 2);
+      eintrag = { ...eintrag, objekt: `zuhause${stufe}`, rauch: [null, [36, -46], [37, -40]][stufe], licht: stufe === 2 ? [[11, -18], [38, -18]] : undefined };
+    }
     const b = eintrag.breite || 1, h = eintrag.hoehe || 1;
     const px = x * KACHEL + (b * KACHEL) / 2;
     const py = (y + h) * KACHEL;
@@ -256,6 +265,9 @@ export class Welt extends Phaser.Scene {
     if (eintrag.leuchtet) this.lichtQuellen.push({ x: px, y: py - 8, r: eintrag.leuchtet });
 
     if (eintrag.objekt === 'wegweiser') this.dinge.push({ typ: 'schild', bild, feld: { x, y, b, h } });
+    if (eintrag.objekt === 'anschlagbrett') this.dinge.push({ typ: 'missionen', bild, feld: { x, y, b, h } });
+    if (eintrag.objekt === 'kleiderkiste') this.dinge.push({ typ: 'kleider', bild, feld: { x, y, b, h } });
+    if (eintrag.objekt?.startsWith('zuhause')) this.zuhauseBild = bild;
     if (eintrag.gibt) {
       const ding = { typ: 'quelle', gibt: eintrag.gibt, objekt: eintrag.objekt, bild, feld: { x, y, b, h } };
       if (eintrag.objekt === 'obstbaum') {
@@ -1022,6 +1034,8 @@ export class Welt extends Phaser.Scene {
     if (ding.typ === 'quelle') this.hole(ding);
     else if (ding.typ === 'schild') this.liesSchild(ding);
     else if (ding.typ === 'versteck') this.schaueHinter(ding);
+    else if (ding.typ === 'missionen') this.oeffneMissionen();
+    else if (ding.typ === 'kleider') this.wechsleKleid(ding);
     else this.redeMit(ding);
   }
 
@@ -1077,6 +1091,12 @@ export class Welt extends Phaser.Scene {
   async redeMit(figur) {
     const d = this.wunschVon(figur);
     const sprecher = d.sprecher === 'held' ? 'held' : figur;
+    if (!d.wunsch && d.saetze) {
+      // bei jedem Reden der nächste Satz
+      const n = figur.satzNr || 0;
+      figur.satzNr = n + 1;
+      return this.sage(sprecher, d.saetze[n % d.saetze.length]);
+    }
     if (!d.wunsch) return this.sage(sprecher, d.sagt);
     if (this.istErfuellt(figur.id)) return this.sage(sprecher, d.danach || d.danke);
     if (d.gespraech) {
@@ -1123,6 +1143,55 @@ export class Welt extends Phaser.Scene {
     this.aktualisiereWunsch(figur);
     const rest = d.anzahl - n;
     return this.sage(figur.baustelle ? 'held' : figur, (d.weiter || 'Super! Noch {rest}!').replace('{rest}', rest));
+  }
+
+  // Missionsbrett der Garde
+  oeffneMissionen() {
+    if (this.zwischenszene) return;
+    this.sichern();
+    this.pfad = [];
+    this.scene.pause();
+    this.scene.launch('Missionen');
+    this.scene.bringToTop('Missionen');
+  }
+
+  // Kleiderkiste: die nächste gewonnene Kleidung anziehen
+  wechsleKleid(kiste) {
+    const kleider = this.stand.kleider || ['standard'];
+    this.tweens.add({ targets: kiste.bild, scaleY: 1.15, duration: 120, yoyo: true });
+    if (kleider.length < 2) return this.sage('held', 'Meine Kleiderkiste. Mit Missionen verdiene ich neue Kleider!');
+    const i = (kleider.indexOf(this.stand.kleid || 'standard') + 1) % kleider.length;
+    this.stand.kleid = kleider[i];
+    heldTexturen(this, this.stand.kleid);
+    this.konfetti(this.held.x, this.held.y - 30, 30);
+    spiele('herz');
+    this.heldPose = 'jubeln';
+    this.heldPoseBis = this.time.now + 900;
+    this.sichern();
+    return this.sage('held', `Jetzt trage ich ${KLEIDER[this.stand.kleid].name}!`);
+  }
+
+  // Zurück von einer Mission: die neue Belohnung zeigen
+  async zeigeBelohnung() {
+    const m = MISSIONEN.find((x) => x.id === this.stand.neu);
+    this.stand.neu = null;
+    this.sichern();
+    if (!m) return;
+    const b = belohnungVon(m);
+    this.zwischenszene = true;
+    if (m.belohnung.haus !== undefined && this.zuhauseBild) {
+      this.cameras.main.pan(this.zuhauseBild.x, this.zuhauseBild.y - 20, 900, 'Sine.easeInOut');
+      await new Promise((r) => setTimeout(r, 1000));
+      this.konfetti(this.zuhauseBild.x, this.zuhauseBild.y - 30, 60);
+    } else {
+      this.konfetti(this.held.x, this.held.y - 30, 60);
+    }
+    spiele('splash');
+    await this.zeigeSplash({ titel: 'Mission geschafft!', text: b.text, bild: b.bild, farbe: 0xe0b23c });
+    if (this.lebt && b.sagt) await this.sage('d', b.sagt);
+    if (this.lebt && m.belohnung.kleid) await this.sage('held', 'Die Kleider sind jetzt in der roten Kiste. Da kann ich mich immer umziehen.');
+    this.cameras.main.startFollow(this.held, true, 0.1, 0.1, 0, 20);
+    this.zwischenszene = false;
   }
 
   // Wegweiser: jedes Mal ein anderes (lustiges) Ziel
@@ -1338,6 +1407,12 @@ export class Welt extends Phaser.Scene {
       if (s.fackel === false) { this.fackelAn = false; if (this.traegt === 'fackel') this.gibAb(); if (!still) spiele('wind'); }
       if (s.zustand) { const f = this.figuren.find((x) => x.buchstabe === s.zustand[0]); if (f) f.vorsilbe = figurTexturen(this, f.daten.aussehen, s.zustand[1]); }
       if (s.gib && !still) this.nimm(s.gib);
+      if (s.verwandle) {
+        // alle Kacheln mit einem Zeichen umwandeln, z.B. überflutete Wiese -> Gras
+        const felder = [];
+        this.zeilen.forEach((z, y) => [...z].forEach((c, x) => { if (c === s.verwandle.von) felder.push([x, y]); }));
+        if (felder.length) this.verwandle(felder, s.verwandle.zu);
+      }
       if (still) continue;
       if (s.sage) await this.sage(s.sage[0], s.sage[1]);
       if (s.warte) await new Promise((r) => setTimeout(r, s.warte));
@@ -1349,6 +1424,11 @@ export class Welt extends Phaser.Scene {
       if (s.splash) await this.zeigeSplash(s.splash);
       if (s.entscheidung) await this.zeigeUeberlagerung('Entscheidung', s.entscheidung, 'entscheidungFertig');
       if (s.figurKommt) await this.figurKommt(s.figurKommt);
+      if (s.missionFertig) {
+        schliesseMissionAb(this.registry, s.missionFertig);
+        this.verlasse(() => this.scene.start('Welt', { karte: KAPITEL[6].start }));
+        return 'verlassen';
+      }
       if (s.kapitelEnde) { this.verlasse(() => this.scene.start('KapitelEnde', { kapitel: this.stand.kapitel })); return 'verlassen'; }
       if (s.kapitelWechsel) {
         this.stand.kapitel = s.kapitelWechsel; this.stand.ort = null; this.stand.traegt = null; this.registry.set('traegt', null);
@@ -1492,7 +1572,14 @@ export class Welt extends Phaser.Scene {
       const a = this.ausloeserFelder[0];
       return { x: a.x * KACHEL + 8, y: (a.y + 1) * KACHEL, hoch: 14, feld: a };
     }
-    return this.ausgangZu(() => true) || this.ausgangZu(null, null, true);
+    return this.ausgangZu(() => true) || this.ausgangZu(null, null, true) || this.brettZiel();
+  }
+
+  // Zuhause: der Pfeil zeigt zum Missionsbrett, solange es offene Missionen gibt
+  brettZiel() {
+    if (!this.karte.zuhause || MISSIONEN.every((m) => (this.stand.missionen || []).includes(m.id))) return null;
+    const brett = this.dinge.find((d) => d.typ === 'missionen');
+    return brett ? { x: brett.bild.x, y: brett.bild.y, hoch: brett.bild.height, ding: brett } : null;
   }
 
   huhnZiel(h) {

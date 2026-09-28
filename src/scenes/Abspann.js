@@ -6,6 +6,7 @@ import { spiele } from '../systeme/ton.js';
 import { spieleMusik, stoppeMusik } from '../systeme/musik.js';
 import { sprich, verstummen } from '../systeme/stimme.js';
 import { sichere } from '../systeme/speichern.js';
+import { starteKapitel } from '../systeme/kapitel.js';
 import { bergKulisse, dekoZwerg } from '../systeme/kulisse.js';
 import { figurTexturen } from '../grafik/figur-texturen.js';
 
@@ -83,12 +84,19 @@ export class Abspann extends Phaser.Scene {
   zeigeKnopf() {
     if (this.knopfDa) return;
     this.knopfDa = true;
-    const k = knopf(this, 480, 330, { text: 'Zum Titelbild', breite: 320, hoehe: 76, groesse: 32, icon: 'herz', iconScale: 2.5 }, () => {
+    const k = knopf(this, 480, 300, { text: 'Weiter: Die Ehrengarde', breite: 440, hoehe: 76, groesse: 30, icon: 'herz', iconScale: 2.5 }, () => this.weiterZurGarde());
+    const t = knopf(this, 480, 400, { text: 'Zum Titelbild', breite: 300, hoehe: 56, groesse: 24, farbe: 0x5c5460 }, () => {
       verstummen();
       stoppeMusik();
       this.scene.start('Titel');
     });
-    k.setScale(0);
-    this.tweens.add({ targets: k, scale: 1, duration: 400, ease: 'Back.easeOut' });
+    [k, t].forEach((b) => { b.setScale(0); this.tweens.add({ targets: b, scale: 1, duration: 400, ease: 'Back.easeOut' }); });
+  }
+
+  // Nach dem Happy End geht es weiter: Missionen der Ehrengarde
+  weiterZurGarde() {
+    verstummen();
+    stoppeMusik();
+    starteKapitel(this);
   }
 }

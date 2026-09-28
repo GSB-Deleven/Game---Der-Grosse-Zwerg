@@ -18,6 +18,7 @@ import { Splash } from './scenes/Splash.js';
 import { Entscheidung } from './scenes/Entscheidung.js';
 import { Flug } from './scenes/Flug.js';
 import { Abspann } from './scenes/Abspann.js';
+import { Missionen } from './scenes/Missionen.js';
 
 // Das Spiel rechnet mit 960 x 540 Punkten. Die Spielwelt wird 3-fach vergrössert
 // gezeigt (so sieht man 20 x 11 Kacheln) – der typische Retro-Look.
@@ -40,7 +41,7 @@ const spiel = new Phaser.Game({
   scale: { mode: Phaser.Scale.EXPAND, autoCenter: Phaser.Scale.CENTER_BOTH },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { gamepad: controllerErlaubt, activePointers: 3 },
-  scene: [Boot, Titel, Spielstaende, Geschichte, Welt, Oberflaeche, Pause, Splash, Entscheidung, Flug, Abspann, KapitelEnde],
+  scene: [Boot, Titel, Spielstaende, Geschichte, Welt, Oberflaeche, Pause, Splash, Entscheidung, Flug, Abspann, KapitelEnde, Missionen],
 });
 
 // Hochkant spielen (einhändig), falls eingeschaltet: Spielfeld dreht sich mit dem Handy

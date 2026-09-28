@@ -1,11 +1,20 @@
 import { baueHeld, baueFigur, alsTextur } from './figuren-baukasten.js';
 import { baueDrache, baueTier, baueAugen, baueFlugDrache } from './drache.js';
 import { FIGUREN_AUSSEHEN } from './figuren-liste.js';
+import { KLEIDER } from '../levels/missionen.js';
 
 // Alle Bilder des Grossen Zwergs als Texturen anlegen (einmalig beim Start)
-export function heldTexturen(scene) {
-  if (scene.textures.exists('held_unten_steh0')) return;
-  for (const [key, ebene] of Object.entries(baueHeld())) alsTextur(scene, key, ebene);
+// kleid: welche Kleidung der Grosse Zwerg trägt (siehe KLEIDER in src/levels/missionen.js)
+let heldKleid = null;
+export function heldTexturen(scene, kleid = 'standard') {
+  if (scene.textures.exists('held_unten_steh0') && heldKleid === kleid) return;
+  const neu = !scene.textures.exists('held_unten_steh0');
+  for (const key of scene.textures.getTextureKeys()) if (key.startsWith('held_')) scene.textures.remove(key);
+  heldKleid = kleid;
+  for (const [key, ebene] of Object.entries(baueHeld(KLEIDER[kleid]?.farben))) alsTextur(scene, key, ebene);
+  if (!neu) return;
+  // Vorschaubilder der Kleider (fürs Missionsbrett)
+  for (const [name, k] of Object.entries(KLEIDER)) alsTextur(scene, `kleid_${name}`, baueHeld(k.farben).held_unten_jubeln);
   alsTextur(scene, 'drachenaugen', baueAugen());
   for (let i = 0; i < 3; i++) alsTextur(scene, `flugdrache${i}`, baueFlugDrache(i));
 }

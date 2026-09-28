@@ -5,6 +5,8 @@ import { stoppeMusik } from './musik.js';
 // Startet das aktuelle Kapitel des Spielstands (mit Bildergeschichte, falls noch nicht gesehen)
 export function starteKapitel(scene, { mitIntro = true } = {}) {
   const stand = scene.registry.get('stand');
+  // Wer das Spiel geschafft hat, spielt bei der Ehrengarde weiter (Kapitel 6)
+  if (stand.fertig && stand.kapitel < 6) { stand.kapitel = 6; stand.ort = null; stand.traegt = null; }
   const kapitel = KAPITEL[stand.kapitel] || KAPITEL[1];
   stand.geschichten = stand.geschichten || (stand.introGesehen ? ['intro'] : []);
   const ort = stand.ort && kapitel.karten.includes(stand.ort.karte) ? stand.ort : null;

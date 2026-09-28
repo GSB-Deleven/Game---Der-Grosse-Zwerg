@@ -1,0 +1,44 @@
+// KAPITEL 6 – Das Zuhause von Grossem Zwerg und Glutherz
+// §  = das Zuhause (wird mit jeder Mission grösser: Zelt → Holzhütte → Steinhaus)
+// Ø  = Missionsbrett der Garde, Þ = Kleiderkiste
+export default {
+  name: 'Unser Zuhause',
+  musik: 'dorf',
+  zuhause: true,
+  leben: { falter: 6, voegel: true, wolken: true, huehner: [[16, 11], [18, 12]] },
+  karte: [
+    'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+    'T..,.....T.......,....T.....,T',
+    'T.............<..............T',
+    'T....,.....§++........,......T',
+    'T..........+++...............T',
+    'T..*......Þ.:........d.......T',
+    'T...........:................T',
+    'T..,........::::::::::Ø......T',
+    'T.....P.....:.........:......T',
+    'T...........:...,.....:..~~~.T',
+    'T.:,..,.....@.........:.~~~~.T',
+    'T...........:.........:..~~..T',
+    'T..T....?...:.........:......T',
+    'T...........::::::::::::.,...T',
+    'T..,.....*.......,......T....T',
+    'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+  ],
+  ausgaenge: {},
+  figuren: {
+    d: {
+      name: 'Glutherz',
+      aussehen: 'drache',
+      zustand: 'froh',
+      stimme: { hoehe: 0.5 },
+      // saetze: bei jedem Reden der nächste
+      saetze: [
+        'Hier wohnen wir jetzt, du und ich!',
+        'Am Missionsbrett steht, wo man uns braucht. Schau mal nach!',
+        'Mit jeder Mission wird unser Zuhause schöner.',
+        'In der roten Kiste sind deine Kleider.',
+        'Ich bin so froh, dass wir Freunde sind!',
+      ],
+    },
+  },
+};

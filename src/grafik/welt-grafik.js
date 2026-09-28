@@ -548,6 +548,53 @@ const OBJEKTE = {
     for (const [x, y] of [[4, 8], [9, 6], [13, 9], [7, 11], [12, 12]]) { g.setze(x, y, '#e8303a'); g.setze(x + 1, y, '#ff6a70'); g.setze(x, y + 1, '#a8202a'); g.setze(x + 1, y + 1, '#e8303a'); }
     g.aufmalen(e);
   }),
+  // --- Das Zuhause von Grossem Zwerg und Glutherz (3 x 2 Felder, wird mit Missionen ausgebaut)
+  zuhause0: () => mach(48, 40, (e) => { // Zelt
+    teil(e, (t) => { vieleck(t, [[24, 4], [45, 38], [3, 38]], RAMPEN.beige); for (let y = 10; y < 38; y += 5) for (let x = 3; x < 46; x++) if (t.voll(x, y) && (x + y) % 3 === 0) t.setze(x, y, RAMPEN.beige[0]); });
+    teil(e, (t) => { vieleck(t, [[24, 16], [31, 38], [17, 38]], ['#3a2a20', '#5a4030', '#7a5a40']); });
+    teil(e, (t) => { rechteck(t, 23, 0, 2, 6, RAMPEN.holz); vieleck(t, [[25, 0], [33, 2.5], [25, 5]], R.stoffRot); });
+  }),
+  zuhause1: () => mach(48, 50, (e) => { // Holzhütte
+    teil(e, (t) => { rechteck(t, 33, 4, 6, 14, R.stein); });
+    teil(e, (t) => {
+      rechteck(t, 5, 24, 38, 25, RAMPEN.holz);
+      for (let y = 26; y < 49; y += 4) for (let x = 5; x < 43; x++) t.setze(x, y, RAMPEN.holz[0]);
+    });
+    teil(e, (t) => { vieleck(t, [[24, 6], [47, 27], [1, 27]], ['#5a2e16', '#7a4020', '#a0582e']); for (let y = 12; y < 27; y += 4) for (let x = 1; x < 47; x++) if (t.voll(x, y)) t.setze(x, y, '#4a2410'); });
+    teil(e, (t) => { rechteck(t, 20, 34, 9, 15, ['#3a2410', '#5a3a20', '#7a5030']); t.setze(27, 42, RAMPEN.gold[2]); });
+    teil(e, (t) => { rechteck(t, 9, 32, 7, 6, ['#e0a030', '#f2c94c', '#fff0a0']); t.setze(12, 32, RAMPEN.holz[0]); t.setze(12, 37, RAMPEN.holz[0]); for (let x = 9; x < 16; x++) t.setze(x, 35, RAMPEN.holz[0]); });
+    teil(e, (t) => { rechteck(t, 33, 32, 7, 6, ['#e0a030', '#f2c94c', '#fff0a0']); for (let x = 33; x < 40; x++) t.setze(x, 35, RAMPEN.holz[0]); });
+  }),
+  zuhause2: () => { // Steinhaus mit Fahne
+    const e = OBJEKTE.haus();
+    const g = new Ebene(48, 58);
+    for (let y = 0; y < 7; y++) g.setze(12, y, RAMPEN.holz[0]);
+    for (let y = 0; y < 4; y++) for (let x = 13; x < 19 - y; x++) g.setze(x, y, x === 13 ? '#a8202a' : '#e8303a');
+    g.aufmalen(e);
+    return e;
+  },
+  anschlagbrett: () => mach(26, 30, (e) => { // Missionsbrett der Garde
+    teil(e, (t) => { rechteck(t, 3, 8, 3, 21, RAMPEN.holz); rechteck(t, 20, 8, 3, 21, RAMPEN.holz); });
+    teil(e, (t) => { rechteck(t, 1, 6, 24, 16, RAMPEN.holz); vieleck(t, [[0, 6], [13, 0], [26, 6]], ['#6a3a1e', '#8a4a26', '#b0643a']); });
+    teil(e, (t) => { rechteck(t, 4, 9, 7, 8, RAMPEN.weiss); rechteck(t, 13, 10, 8, 9, RAMPEN.weiss); for (const [x, y] of [[5, 11], [5, 13], [14, 12], [14, 14], [14, 16]]) for (let i = 0; i < 4; i++) t.setze(x + i, y, '#8a8098'); t.setze(7, 9, '#d83a3a'); t.setze(17, 10, '#d83a3a'); });
+  }),
+  kleiderkiste: () => mach(20, 18, (e) => {
+    teil(e, (t) => { rechteck(t, 2, 6, 16, 11, ['#6a2a1e', '#8a3a26', '#b0543a'], { rund: 1 }); for (let x = 2; x < 18; x++) t.setze(x, 9, RAMPEN.gold[1]); t.setze(10, 11, RAMPEN.gold[2]); });
+    teil(e, (t) => { vieleck(t, [[4, 6], [9, 2], [13, 3], [9, 7]], R.stoffRot); });
+  }),
+  stammhaufen: () => mach(28, 18, (e) => { // Baumstämme, die Glutherz geholt hat
+    for (const [y, x0] of [[14, 1], [14, 12], [9, 6]]) {
+      teil(e, (t) => { rechteck(t, x0 + 2, y - 3, 13, 6, RAMPEN.holz); ellipse(t, x0 + 15, y, 2.6, 3, RAMPEN.beige); t.setze(x0 + 15, y, RAMPEN.holz[1]); });
+    }
+  }),
+  dammstamm: () => mach(16, 16, (e) => { // aufgeschichtete Baumstämme im Fluss
+    for (const [y, x0] of [[12, -2], [7, 3], [3, -4]]) {
+      teil(e, (t) => { rechteck(t, x0, y - 2, 22, 5, RAMPEN.holz); for (let x = x0 + 2; x < x0 + 20; x += 5) t.setze(x, y, RAMPEN.holz[0]); });
+    }
+    const g = new Ebene(16, 16);
+    for (const x of [1, 5, 9, 13]) { g.setze(x, 15, '#d8f0ff'); g.setze(x + 1, 15, '#ffffff'); }
+    g.aufmalen(e);
+  }),
   beet_rot: () => beet(BLUMEN_FARBEN.rot),
   beet_gelb: () => beet(BLUMEN_FARBEN.gelb),
   beet_blau: () => beet(BLUMEN_FARBEN.blau),
@@ -703,6 +750,12 @@ function kleinteile() {
       teil(e, (x) => { for (const [bx, by] of [[8, 2.5], [4.5, 5.5], [11.5, 5.5], [6, 9], [10, 9]]) ellipse(x, bx, by, 2.6, 2.6, f); ellipse(x, 8, 6, 2, 2, RAMPEN.gold); });
     });
   }
+  t.holz = mach(16, 16, (e) => teil(e, (x) => { rechteck(x, 1, 5, 12, 7, RAMPEN.holz, { rund: 1 }); ellipse(x, 13, 8.5, 2.5, 3.5, RAMPEN.beige); x.setze(13, 8, RAMPEN.holz[1]); for (let i = 3; i < 11; i += 3) x.setze(i, 7, RAMPEN.holz[0]); }));
+  t.brief = mach(16, 12, (e) => teil(e, (x) => {
+    rechteck(x, 0, 1, 16, 11, RAMPEN.weiss);
+    for (let i = 0; i < 8; i++) { x.setze(i, 1 + i * 0.6, '#b8b0c0'); x.setze(15 - i, 1 + i * 0.6, '#b8b0c0'); }
+    ellipse(x, 8, 6, 1.6, 1.6, ['#a8202a', '#d83a3a', '#ff7a80']);
+  }));
   // Lupe (Wunsch-Bild fürs Versteckis)
   t.lupe = mach(16, 16, (e) => teil(e, (x) => {
     ellipse(x, 6.5, 6.5, 5, 5, RAMPEN.stahl); ellipse(x, 6.5, 6.5, 3.3, 3.3, ['#8ac8f0', '#b8e0ff', '#ffffff']);

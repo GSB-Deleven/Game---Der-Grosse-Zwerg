@@ -1,0 +1,76 @@
+// MISSION «Der Staudamm» (Kapitel 6)
+// Der Fluss ist über die Ufer getreten (Ç = überflutete Wiese). Glutherz hat Baumstämme geholt (Ð),
+// der Grosse Zwerg schichtet sie oben am Fluss zu einem Damm auf (b = Bauaufgabe).
+export default {
+  name: 'Am wilden Fluss',
+  musik: 'reise',
+  leben: { falter: 4, voegel: true, wolken: true },
+  karte: [
+    'MMMMMMMM~~~MMMMMMMMMMMMMMMMMMMMM',
+    'M..T.,..~~~...T....,..T.....T..M',
+    'M.......~~~.................,..M',
+    'M..<....~~~...Ð..d........<....M',
+    'M....,..~~~....................M',
+    'M.......~~~b..........,.....?..M',
+    'M..T....~~~....................M',
+    'M.......~~~.............:::::::M',
+    'M...,...~~~ÇÇÇÇÇÇÇ......:......M',
+    'M.......~~~ÇÇÇÇÇÇÇÇÇ.f..:..H++.M',
+    'M..<....~~~ÇÇÇÇÇÇÇÇÇ....:..+++.M',
+    'M.......~~~ÇÇÇÇÇÇÇÇ.....:......M',
+    'M....,..~~~ÇÇÇÇÇÇÇ...@..:..,...M',
+    'M.......~~~ÇÇÇÇÇ........:......M',
+    'M..T....~~~...........,:....T..M',
+    'M.......~~~.............:......M',
+    'MMMMMMMM~~~MMMMMMMMMMMMMMMMMMMMM',
+  ],
+  ausgaenge: {},
+  figuren: {
+    d: {
+      name: 'Glutherz',
+      aussehen: 'drache',
+      zustand: 'froh',
+      stimme: { hoehe: 0.5 },
+      saetze: [
+        'Die Baumstämme habe ich vom Berg geholt. Für mich sind die ganz leicht!',
+        'Bring sie zum Schild am Fluss. Dort ist er schön schmal.',
+      ],
+    },
+    f: {
+      name: 'Bäuerin Frida',
+      aussehen: 'baeuerin',
+      stimme: { hoehe: 1.2 },
+      saetze: [
+        'Mein Gemüsegarten steht ganz unter Wasser! Und meine Kürbisse schwimmen davon!',
+        'Oben am Fluss, beim Schild, kann man ihn aufstauen.',
+      ],
+    },
+    b: {
+      baustelle: { schild: 'schild', baue: [[10, 5], [9, 5], [8, 5]], zu: 'Ŧ' },
+      wunsch: 'holz',
+      anzahl: 3,
+      sagt: 'Hier ist der Fluss schmal. Drei Baumstämme, dann hält der Damm!',
+      weiter: 'Hau ruck! Noch {rest} Stamm!',
+      danke: 'Geschafft! Der Damm steht!',
+    },
+  },
+  ereignisse: {
+    beimBetreten: [
+      { sage: ['f', 'Hilfe! Der Fluss ist über die Ufer getreten! Mein ganzer Garten steht unter Wasser!'] },
+      { sage: ['d', 'Keine Sorge! Ich habe vom Berg schon Baumstämme geholt.'] },
+      { sage: ['held', 'Dann schichte ich sie oben am Fluss auf. Wir bauen einen Damm!'] },
+    ],
+    wennFertig: [
+      { sage: ['d', 'Ich schiebe die Stämme ganz fest zusammen. Hau ruck!'] },
+      { wackeln: 500 },
+      { ton: 'kling' },
+      { verwandle: { von: 'Ç', zu: '.' } },
+      { sage: ['held', 'Schau! Das Wasser geht zurück!'] },
+      { jubel: ['f', 'd'] },
+      { sage: ['f', 'Mein Garten ist wieder da! Danke, ihr zwei!'] },
+      { sage: ['d', 'Und durch die kleine Lücke im Damm fliesst genau so viel Wasser, wie der Fluss braucht.'] },
+      { splash: { titel: 'Der Damm hält!', text: 'Der Grosse Zwerg und Glutherz haben den Fluss gezähmt.', bild: 'holz', farbe: 0x3d74b8 } },
+      { missionFertig: 'damm' },
+    ],
+  },
+};

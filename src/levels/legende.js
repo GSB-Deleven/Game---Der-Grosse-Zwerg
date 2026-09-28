@@ -80,4 +80,12 @@ export const LEGENDE = {
   'Ä': { fest: true, objekt: 'beet_rot', gibt: 'blume_rot' },
   'Ë': { fest: true, objekt: 'beet_gelb', gibt: 'blume_gelb' },
   'Ï': { fest: true, objekt: 'beet_blau', gibt: 'blume_blau' },
+
+  // Ehrengarde: Zuhause, Missionsbrett, Kleiderkiste, Mission «Staudamm»
+  '§': { fest: true, objekt: 'zuhause', breite: 3, hoehe: 2 },       // Bild hängt von der Ausbaustufe ab
+  'Ø': { fest: true, objekt: 'anschlagbrett' },
+  'Þ': { fest: true, objekt: 'kleiderkiste' },
+  'Ð': { fest: true, objekt: 'stammhaufen', gibt: 'holz' },
+  'Ç': { boden: 'wasser', fest: true },                             // überflutete Wiese
+  'Ŧ': { boden: 'wasser', objekt: 'dammstamm', flach: true, schatten: false }, // Damm aus Baumstämmen – begehbar
 };

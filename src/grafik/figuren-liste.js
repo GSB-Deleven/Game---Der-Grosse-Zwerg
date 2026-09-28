@@ -20,6 +20,7 @@ export const FIGUREN_AUSSEHEN = {
   wache: { typ: 'zwerg', haar: 'braun', bart: 'zoepfe', kleid: 'blau', kopf: 'hoernerhelm', kopfFarbe: 'stahl', umhang: 'weinrot' },
   wache2: { typ: 'zwerg', haar: 'rot', bart: 'gabel', kleid: 'blau', kopf: 'nasenhelm', kopfFarbe: 'stahl', umhang: 'weinrot' },
   // Kapitel 2 – Schloss
+  baeuerin: { typ: 'zwergin', haar: 'kastanie', kleid: 'orange', kopf: 'kapuze', kopfFarbe: 'gelb', schuerze: 'beige' },
   gaertnerin: { typ: 'zwergin', haar: 'blond', kleid: 'gruen', kopf: 'stirnband', kopfFarbe: 'rosa', schuerze: 'beige' },
   stalljunge: { typ: 'kind', haar: 'braun', kleid: 'leder', kopf: 'kapuze', kopfFarbe: 'moos' },
   berater: { typ: 'zwerg', haar: 'grau', bart: 'lang', kleid: 'weinrot', kopf: 'glatze', umhang: 'lila' },

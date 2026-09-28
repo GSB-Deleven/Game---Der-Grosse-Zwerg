@@ -9,9 +9,11 @@ import berg from './berg.js';
 import gipfel from './gipfel.js';
 import hoehle from './hoehle.js';
 import marktplatz from './marktplatz.js';
+import zuhause from './zuhause.js';
+import damm from './damm.js';
 
 // Alle Karten des Spiels. Neue Karte: Datei anlegen und hier eintragen.
-export const KARTEN = { dorf, bibliothek, burghof, thronsaal, see, tal, wald, berg, gipfel, hoehle, marktplatz };
+export const KARTEN = { dorf, bibliothek, burghof, thronsaal, see, tal, wald, berg, gipfel, hoehle, marktplatz, zuhause, damm };
 
 // Kapitel fassen Karten zusammen. Ein Kapitel ist geschafft, wenn alle Wünsche erfüllt sind.
 //   start       – auf welcher Karte es losgeht
@@ -92,5 +94,12 @@ export const KAPITEL = {
     karten: ['marktplatz'],
     start: 'marktplatz',
     startSzene: 'Flug',
+  },
+  // Nach dem Happy End: Missionen der Ehrengarde (siehe src/levels/missionen.js). Hört nie auf.
+  6: {
+    name: 'Die Ehrengarde',
+    karten: ['zuhause', 'damm'],
+    start: 'zuhause',
+    intro: 'kapitel6',
   },
 };

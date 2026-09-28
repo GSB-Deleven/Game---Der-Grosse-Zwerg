@@ -6,6 +6,7 @@ import { spieleMusik } from '../systeme/musik.js';
 import { sprich, verstummen } from '../systeme/stimme.js';
 import { sichere, ladeEinstellungen } from '../systeme/speichern.js';
 import { KAPITEL } from '../levels/index.js';
+import { schliesseMissionAb } from '../systeme/missionen.js';
 
 // DER FLUG: Der Grosse Zwerg reitet auf Glutherz zum Schloss.
 // Hoch und runter steuern (antippen/ziehen, Pfeiltasten, Stick), Sterne sammeln. Nichts kann schiefgehen.
@@ -16,6 +17,14 @@ const ABSCHNITTE = [
   { name: 'tal', text: 'Über das tiefe Tal – ganz ohne Brücke!', himmel: [0x6ab0e8, 0xf0d8b0] },
   { name: 'see', text: 'Über den grossen See – schau, wie er glitzert!', himmel: [0x7ab8f0, 0xf8c8a0] },
   { name: 'schloss', text: 'Da vorne ist das Schloss der Königin!', himmel: [0xe89a6a, 0xf8d8a0] },
+];
+// Mission «Post mit Glutherz»: Briefe statt Sterne, am Ende nach Hause
+const POST = [
+  { name: 'wald', text: 'Post für die Waldzwerge! Sammle die Briefe ein!', himmel: [0x5aa0e0, 0xbfe3f5] },
+  { name: 'see', text: 'Ein Brief für die Fischerin am See!', himmel: [0x7ab8f0, 0xf8c8a0] },
+  { name: 'berge', text: 'Ein Paket für die Bergzwerge. Hui, ist das windig!', himmel: [0x4a88d8, 0xd0e8f8] },
+  { name: 'tal', text: 'Und eine Karte für Oma Runa!', himmel: [0x6ab0e8, 0xf0d8b0] },
+  { name: 'schloss', text: 'Alle Briefe sind angekommen. Ab nach Hause!', himmel: [0xe89a6a, 0xf8d8a0] },
 ];
 const DAUER = 11000; // pro Abschnitt
 
@@ -93,8 +102,11 @@ function landschaften(scene) {
 export class Flug extends Phaser.Scene {
   constructor() { super('Flug'); }
 
-  create() {
+  create(daten) {
     mittig(this);
+    this.mission = daten?.mission || null;
+    this.abschnitte = this.mission === 'post' ? POST : ABSCHNITTE;
+    this.ding = this.mission === 'post' ? 'brief' : 'stern';
     this.stand = this.registry.get('stand');
     this.sterne = 0;
     this.abschnitt = -1;
@@ -108,7 +120,7 @@ export class Flug extends Phaser.Scene {
     this.sonne = this.add.circle(800, 90, 40, 0xfff4b0).setAlpha(0.9);
     this.ferne = this.add.tileSprite(480, 320, 3600, 200, 'flug_ferne').setTileScale(1, 1).setOrigin(0.5, 1);
     this.boeden = {};
-    for (const a of ABSCHNITTE) {
+    for (const a of ABSCHNITTE) {  // alle Böden anlegen, die Reihenfolge bestimmt this.abschnitte
       this.boeden[a.name] = this.add.tileSprite(480, 540, 3600, 220, `flug_${a.name}`).setOrigin(0.5, 1).setAlpha(0);
     }
     this.wolken = [];
@@ -126,10 +138,10 @@ export class Flug extends Phaser.Scene {
     this.time.addEvent({ delay: 170, loop: true, callback: () => { fl = (fl + 1) % 4; this.drache.setTexture(`flugdrache${[0, 1, 2, 1][fl]}`); } });
 
     this.sternGruppe = [];
-    this.time.addEvent({ delay: 900, loop: true, callback: () => { if (!this.beendet && this.abschnitt < ABSCHNITTE.length - 1) this.neuerStern(); } });
+    this.time.addEvent({ delay: 900, loop: true, callback: () => { if (!this.beendet && this.abschnitt < this.abschnitte.length - 1) this.neuerStern(); } });
 
     // Anzeige
-    this.sternBild = this.add.image(40, 40, 'stern').setScale(3);
+    this.sternBild = this.add.image(40, 40, this.ding).setScale(3);
     this.sternText = this.add.text(70, 42, '0', zahlStil(26)).setOrigin(0, 0.5);
     // Auf breiten/hohen Bildschirmen: Boden an den unteren Rand, Sternzähler in die Ecke
     beiGroesse(this, () => {
@@ -163,9 +175,9 @@ export class Flug extends Phaser.Scene {
     g.fillStyle(0x2a2236, 0.92).fillRoundedRect(-215, -62, 430, 124, 20);
     g.lineStyle(5, 0xf2c94c).strokeRoundedRect(-215, -62, 430, 124, 20);
     tafel.add(g);
-    tafel.add(this.add.image(-180, -24, 'stern').setScale(2));
-    tafel.add(this.add.image(180, -24, 'stern').setScale(2));
-    tafel.add(this.add.text(0, -24, 'Sammle die Sterne!', stil(30, '#f2c94c', { strokeThickness: 7 })).setOrigin(0.5));
+    tafel.add(this.add.image(-180, -24, this.ding).setScale(2));
+    tafel.add(this.add.image(180, -24, this.ding).setScale(2));
+    tafel.add(this.add.text(0, -24, this.ding === 'brief' ? 'Sammle die Briefe!' : 'Sammle die Sterne!', stil(30, '#f2c94c', { strokeThickness: 7 })).setOrigin(0.5));
     tafel.add(this.add.text(0, 28, wie, stil(21, '#ffffff')).setOrigin(0.5));
     tafel.setScale(0.3).setAlpha(0);
     this.tweens.add({ targets: tafel, scale: 1, alpha: 1, duration: 450, ease: 'Back.easeOut' });
@@ -184,7 +196,7 @@ export class Flug extends Phaser.Scene {
       this.tweens.add({ targets: finger, y: { from: 55, to: -55 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
     this.steuerPfeile = pfeile;
-    sprich(`Sammle die Sterne! ${touch ? 'Wisch nach oben oder unten' : 'Drück die Pfeiltasten hoch oder runter'}, dann fliegt Glutherz hoch oder runter.`, { hoehe: 0.75 });
+    sprich(`${this.ding === 'brief' ? 'Sammle die Briefe' : 'Sammle die Sterne'}! ${touch ? 'Wisch nach oben oder unten' : 'Drück die Pfeiltasten hoch oder runter'}, dann fliegt Glutherz hoch oder runter.`, { hoehe: 0.75 });
     // spätestens nach 12 Sekunden ausblenden
     this.time.delayedCall(12000, () => this.versteckeAnleitung());
   }
@@ -210,14 +222,15 @@ export class Flug extends Phaser.Scene {
   }
 
   neuerStern() {
-    const s = this.add.image(1000 + (this.r?.x || 0), 140 + Math.random() * 270, 'stern').setScale(2.4).setDepth(5);
-    this.tweens.add({ targets: s, angle: 360, duration: 2000, repeat: -1 });
+    const s = this.add.image(1000 + (this.r?.x || 0), 140 + Math.random() * 270, this.ding).setScale(2.4).setDepth(5);
+    if (this.ding === 'brief') this.tweens.add({ targets: s, angle: { from: -12, to: 12 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    else this.tweens.add({ targets: s, angle: 360, duration: 2000, repeat: -1 });
     this.sternGruppe.push(s);
   }
 
   naechsterAbschnitt() {
     this.abschnitt++;
-    const a = ABSCHNITTE[this.abschnitt];
+    const a = this.abschnitte[this.abschnitt];
     if (!a) return;
     for (const [name, t] of Object.entries(this.boeden)) this.tweens.add({ targets: t, alpha: name === a.name ? 1 : 0, duration: 1500 });
     const h = this.himmel;
@@ -290,11 +303,13 @@ export class Flug extends Phaser.Scene {
     if (this.fertig) return;
     this.fertig = true;
     verstummen();
-    this.stand.sterne = (this.stand.sterne || 0) + this.sterne;
+    if (this.ding === 'stern') this.stand.sterne = (this.stand.sterne || 0) + this.sterne;
     this.stand.ort = null;
     sichere(this.registry);
+    if (this.mission) schliesseMissionAb(this.registry, this.mission);
     spiele('splash');
     this.cameras.main.fadeOut(900, 255, 240, 200);
-    this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Welt', { karte: KAPITEL[5].start }));
+    const ziel = this.mission ? KAPITEL[6].start : KAPITEL[5].start;
+    this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Welt', { karte: ziel }));
   }
 }

@@ -6,7 +6,8 @@ Mut, Tapferkeit und Liebe.**
 ## Kapitel 1 – Die Zwergenfeste
 Im Bergtal wohnen die Zwerge in Steinhäusern. Der Grosse Zwerg hilft allen – genau so, wie Liv es sich gewünscht hat:
 - **Essen** vom Markt für Mama Hilde und die Zwergenkinder
-- **Wasser** vom Brunnen für den Schmied und Oma Runa
+- **Wasser** vom Brunnen für den Schmied
+- **Hühner einfangen** für Oma Runa und **Versteckis** mit Nella
 - **Äpfel** von ganz oben am Baum – nur der Grosse Zwerg kommt so hoch
 - **Bücher** vom obersten Regal der Runen-Bibliothek
 
@@ -14,7 +15,7 @@ Die frechen Kinder necken ihn zuerst («Du bist doch gar kein Zwerg!») – und 
 Am Ende bringt der **Bote der Königin** eine Nachricht: Ein Drache wohnt auf dem höchsten Berg.
 
 ## Kapitel 2 – Der Ruf der Königin
-Im **Burghof** hilft der Grosse Zwerg der Gärtnerin (Wasser für die Rosen) und Pony Flocke (Heu).
+Im **Burghof** hilft der Grosse Zwerg der Gärtnerin (rote, gelbe und blaue Blume für den Strauss der Königin) und Pony Flocke (Heu).
 Im **Thronsaal** erzählt Königin Brunhild vom Drachen und bittet ihn um Hilfe.
 
 ## Kapitel 3 – Die grosse Reise
@@ -36,3 +37,16 @@ und sie werden Freunde.
 Auf Glutherz' Rücken fliegen sie über Wald, Berge, Tal und See (Sterne sammeln!) bis zum Schloss.
 Auf dem Marktplatz kommt die Königin herunter – und ernennt die beiden zu **Ehrenmitgliedern der königlichen Garde**.
 Abspann: «Spielidee und Wünsche: Liv».
+
+## Kapitel 6 – Die Ehrengarde (hört nie auf)
+Nach dem Abspann geht es weiter: Der Grosse Zwerg und Glutherz wohnen zusammen gleich neben dem Schloss.
+Am Anfang ist ihr **Zuhause** nur ein Zelt. Am **Missionsbrett** wählt man eine Mission (Bildkarten, werden vorgelesen).
+Jede Mission bringt eine **Belohnung**: Das Zuhause wird grösser (Zelt → Holzhütte → Steinhaus) oder es gibt neue Kleider
+(in der **roten Kiste** kann man sich umziehen). Geschaffte Missionen haben einen Haken und lassen sich nochmals spielen.
+
+| Mission | Was passiert | Belohnung |
+|---|---|---|
+| Der Staudamm | Der Fluss ist über die Ufer getreten. Glutherz hat Baumstämme geholt, der Grosse Zwerg schichtet 3 davon zum Damm auf – das Wasser geht zurück. | Holzhütte |
+| Post mit Glutherz | Die Brieftauben haben Schnupfen: mit Glutherz durchs Reich fliegen und Briefe einsammeln. | Rüstung der Garde (goldener Helm) |
+
+Neue Missionen: siehe **Neues Level bauen** (Abschnitt «Neue Mission») oder ein Issue mit der Vorlage «Neue Mission» und **@claude**.

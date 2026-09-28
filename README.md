@@ -97,15 +97,16 @@ Das Spiel füllt jeden Bildschirm aus. **Quer** liegt das Steuerkreuz rechts und
 
 ---
 
-## 🗺️ Fünf Kapitel, elf Orte
+## 🗺️ Fünf Kapitel, elf Orte – und dann die Ehrengarde
 
 | Kapitel | Orte | Was passiert |
 |---|---|---|
-| 1️⃣ **Die Zwergenfeste** | Dorf, Runen-Bibliothek | Essen, Wasser, Äpfel und Bücher: Der Grosse Zwerg hilft allen. Die frechen Kinder werden Freunde, und der Bote der Königin kommt. |
-| 2️⃣ **Der Ruf der Königin** | Burghof, Thronsaal | Pony Flocke hat Hunger, die Rosen haben Durst. Königin Brunhild erzählt vom Drachen. |
+| 1️⃣ **Die Zwergenfeste** | Dorf, Runen-Bibliothek | Essen, Wasser, Äpfel und Bücher, Hühner einfangen und Versteckis: Der Grosse Zwerg hilft allen. Die frechen Kinder werden Freunde, und der Bote der Königin kommt. |
+| 2️⃣ **Der Ruf der Königin** | Burghof, Thronsaal | Pony Flocke hat Hunger, die Gärtnerin braucht eine rote, gelbe und blaue Blume. Königin Brunhild erzählt vom Drachen. |
 | 3️⃣ **Die grosse Reise** | See, Tal, Wald, Berg | Trittsteine über den See, eine Brücke übers Tal, Glühwürmchen im dunklen Wald, eine Strickleiter und Mut für die ängstlichen Zwerge |
 | 4️⃣ **Der Drache** | Gipfel, Höhle | Die Fackel geht aus, zwei leuchtende Augen … *«Halt, lieber Drache, ich will dir nichts tun!»* Glutherz wird ein Freund. |
 | 5️⃣ **Der Flug und das Fest** | Flug, Marktplatz | Auf Glutherz über das ganze Reich bis zum Schloss. Die Königin ernennt beide zu Ehrenmitgliedern der Garde. |
+| 🛡️ **Die Ehrengarde** | Zuhause, Missionen | Nach dem Abspann geht es weiter: Missionen am Missionsbrett (Staudamm bauen, Post fliegen …). Jede Mission baut das gemeinsame Zuhause aus (Zelt → Holzhütte → Steinhaus) oder bringt neue Kleider. |
 
 ![Thronsaal der Königin](docs/bilder/thronsaal.png)
 
@@ -175,6 +176,7 @@ Die Figuren setzt ein **Baukasten** aus Teilen zusammen (Stiefel, Rumpf, Bart, H
 | Ein **neues Level** bauen | [docs/NEUES-LEVEL.md](docs/NEUES-LEVEL.md) |
 | Bildergeschichten, allgemeine Texte | `src/texte/de.js` |
 | Kapitel und Drehbücher | `src/levels/index.js` |
+| Missionen der Ehrengarde, Ausbaustufen, Kleider | `src/levels/missionen.js` |
 
 Karten werden mit Zeichen «gemalt», z. B. `T` = Tanne, `B` = Brunnen, `F` = Obstbaum, `a`–`z` = Figuren:
 

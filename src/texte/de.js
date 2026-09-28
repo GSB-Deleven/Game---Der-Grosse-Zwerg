@@ -29,6 +29,12 @@ export const TEXTE = {
     'Ganz oben war eine dunkle Höhle. Es roch nach Feuer und ein bisschen nach Schwefel. Er zündete eine Fackel an und ging hinein.',
   ],
 
+  kapitel6: [
+    'Von nun an wohnten der Grosse Zwerg und Glutherz zusammen, gleich neben dem Schloss.',
+    'Am Anfang hatten sie nur ein kleines Zelt. Aber für die Ehrengarde gab es im Zwergenreich viel zu tun!',
+    'Schau aufs Missionsbrett! Mit jeder Mission wird euer Zuhause schöner, und es gibt neue Kleider.',
+  ],
+
   kapitelGeschafft: (n) => `Kapitel ${n} geschafft!`,
   weiter: 'Weiter',
   zurueck: 'Zum Titelbild',
@@ -50,6 +56,7 @@ export const GEGENSTAENDE = {
   blume_rot: { holen: 'Eine rote Blume. Rot wie eine Erdbeere!' },
   blume_gelb: { holen: 'Eine gelbe Blume. Gelb wie die Sonne!' },
   blume_blau: { holen: 'Eine blaue Blume. Blau wie der Himmel!' },
+  holz: { holen: 'Ein dicker Baumstamm. Hau ruck!' },
 };
 
 // Wegweiser: jedes Mal ein anderes Ziel (und Mordor kommt immer wieder …)

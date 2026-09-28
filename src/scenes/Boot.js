@@ -30,7 +30,8 @@ export class Boot extends Phaser.Scene {
         const stand = leererSpielstand('Test', 'held');
         stand.kapitel = k;
         stand.introGesehen = true;
-        stand.geschichten = ['intro', 'kapitel2', 'kapitel3', 'kapitel4'];
+        stand.geschichten = ['intro', 'kapitel2', 'kapitel3', 'kapitel4', 'kapitel6'];
+        if (k >= 6) stand.fertig = true;
         this.registry.set('platz', 2);
         this.registry.set('stand', stand);
         starteKapitel(this, { mitIntro: false });
