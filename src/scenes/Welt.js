@@ -8,7 +8,7 @@ import { sprich, verstummen } from '../systeme/stimme.js';
 import { spiele } from '../systeme/ton.js';
 import { spieleMusik, ducken } from '../systeme/musik.js';
 import { sichere } from '../systeme/speichern.js';
-import { GEGENSTAENDE } from '../texte/de.js';
+import { GEGENSTAENDE, WEGWEISER } from '../texte/de.js';
 import { beiGroesse } from '../systeme/bildschirm.js';
 
 const TEMPO = 84;          // Lauftempo (Pixel pro Sekunde)
@@ -16,6 +16,8 @@ const SCHRITTWEITE = 30;   // so viele Pixel pro ganzem Laufzyklus
 const HELD = { name: 'Der Grosse Zwerg', hoehe: 0.75 };
 const HOCH_OBEN = new Set(['obstbaum', 'regal']); // hier muss er sich strecken
 const REDE_WUENSCHE = new Set(['mut', 'reden']);  // werden durch Reden erfüllt
+// Bild in der Wunsch-Blase, wenn es nicht gleich heisst wie der Wunsch
+const WUNSCH_BILD = { mut: 'herz', reden: 'ausruf', huehner: 'huhn0', suchen: 'lupe' };
 
 export class Welt extends Phaser.Scene {
   constructor() { super('Welt'); }
@@ -54,6 +56,7 @@ export class Welt extends Phaser.Scene {
     this.dunkelheit = this.karte.dunkel || 0;
     this.heldLicht = this.karte.heldLicht ?? 60;
     this.fackelAn = true;
+    this.suche = null; // laufendes Versteckis
   }
 
   create() {
@@ -252,6 +255,7 @@ export class Welt extends Phaser.Scene {
     if (eintrag.funken) this.schmiedefunken(px + eintrag.funken[0], py + eintrag.funken[1], py + 1);
     if (eintrag.leuchtet) this.lichtQuellen.push({ x: px, y: py - 8, r: eintrag.leuchtet });
 
+    if (eintrag.objekt === 'wegweiser') this.dinge.push({ typ: 'schild', bild, feld: { x, y, b, h } });
     if (eintrag.gibt) {
       const ding = { typ: 'quelle', gibt: eintrag.gibt, objekt: eintrag.objekt, bild, feld: { x, y, b, h } };
       if (eintrag.objekt === 'obstbaum') {
@@ -364,7 +368,7 @@ export class Welt extends Phaser.Scene {
     if (!d.wunsch || this.istErfuellt(ding.id)) return;
     const hoch = ding.baustelle ? ding.bild.height + 16 : ding.bild.height * (ding.masse?.fussY || 1) + 8;
     const c = this.add.container(ding.bild.x, ding.bild.y - hoch).setDepth(90000);
-    const icon = d.wunsch === 'mut' ? 'herz' : d.wunsch === 'reden' ? 'ausruf' : d.wunsch;
+    const icon = WUNSCH_BILD[d.wunsch] || d.wunsch;
     c.add(this.add.image(0, 0, 'blase').setScale(0.8));
     c.add(this.add.image(0, -1.5, icon).setScale(0.65));
     if (d.anzahl > 1) {
@@ -393,6 +397,18 @@ export class Welt extends Phaser.Scene {
     for (const [hx, hy] of leben.huehner || []) {
       const s = this.add.image(hx * KACHEL + 8, hy * KACHEL + 12, 'huhn0').setOrigin(0.5, 1).setDepth(hy * KACHEL + 12);
       this.huehner.push({ s, ziel: null, warte: Math.random() * 2000, pickt: 0 });
+    }
+    // Ausgebüxte Hühner (Wunsch "huehner"): schon gefangene sitzen bei der Besitzerin
+    for (const f of this.figuren) {
+      const d = f.daten;
+      if (d.wunsch !== 'huehner' || !d.ausreisser) continue;
+      const gefangen = this.istErfuellt(f.id) ? d.anzahl : (this.stand.fortschritt[f.id] || 0);
+      d.ausreisser.forEach(([hx, hy], i) => {
+        const frei = i >= gefangen;
+        const platz = frei ? { x: hx, y: hy } : this.platzBei(f);
+        const s = this.add.image(platz.x * KACHEL + 8, platz.y * KACHEL + 12, 'huhn0').setOrigin(0.5, 1).setDepth(platz.y * KACHEL + 12);
+        this.huehner.push({ s, ziel: null, warte: Math.random() * 2000, pickt: 0, frei, besitzer: f, geflohen: false });
+      });
     }
     this.gluehwuermchen = [];
     for (const [gx, gy] of leben.gluehwuermchen || []) {
@@ -493,6 +509,8 @@ export class Welt extends Phaser.Scene {
       g.q.x = g.s.x; g.q.y = g.s.y;
     }
     for (const h of this.huehner) {
+      if (h.fliegt) continue;
+      if (h.frei && !this.zwischenszene && Phaser.Math.Distance.Between(h.s.x, h.s.y, this.held.x, this.held.y) < 14) { this.fangeHuhn(h); continue; }
       h.warte -= delta;
       if (h.ziel) {
         const dx = h.ziel.x - h.s.x, dy = h.ziel.y - h.s.y, d = Math.hypot(dx, dy);
@@ -518,6 +536,54 @@ export class Welt extends Phaser.Scene {
         if (w.s.x > this.breite * KACHEL + 200) { w.s.x = -200; w.s.y = Math.random() * this.hoehe * KACHEL; }
       }
     }
+  }
+
+  // Ein freies Feld neben einer Figur (z.B. für gefangene Hühner)
+  platzBei(figur) {
+    const felder = this.felderUm(figur.feld);
+    return felder.length ? Phaser.Utils.Array.GetRandom(felder) : { x: figur.feld.x, y: figur.feld.y + 1 };
+  }
+
+  // Der Grosse Zwerg erreicht ein ausgebüxtes Huhn: beim ersten Mal flattert es davon, dann ist es gefangen
+  fangeHuhn(h) {
+    spiele('gack');
+    h.fliegt = true;
+    h.ziel = null;
+    // im Bogen hüpfen/flattern
+    const hopser = (x, y, dauer, fertig) => {
+      const x0 = h.s.x, y0 = h.s.y, hoehe = dauer / 25;
+      h.s.setFlipX(x < x0).setTexture('huhn1');
+      this.tweens.addCounter({
+        from: 0, to: 1, duration: dauer, onComplete: fertig,
+        onUpdate: (tw) => {
+          const t = tw.getValue();
+          h.s.setPosition(x0 + (x - x0) * t, y0 + (y - y0) * t - Math.sin(t * Math.PI) * hoehe).setDepth(y0 + (y - y0) * t);
+          h.s.setTexture(Math.floor(t * 8) % 2 ? 'huhn1' : 'huhn0');
+        },
+      });
+    };
+    if (!h.geflohen) {
+      h.geflohen = true;
+      const hx = Math.floor(h.s.x / KACHEL), hy = Math.floor((h.s.y - 4) / KACHEL);
+      const weg = Math.sign(h.s.x - this.held.x) || 1, wegY = Math.sign(h.s.y - this.held.y);
+      const ziel = [[3 * weg, 2 * wegY], [3 * weg, 0], [0, 3 * (wegY || 1)], [-3 * weg, 0], [2 * weg, -2], [0, -3]]
+        .map(([dx, dy]) => ({ x: hx + dx, y: hy + dy })).find((p) => this.istFrei(p.x, p.y) && this.sucheWeg([p])) || { x: hx, y: hy };
+      this.konfetti(h.s.x, h.s.y - 8, 8);
+      hopser(ziel.x * KACHEL + 8, ziel.y * KACHEL + 12, 500, () => { h.fliegt = false; h.warte = 1500; });
+      return;
+    }
+    h.frei = false;
+    const f = h.besitzer;
+    const platz = this.platzBei(f);
+    this.konfetti(h.s.x, h.s.y - 8, 16);
+    hopser(platz.x * KACHEL + 8, platz.y * KACHEL + 12, 1100, () => { h.fliegt = false; h.warte = 1000; });
+    const n = (this.stand.fortschritt[f.id] || 0) + 1;
+    this.stand.fortschritt[f.id] = n;
+    this.letzterWunsch = f;
+    this.sichern();
+    if (n >= f.daten.anzahl) { this.erfuelle(f, true); return; }
+    this.aktualisiereWunsch(f);
+    this.sage(f, (f.daten.weiter || 'Super! Noch {rest}!').replace('{rest}', f.daten.anzahl - n));
   }
 
   // -------------------------------------------------------------------------
@@ -641,6 +707,7 @@ export class Welt extends Phaser.Scene {
       if (this.zwischenszene) return;
       const p = this.cameras.main.getWorldPoint(zeiger.x, zeiger.y);
       const huhn = this.huehner.find((h) => Phaser.Math.Distance.Between(h.s.x, h.s.y - 6, p.x, p.y) < 10);
+      if (huhn?.frei) { this.laufeZuHuhn(huhn); return; }
       if (huhn) { spiele('gack'); this.tweens.add({ targets: huhn.s, y: huhn.s.y - 6, duration: 120, yoyo: true }); return; }
       this.laufeZu(p.x, p.y);
     });
@@ -704,6 +771,18 @@ export class Welt extends Phaser.Scene {
       this.schaueZu(getroffen);
       this.interagiere(getroffen);
     }
+  }
+
+  // Zu einem Huhn laufen (ohne dabei aus Versehen den Baum dahinter anzutippen)
+  laufeZuHuhn(h) {
+    const f = { x: Math.floor(h.s.x / KACHEL), y: Math.floor((h.s.y - 4) / KACHEL) };
+    const pfad = this.sucheWeg(this.istFrei(f.x, f.y) ? [f] : this.felderUm({ ...f, b: 1, h: 1 }));
+    if (!pfad) return;
+    this.pfad = pfad;
+    this.pfadLetztes = this.heldFeld();
+    this.haengtSeit = 0;
+    this.pfadZiel = null;
+    this.zeigeTippMarke(h.s.x, h.s.y - 6);
   }
 
   zeigeTippMarke(x, y) {
@@ -941,6 +1020,8 @@ export class Welt extends Phaser.Scene {
     this.aktionGesperrt = true;
     this.time.delayedCall(350, () => { this.aktionGesperrt = false; });
     if (ding.typ === 'quelle') this.hole(ding);
+    else if (ding.typ === 'schild') this.liesSchild(ding);
+    else if (ding.typ === 'versteck') this.schaueHinter(ding);
     else this.redeMit(ding);
   }
 
@@ -1004,6 +1085,13 @@ export class Welt extends Phaser.Scene {
       return;
     }
     if (REDE_WUENSCHE.has(d.wunsch)) return this.erfuelle(figur, true);
+    if (d.wunsch === 'suchen') return this.starteVersteckis(figur);
+    if (this.traegt && d.falsch && this.traegt !== d.wunsch) {
+      // Falsche Farbe gebracht: jetzt hilft der Pfeil
+      figur.falschGebracht = true;
+      this.letzterWunsch = figur;
+      return this.sage(figur, d.falsch);
+    }
     if (this.traegt === d.wunsch) {
       if (d.anzahl > 1 || figur.baustelle) return this.liefereTeil(figur);
       return this.erfuelle(figur);
@@ -1037,6 +1125,90 @@ export class Welt extends Phaser.Scene {
     return this.sage(figur.baustelle ? 'held' : figur, (d.weiter || 'Super! Noch {rest}!').replace('{rest}', rest));
   }
 
+  // Wegweiser: jedes Mal ein anderes (lustiges) Ziel
+  liesSchild(schild) {
+    const n = this.stand.schildNr || 0;
+    this.stand.schildNr = n + 1;
+    const [steht, sagt] = WEGWEISER[n % WEGWEISER.length];
+    this.tweens.add({ targets: schild.bild, angle: 4, duration: 90, yoyo: true, repeat: 1 });
+    return this.sage('held', `Da steht: «${steht}». ${sagt}`);
+  }
+
+  // Versteckis: die Figur versteckt sich hinter einem von mehreren Dingen
+  async starteVersteckis(figur) {
+    const d = figur.daten;
+    this.zwischenszene = true;
+    this.pfad = [];
+    this.held.setVelocity(0, 0);
+    await this.sage(figur, (!figur.gesprochen && d.neckt ? `${d.neckt} ` : '') + d.sagt);
+    figur.gesprochen = true;
+    if (!this.lebt) return;
+    this.konfetti(figur.bild.x, figur.bild.y - 16, 20);
+    spiele('aufheben');
+    this.verstecke(figur, true);
+    this.blick = 'oben';
+    await this.sage('held', d.zaehlen || 'Eins … zwei … drei! Ich komme!');
+    if (!this.lebt) return;
+    const orte = d.verstecke.map(([x, y], nr) => {
+      const bild = (this.objekte[`${x},${y}`] || []).filter((b) => b.texture?.key?.startsWith('obj_')).at(-1);
+      return { typ: 'versteck', nr, bild, feld: { x, y, b: 1, h: 1 }, geprueft: false };
+    }).filter((o) => o.bild);
+    let richtig = Phaser.Math.Between(0, orte.length - 1);
+    if (richtig === this.letztesVersteck) richtig = (richtig + 1) % orte.length;
+    this.letztesVersteck = richtig;
+    this.suche = { figur, orte, richtig: orte[richtig], leer: 0 };
+    this.dinge.push(...orte);
+    // Das richtige Versteck raschelt ab und zu – und kichert
+    this.suche.rascheln = this.time.addEvent({
+      delay: 2200, loop: true, callback: () => {
+        const b = this.suche?.richtig.bild;
+        if (!b) return;
+        this.tweens.add({ targets: b, angle: { from: -5, to: 5 }, duration: 80, yoyo: true, repeat: 2, onComplete: () => b.setAngle(0) });
+        const t = this.add.text(b.x + 6, b.y - b.height, 'hihi', { fontFamily: '"Pixelify Sans", sans-serif', fontSize: '24px', color: '#ffffff', stroke: '#1b1420', strokeThickness: 5 }).setScale(0.25).setDepth(99950);
+        this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, duration: 1100, onComplete: () => t.destroy() });
+      },
+    });
+    this.letzterWunsch = figur;
+    this.zwischenszene = false;
+  }
+
+  async schaueHinter(ort) {
+    const s = this.suche;
+    if (!s || ort.geprueft) return;
+    ort.geprueft = true;
+    const d = s.figur.daten;
+    this.tweens.add({ targets: ort.bild, angle: { from: -6, to: 6 }, duration: 70, yoyo: true, repeat: 2, onComplete: () => ort.bild.setAngle(0) });
+    if (ort !== s.richtig) {
+      const text = (d.leer || ['Hier ist sie nicht.'])[s.leer++ % (d.leer?.length || 1)];
+      // Kleine Überraschung hinter dem Versteck
+      if (text.includes('Schmetterling')) {
+        const f = this.add.image(ort.bild.x, ort.bild.y - 10, 'falter0').setDepth(97000).setTint(0xffc0e0);
+        this.tweens.add({ targets: f, y: f.y - 50, x: f.x + 30, alpha: 0, duration: 1600, onComplete: () => f.destroy() });
+      } else if (text.includes('Huhn')) {
+        spiele('gack');
+        const h = this.add.image(ort.bild.x, ort.bild.y, 'huhn1').setOrigin(0.5, 1).setDepth(ort.bild.y + 1);
+        this.tweens.add({ targets: h, x: h.x + 40, y: h.y - 6, alpha: 0, duration: 1200, onComplete: () => h.destroy() });
+      }
+      return this.sage('held', text);
+    }
+    // Gefunden!
+    this.zwischenszene = true;
+    s.rascheln.remove();
+    this.dinge = this.dinge.filter((x) => x.typ !== 'versteck');
+    this.suche = null;
+    const f = s.figur;
+    const heim = { x: f.bild.x, y: f.bild.y };
+    f.bild.setPosition(ort.bild.x + (this.held.x < ort.bild.x ? -10 : 10), ort.bild.y).setVisible(true).setDepth(ort.bild.y + 1);
+    this.erscheine(f);
+    spiele('herz');
+    await this.sage(f, d.gefunden || 'Gefunden!');
+    if (!this.lebt) return;
+    await new Promise((r) => this.tweens.add({ targets: f.bild, x: heim.x, y: heim.y, duration: 900, onUpdate: () => f.bild.setDepth(f.bild.y), onComplete: r }));
+    this.verstecke(f, false);
+    this.zwischenszene = false;
+    await this.erfuelle(f, true);
+  }
+
   async erfuelle(figur, durchReden = false, ohneDanke = false) {
     const d = this.wunschVon(figur);
     if (!durchReden && !(d.anzahl > 1)) this.gibAb();
@@ -1046,6 +1218,7 @@ export class Welt extends Phaser.Scene {
     if (!nochMehr) this.stand.erfuellt.push(figur.id);
     this.stand.herzen += 1;
     if (this.letzterWunsch === figur) this.letzterWunsch = null;
+    figur.falschGebracht = false;
     this.sichern();
 
     figur.blase?.destroy();
@@ -1297,6 +1470,16 @@ export class Welt extends Phaser.Scene {
       return this.ausgangZu((w) => w.wunsch === this.traegt);
     }
     const lw = this.letzterWunsch && this.wunschVon(this.letzterWunsch).wunsch;
+    if (lw === 'huehner' && !this.istErfuellt(this.letzterWunsch.id)) {
+      const huhn = naechste(this.huehner.filter((h) => h.frei && h.besitzer === this.letzterWunsch).map((h) => ({ h, bild: h.s })));
+      if (huhn) return this.huhnZiel(huhn.h);
+    }
+    if (lw === 'suchen' && this.suche) {
+      // zeigt nur zum nächsten noch nicht angeschauten Versteck – suchen muss man selber
+      const ort = naechste(this.suche.orte.filter((o) => !o.geprueft));
+      return ort ? ziel(ort) : null;
+    }
+    if (lw && this.wunschVon(this.letzterWunsch).selberSuchen && !this.letzterWunsch.falschGebracht && !this.istErfuellt(this.letzterWunsch.id)) return null;
     if (lw && !this.istErfuellt(this.letzterWunsch.id) && !REDE_WUENSCHE.has(lw)) {
       const quelle = naechste(this.dinge.filter((d) => d.typ === 'quelle' && d.gibt === lw));
       if (quelle) return ziel(quelle);
@@ -1310,6 +1493,21 @@ export class Welt extends Phaser.Scene {
       return { x: a.x * KACHEL + 8, y: (a.y + 1) * KACHEL, hoch: 14, feld: a };
     }
     return this.ausgangZu(() => true) || this.ausgangZu(null, null, true);
+  }
+
+  huhnZiel(h) {
+    return { x: h.s.x, y: h.s.y, hoch: 14, huhn: h, feld: { x: Math.floor(h.s.x / KACHEL), y: Math.floor((h.s.y - 4) / KACHEL) } };
+  }
+
+  // Für den automatischen Test: wie der Pfeil, aber er kennt auch die Lösung (richtige Farbe, richtiges Versteck)
+  loesungsZiel() {
+    if (this.suche && !this.zwischenszene) return { x: this.suche.richtig.bild.x, y: this.suche.richtig.bild.y, hoch: 16, ding: this.suche.richtig };
+    const lw = this.letzterWunsch && !this.istErfuellt(this.letzterWunsch.id) && this.wunschVon(this.letzterWunsch);
+    if (lw?.selberSuchen && this.traegt !== lw.wunsch) {
+      const q = this.dinge.find((d) => d.typ === 'quelle' && d.gibt === lw.wunsch);
+      if (q) return { x: q.bild.x, y: q.bild.y, hoch: 16, ding: q };
+    }
+    return this.pfeilZiel();
   }
 
   // Tür zu einer Karte, auf der es einen passenden Wunsch (oder eine Quelle) gibt

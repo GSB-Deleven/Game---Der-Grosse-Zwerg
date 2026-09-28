@@ -75,4 +75,9 @@ export const LEGENDE = {
   'Ü': { fest: true, objekt: 'thron', breite: 2 },
   'Ö': { boden: 'hoehlenwand', fest: true },
   '`': { fest: true, objekt: 'holzstapel', gibt: 'brett' },
+
+  // Blumenbeete zum Farben-Sortieren
+  'Ä': { fest: true, objekt: 'beet_rot', gibt: 'blume_rot' },
+  'Ë': { fest: true, objekt: 'beet_gelb', gibt: 'blume_gelb' },
+  'Ï': { fest: true, objekt: 'beet_blau', gibt: 'blume_blau' },
 };

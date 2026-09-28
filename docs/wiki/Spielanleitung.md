@@ -14,6 +14,13 @@
 - Der Grosse Zwerg **trägt** immer ein Ding über dem Kopf. Bringt man es der richtigen Figur, gibt es ein **Herz**.
 - Manche Aufgaben brauchen mehrere Dinge (z. B. **3 Steine** für Trittsteine) – die Blase zeigt «1/3».
 - Manche Figuren brauchen nur **Mut** (Herz in der Blase) – einfach mit ihnen reden.
+- **Hühner einfangen:** Oma Runas Hühner sind ausgebüxt – einfach hinlaufen. Beim ersten Mal flattern sie noch davon!
+- **Versteckis:** Nella versteckt sich im Dorf. Wo raschelt und kichert es? Dort nachschauen.
+- **Farben:** Die Gärtnerin im Burghof wünscht sich eine rote, eine gelbe und eine blaue Blume.
+  Den Pfeil zum richtigen Beet gibt es erst, wenn man einmal die falsche Farbe bringt.
+- **Wegweiser** antippen: Jeder zeigt zu einem anderen berühmten Ort … und Mordor kommt immer wieder vor.
+- Beim **Drachenflug** zeigt eine Tafel, wie man Glutherz steuert: auf dem Handy nach oben oder unten wischen, am Computer ↑ und ↓.
+- Im **Menü** genügt ein Tipp neben das Fenster, um weiterzuspielen.
 - Bei besonderen Momenten gibt es eine grosse **Einblendung mit Konfetti**.
 
 Es gibt keine Gegner, man kann nichts falsch machen und nichts verlieren.

@@ -4,7 +4,7 @@ import { stil, zahlStil } from '../systeme/schrift.js';
 import { spiele } from '../systeme/ton.js';
 import { spieleMusik } from '../systeme/musik.js';
 import { sprich, verstummen } from '../systeme/stimme.js';
-import { sichere } from '../systeme/speichern.js';
+import { sichere, ladeEinstellungen } from '../systeme/speichern.js';
 import { KAPITEL } from '../levels/index.js';
 
 // DER FLUG: Der Grosse Zwerg reitet auf Glutherz zum Schloss.
@@ -140,16 +140,67 @@ export class Flug extends Phaser.Scene {
       this.sternText.setPosition(70 - r.x, 42 - r.y);
     });
     this.bannerText = this.add.text(480, 100, '', stil(30, '#ffffff', { align: 'center', wordWrap: { width: 860 } })).setOrigin(0.5).setAlpha(0);
-    this.hinweis = this.add.text(480, 510, 'Tippe oben oder unten, um zu steuern', stil(20, '#ffffff')).setOrigin(0.5);
-    this.tweens.add({ targets: this.hinweis, alpha: 0, delay: 5000, duration: 800 });
+    this.zeigeAnleitung();
 
     this.tasten = this.input.keyboard.addKeys('UP,DOWN,W,S');
-    this.input.on('pointerdown', (p) => { this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); });
-    this.input.on('pointermove', (p) => { if (p.isDown) this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); });
+    this.input.on('pointerdown', (p) => { this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); this.gesteuert(); });
+    this.input.on('pointermove', (p) => { if (p.isDown) { this.ziel = Phaser.Math.Clamp(p.worldY, 130, 420); this.gesteuert(); } });
 
     spieleMusik('flug');
     this.cameras.main.fadeIn(800);
     this.naechsterAbschnitt();
+  }
+
+  // Zu Beginn: Tafel «Sammle die Sterne!» und wie man Glutherz steuert (passend zum Gerät)
+  zeigeAnleitung() {
+    const einst = ladeEinstellungen();
+    const touch = einst.touch === 'an' || (einst.touch !== 'aus' && this.sys.game.device.input.touch);
+    const wie = touch ? 'Wisch nach oben oder unten!' : 'Drück ↑ oder ↓ (oder W und S)';
+    this.steuerZaehler = 0;
+    this.anleitungSeit = this.time.now;
+    const tafel = this.add.container(610, 170).setDepth(20);
+    const g = this.add.graphics();
+    g.fillStyle(0x2a2236, 0.92).fillRoundedRect(-215, -62, 430, 124, 20);
+    g.lineStyle(5, 0xf2c94c).strokeRoundedRect(-215, -62, 430, 124, 20);
+    tafel.add(g);
+    tafel.add(this.add.image(-180, -24, 'stern').setScale(2));
+    tafel.add(this.add.image(180, -24, 'stern').setScale(2));
+    tafel.add(this.add.text(0, -24, 'Sammle die Sterne!', stil(30, '#f2c94c', { strokeThickness: 7 })).setOrigin(0.5));
+    tafel.add(this.add.text(0, 28, wie, stil(21, '#ffffff')).setOrigin(0.5));
+    tafel.setScale(0.3).setAlpha(0);
+    this.tweens.add({ targets: tafel, scale: 1, alpha: 1, duration: 450, ease: 'Back.easeOut' });
+    this.anleitung = tafel;
+
+    // Pfeile über und unter Glutherz, dazu ein «Finger», der hoch und runter wischt
+    const pfeile = this.add.container(0, 0).setDepth(19);
+    const oben = this.add.triangle(0, -95, 0, 22, 18, 0, 36, 22, 0xffffff).setStrokeStyle(4, 0x1b1420);
+    const unten = this.add.triangle(0, 95, 0, 0, 18, 22, 36, 0, 0xffffff).setStrokeStyle(4, 0x1b1420);
+    pfeile.add([oben, unten]);
+    this.tweens.add({ targets: oben, y: -105, duration: 450, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: unten, y: 105, duration: 450, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    if (touch) {
+      const finger = this.add.circle(0, 0, 13, 0xffffff, 0.85).setStrokeStyle(3, 0x1b1420);
+      pfeile.add(finger);
+      this.tweens.add({ targets: finger, y: { from: 55, to: -55 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    this.steuerPfeile = pfeile;
+    sprich(`Sammle die Sterne! ${touch ? 'Wisch nach oben oder unten' : 'Drück die Pfeiltasten hoch oder runter'}, dann fliegt Glutherz hoch oder runter.`, { hoehe: 0.75 });
+    // spätestens nach 12 Sekunden ausblenden
+    this.time.delayedCall(12000, () => this.versteckeAnleitung());
+  }
+
+  // Jemand hat gesteuert: nach ein paar Mal (und kurzem Lesen) verschwindet die Anleitung
+  gesteuert() {
+    if (!this.anleitung) return;
+    this.steuerZaehler++;
+    if (this.steuerZaehler > 20 && this.time.now - this.anleitungSeit > 4000) this.versteckeAnleitung();
+  }
+
+  versteckeAnleitung() {
+    if (!this.anleitung) return;
+    const weg = [this.anleitung, this.steuerPfeile];
+    this.anleitung = null;
+    this.tweens.add({ targets: weg, alpha: 0, duration: 600, onComplete: () => weg.forEach((o) => o.destroy()) });
   }
 
   neueWolke(x, vorn) {
@@ -172,9 +223,13 @@ export class Flug extends Phaser.Scene {
     const h = this.himmel;
     h.clear();
     h.fillGradientStyle(a.himmel[0], a.himmel[0], a.himmel[1], a.himmel[1], 1).fillRect(-1400, -1400, 3760, 3340);
-    this.bannerText.setText(a.text).setAlpha(0);
-    this.tweens.add({ targets: this.bannerText, alpha: 1, duration: 500, hold: 3500, yoyo: true });
-    sprich(a.text, { hoehe: 0.75 });
+    const banner = () => {
+      this.bannerText.setText(a.text).setAlpha(0);
+      this.tweens.add({ targets: this.bannerText, alpha: 1, duration: 500, hold: 3500, yoyo: true });
+      sprich(a.text, { hoehe: 0.75 });
+    };
+    if (this.abschnitt === 0) this.time.delayedCall(6500, () => { if (!this.anleitung) banner(); });
+    else banner();
     if (a.name === 'schloss') {
       this.schloss.setVisible(true).setX(1300 + (this.r?.x || 0));
       this.tweens.add({ targets: this.schloss, x: 700, duration: 5000, ease: 'Sine.easeOut' });
@@ -195,9 +250,11 @@ export class Flug extends Phaser.Scene {
       if (pad?.up) this.ziel = Math.max(130, this.ziel - 260 * dt);
       if (pad?.down) this.ziel = Math.min(420, this.ziel + 260 * dt);
     }
+    if (this.anleitung && (this.tasten.UP.isDown || this.tasten.DOWN.isDown || this.tasten.W.isDown || this.tasten.S.isDown)) this.gesteuert();
     const alt = this.reiter.y;
     this.reiter.y += (this.ziel - this.reiter.y) * Math.min(1, dt * 3) + Math.sin(zeit / 400) * 0.3;
     this.reiter.setRotation(Phaser.Math.Clamp((this.reiter.y - alt) * 0.04, -0.25, 0.25));
+    this.steuerPfeile?.setPosition(this.reiter.x + 10, this.reiter.y);
 
     this.ferne.tilePositionX += tempo * 0.15 * dt;
     for (const t of Object.values(this.boeden)) t.tilePositionX += tempo * dt;

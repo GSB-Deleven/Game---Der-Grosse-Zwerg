@@ -47,4 +47,29 @@ export const GEGENSTAENDE = {
   heu: { holen: 'Ein Arm voll Heu!' },
   fackel: { holen: 'Eine Fackel. Jetzt wird es hell!' },
   pilze: { holen: 'Leuchtende Höhlenpilze!' },
+  blume_rot: { holen: 'Eine rote Blume. Rot wie eine Erdbeere!' },
+  blume_gelb: { holen: 'Eine gelbe Blume. Gelb wie die Sonne!' },
+  blume_blau: { holen: 'Eine blaue Blume. Blau wie der Himmel!' },
 };
+
+// Wegweiser: jedes Mal ein anderes Ziel (und Mordor kommt immer wieder …)
+// [was draufsteht, was der Grosse Zwerg dazu sagt]
+export const WEGWEISER = [
+  ['Mordor: 1000 Meilen', 'Nein danke. Da ist es viel zu dunkel und niemand lacht.'],
+  ['Erebor, der Einsame Berg – Gimlis Heimat', 'Gimli hat bestimmt einen noch längeren Bart als ich!'],
+  ['Auenland: Zweites Frühstück um 11 Uhr', 'Zweites Frühstück? Das klingt wunderbar!'],
+  ['Moria: Sag Freund und tritt ein', 'Freund! … Hm. Hier ist ja gar keine Tür.'],
+  ['Mordor: Immer noch 1000 Meilen', 'Ich sagte doch schon: nein danke!'],
+  ['Tiefwasser: Badehose nicht vergessen', 'Eine Badehose in meiner Grösse? Die gibt es nicht.'],
+  ['Mithril-Halle: Zwerge willkommen. Riesen bitte bücken!', 'Bin ich jetzt ein Zwerg oder ein Riese? Ich bücke mich einfach.'],
+  ['Baldurs Tor: Ganz, ganz weit weg', 'Dann gehe ich lieber ein anderes Mal.'],
+  ['Mordor: Wirklich nicht. Auch nicht kurz.', 'Schon gut, schon gut!'],
+  ['Bruchtal: Hier wohnen Elben. Bitte leise singen.', 'La la laaa … Oh, war das zu laut?'],
+  ['Isengard: Wegen Bauarbeiten geschlossen', 'Schade! Ich hätte so gerne beim Bauen geholfen.'],
+  ['Niewinter: Hier ist nie Winter. Trotzdem Mütze anziehen!', 'Eine Zwergenmütze passt immer.'],
+  ['Mordor: Geh lieber heim und iss ein Zvieri', 'Endlich ein guter Vorschlag!'],
+  ['Hier war der Grosse Zwerg noch nie', 'Doch! Jetzt schon!'],
+  ['Zum Ende der Welt: 3 Tage. Zurück: auch 3 Tage.', 'Dann bin ich ja erst in 6 Tagen zum Znacht zurück.'],
+  ['Khazad-dûm: Bitte keine Steine in den Brunnen werfen', 'Plumps … Oh. Das war ich nicht!'],
+  ['Mordor → Nein. ← Hier ist es schön.', 'Ich bleibe hier!'],
+];

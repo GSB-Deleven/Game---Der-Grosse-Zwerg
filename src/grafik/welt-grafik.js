@@ -55,6 +55,12 @@ const FARBEN = {
   blumen: ['#f2c94c', '#ffffff', '#e05a8a', '#8fb8f0', '#c07ce0'].map(rgb),
 };
 
+const BLUMEN_FARBEN = {
+  rot: ['#a8202a', '#e8303a', '#ff7a80'],
+  gelb: ['#c89010', '#f2c94c', '#fff0a0'],
+  blau: ['#2a4aa8', '#4a7ae0', '#a0c8ff'],
+};
+
 const IST_WEG = new Set(['weg', 'erde', 'steinboden']);
 const IST_GRAS = new Set(['gras', 'blumen']);
 const IST_FELS = new Set(['fels', 'felswand', 'rune', 'hoehlenwand']);
@@ -542,6 +548,9 @@ const OBJEKTE = {
     for (const [x, y] of [[4, 8], [9, 6], [13, 9], [7, 11], [12, 12]]) { g.setze(x, y, '#e8303a'); g.setze(x + 1, y, '#ff6a70'); g.setze(x, y + 1, '#a8202a'); g.setze(x + 1, y + 1, '#e8303a'); }
     g.aufmalen(e);
   }),
+  beet_rot: () => beet(BLUMEN_FARBEN.rot),
+  beet_gelb: () => beet(BLUMEN_FARBEN.gelb),
+  beet_blau: () => beet(BLUMEN_FARBEN.blau),
   stall: () => mach(48, 50, (e) => {
     teil(e, (t) => { rechteck(t, 3, 20, 42, 29, RAMPEN.holz); for (let x = 3; x < 45; x += 4) for (let y = 20; y < 49; y++) t.setze(x, y, RAMPEN.holz[0]); });
     teil(e, (t) => { vieleck(t, [[8, 2], [40, 2], [47, 22], [1, 22]], ['#6a3a1e', '#8a4a26', '#b0643a']); for (let y = 6; y < 22; y += 4) for (let x = 2; x < 46; x++) if (t.voll(x, y)) t.setze(x, y, '#5a2e16'); });
@@ -591,6 +600,17 @@ const OBJEKTE = {
 };
 
 // Ahnen-Statue: ein Zwerg aus Stein auf einem Sockel
+// Ein Blumenbeet in einer Farbe: [dunkel, mittel, hell]
+function beet(f) {
+  return mach(20, 18, (e) => {
+    teil(e, (t) => { ellipse(t, 10, 13, 9.5, 4.5, R.blatt); });
+    // grosse, gut sichtbare Blüten mit gelber Mitte
+    for (const [x, y] of [[5, 7], [14, 6], [9.5, 3.5], [3.5, 12], [10, 10], [16, 11.5]]) {
+      teil(e, (t) => { ellipse(t, x, y, 3.2, 3, f); t.setze(Math.round(x), Math.round(y), '#ffe066'); });
+    }
+  });
+}
+
 function statue() {
   const figur = baueFigur({ typ: 'zwerg', bart: 'zoepfe', kopf: 'hoernerhelm' }).steh0;
   const e = new Ebene(28, 46);
@@ -676,6 +696,18 @@ function kleinteile() {
     teil(e, (x) => { ellipse(x, 8, 12, 7, 3.5, RAMPEN.holz); });
     for (const [px, py, r] of [[5, 8, 3.5], [11, 8, 3.2], [8, 6, 3]]) teil(e, (x) => { rechteck(x, px - 1, py, 2, 3, RAMPEN.beige); ellipse(x, px, py, r, r * 0.7, ['#4a7a3a', '#7ab84a', '#c8f080'], { nurOben: py }); });
   });
+  // Blumen zum Tragen (rot, gelb, blau)
+  for (const [name, f] of Object.entries(BLUMEN_FARBEN)) {
+    t[`blume_${name}`] = mach(16, 16, (e) => {
+      teil(e, (x) => { rechteck(x, 7, 8, 2, 8, R.blatt); ellipse(x, 5, 12, 2.5, 1.5, R.blatt); });
+      teil(e, (x) => { for (const [bx, by] of [[8, 2.5], [4.5, 5.5], [11.5, 5.5], [6, 9], [10, 9]]) ellipse(x, bx, by, 2.6, 2.6, f); ellipse(x, 8, 6, 2, 2, RAMPEN.gold); });
+    });
+  }
+  // Lupe (Wunsch-Bild fürs Versteckis)
+  t.lupe = mach(16, 16, (e) => teil(e, (x) => {
+    ellipse(x, 6.5, 6.5, 5, 5, RAMPEN.stahl); ellipse(x, 6.5, 6.5, 3.3, 3.3, ['#8ac8f0', '#b8e0ff', '#ffffff']);
+    for (let i = 0; i < 5; i++) { x.setze(10 + i, 10 + i, RAMPEN.holz[1]); x.setze(11 + i, 10 + i, RAMPEN.holz[0]); }
+  }));
   t.ausruf = mach(16, 16, (e) => teil(e, (x) => { rechteck(x, 6, 1, 4, 9, R.stoffRot, { rund: 1 }); ellipse(x, 8, 13, 2, 2, R.stoffRot); }));
   return t;
 }

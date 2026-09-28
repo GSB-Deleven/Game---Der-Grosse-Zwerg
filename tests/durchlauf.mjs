@@ -29,6 +29,7 @@ const zustand = () => page.evaluate(() => {
     aktiv, kapitel: sp.registry.get('stand')?.kapitel,
     karte: w?.kartenName, lebt: w?.lebt, zw: w?.zwischenszene, herzen: sp.registry.get('stand')?.herzen,
     pos: w?.held ? [Math.round(w.held.x), Math.round(w.held.y)] : null,
+    traegt: w?.traegt, letzter: w?.letzterWunsch?.id, erfuellt: sp.registry.get('stand')?.erfuellt, suche: !!w?.suche,
   };
 });
 
@@ -89,10 +90,10 @@ while (Date.now() - start < 60 * 60 * 1000) {
     const aktion = await page.evaluate(() => {
       const w = window.spiel.scene.getScene('Welt');
       if (!w.held || w.wechselt || w.pfad.length || w.pfadZiel || w.aktionGesperrt) return 'warte';
-      const ziel = w.pfeilZiel();
+      const ziel = w.loesungsZiel();
       if (!ziel) return 'kein Ziel';
       const f = ziel.ding ? ziel.ding.feld : ziel.feld;
-      w.laufeZu(f.x * 16 + 8, f.y * 16 + 8);
+      if (ziel.huhn) w.laufeZuHuhn(ziel.huhn); else w.laufeZu(f.x * 16 + 8, f.y * 16 + 8);
       return `${w.kartenName}:${ziel.ding ? (ziel.ding.id || ziel.ding.gibt) : `feld ${f.x},${f.y}`}`;
     });
     if (aktion === letzteAktion && aktion !== 'warte') gleichSeit++; else gleichSeit = 0;

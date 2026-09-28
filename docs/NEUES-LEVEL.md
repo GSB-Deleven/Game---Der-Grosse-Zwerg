@@ -45,6 +45,7 @@ Alle Zeilen müssen **gleich lang** sein.
 | `N` | Heuhaufen | Heu |
 | `(` | Feuerschale | Fackel |
 | `)` | Höhlenpilze | Pilze |
+| `Ä` / `Ë` / `Ï` | Blumenbeet rot / gelb / blau | Blumen in dieser Farbe |
 
 ### Gebäude und Deko
 | Zeichen | Bedeutung | Zeichen | Bedeutung |
@@ -58,7 +59,7 @@ Alle Zeilen müssen **gleich lang** sein.
 | `J` | Zaun | `Z` | Rosen |
 | `!` | Laterne (leuchtet) | `L` | Feuerschale (Deko) |
 | `E` / `A` | Esse / Amboss | `K` / `$` | Fass / Kiste |
-| `%` / `&` | Holzstapel / Heuballen | `?` | Wegweiser |
+| `%` / `&` | Holzstapel / Heuballen | `?` | Wegweiser (anklickbar, jedes Mal ein lustiges Ziel – Texte in `src/texte/de.js` unter `WEGWEISER`) |
 | `P` | Pilze (Deko) | `}` | Kristall (leuchtet) |
 | `0` | Auslöse-Feld für ein Ereignis | `a`–`z` | Figur (siehe unten) |
 | `1`–`9` | Tür / Ausgang | | |
@@ -89,6 +90,9 @@ Weitere Möglichkeiten:
 | `wunsch: 'reden'` + `gespraech: [...]` | Ein Gespräch als Drehbuch (siehe unten), danach erfüllt |
 | `wuensche: [{ wunsch, sagt, danke }, …]` | Mehrere Wünsche nacheinander (wie bei Glutherz) |
 | `anzahl: 3` | Braucht 3 Stück (Blase zeigt «1/3») |
+| `wunsch: 'huehner'`, `anzahl: 3`, `ausreisser: [[x, y], …]` | **Hühner einfangen:** Hühner laufen an diesen Stellen herum. Beim ersten Hinlaufen flattern sie davon, beim zweiten Mal hüpfen sie zurück zur Figur (`weiter: 'Noch {rest}!'`) |
+| `wunsch: 'suchen'`, `verstecke: [[x, y], …]` | **Versteckis:** Die Figur versteckt sich hinter einem dieser Dinge (Busch, Fass, Tanne …). Das richtige raschelt und kichert. Texte: `zaehlen`, `leer: [...]`, `gefunden` |
+| `selberSuchen: true`, `falsch: '…'` (in einem Wunsch) | **Selber suchen** (z. B. Farben): Der Pfeil zeigt die richtige Quelle erst, wenn man einmal das Falsche gebracht hat. `falsch` wird dann gesagt |
 | `geschenk: 'fackel'` | Gibt nach dem Helfen etwas mit |
 | `versteckt: true` | Erst unsichtbar, erscheint durch ein Ereignis (`zeige`) |
 | `licht: 70`, `lichtNachErfuellt: true` | Leuchtet (in dunklen Karten), optional erst nach dem Helfen |

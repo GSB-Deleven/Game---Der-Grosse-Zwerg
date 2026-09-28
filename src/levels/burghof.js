@@ -18,7 +18,7 @@ export default {
     'W..,,B,,,,,,...:::.....p...&...W',
     'W..,,,,,,a,,...:::.........N...W',
     'W..,,,,,,,,*..!:::!.JJJJJ.JJJJ.W',
-    'W..............:::.............W',
+    'W..Ä..Ë..Ï.....:::.............W',
     'W...,:::::::::::::::::::::::,..W',
     'W....:::::::::::::::::::::::...W',
     'W..$.:::::::::::::::::::::::...W',
@@ -35,10 +35,14 @@ export default {
       name: 'Gärtnerin Rosalind',
       aussehen: 'gaertnerin',
       stimme: { hoehe: 1.2 },
-      wunsch: 'wasser',
-      sagt: 'Oh, meine Rosen lassen die Köpfe hängen! Holst du mir Wasser vom Brunnen?',
-      danke: 'Schau, wie sie wieder strahlen! Danke, du Guter!',
-      danach: 'Die Königin liebt diese Rosen.',
+      // Farben sortieren: sie wünscht sich die Blumen der Reihe nach.
+      // selberSuchen = der Pfeil zeigt das richtige Beet erst, wenn man die falsche Farbe bringt
+      wuensche: [
+        { wunsch: 'blume_rot', selberSuchen: true, sagt: 'Ich binde einen Blumenstrauss für die Königin! Bringst du mir eine ROTE Blume? Dort vorne wachsen rote, gelbe und blaue.', falsch: 'Oh, die ist auch schön! Aber ich brauche eine ROTE. Rot wie eine Erdbeere!', danke: 'Rot wie eine Erdbeere! Danke!' },
+        { wunsch: 'blume_gelb', selberSuchen: true, sagt: 'Jetzt brauche ich eine GELBE Blume. Gelb wie die Sonne!', falsch: 'Hihi, das ist nicht gelb! Ich brauche eine GELBE. Gelb wie die Sonne!', danke: 'Gelb wie die Sonne! Wunderbar!' },
+        { wunsch: 'blume_blau', selberSuchen: true, sagt: 'Und zum Schluss eine BLAUE Blume. Blau wie der Himmel!', falsch: 'Fast! Aber ich brauche eine BLAUE. Blau wie der Himmel!', danke: 'Fertig! Der schönste Strauss im ganzen Königreich! Danke, du Guter!' },
+      ],
+      danach: 'Die Königin wird sich so über den Strauss freuen.',
     },
     b: {
       name: 'Stalljunge Emil',
