@@ -3,6 +3,20 @@
 Kinderspiel (Phaser 3 + Vite) nach Davids Gute-Nacht-Geschichte, für Liv (5) und ihren Bruder (3).
 Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https://claude.ai/artifact/7xCpQAoHUWttCtGYtPqEUU
 
+## 🎯 Aktueller Arbeitsauftrag & Übergabe (Branch: `grafik-effekte-test`)
+**Sofort-Fokus:** Wir arbeiten am **«Secret of Mana» HD-2D Grafik-Upgrade** auf dem Branch **`grafik-effekte-test`**.
+Ausführliche Roadmap und Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-ROADMAP.md).
+
+- **Was bereits erledigt ist:**
+  - ✅ Partikelsystem & Atmosphäre (Waldsporen, Blätterfall, Lichtstaub, Höhlenglimmen in `src/scenes/Welt.js` und `src/grafik/welt-grafik.js`).
+- **Was als Nächstes zu tun ist (hier direkt anknüpfen!):**
+  - 🌳 **Bäume & Natur verschönern:** `laubbaum`, `obstbaum` und `tanne` in `src/grafik/welt-grafik.js` aufwerten: Dichte, wolkenartige Blätter-Cluster mit Glanzkante und Schattentiefe, organische Rindenmaserung und Wurzeln (Ziel-Look siehe `docs/referenzen/secret-of-mana-stil.png`).
+  - 🧔 **Zwerg aufwerten (Entscheidung: Weg B - Spritesheets):** Handgezeichnete Spritesheets aus `docs/referenzen/zwerg-spritesheet.png` einbinden (Laufen, Stehen, Aktionen) anstelle der einfachen geometrischen Ellipsen.
+- **Workflow bei Modellwechsel (Claude ↔ Antigravity):**
+  - Immer auf Branch `grafik-effekte-test` bleiben.
+  - Nach Änderungen: `npm run pruefen` (Karten) und `npm run build` ausführen.
+  - Änderungen auf `grafik-effekte-test` committen und pushen (keine Modellnamen im Commit-Text).
+
 ## Grundsätze (nicht verhandelbar)
 - Kein Kampf, keine Gewalt, kein Game Over, man kann nichts verlieren. Freundschaft statt Kampf.
 - D&D-/Tolkien-Zwerge (Hörnerhelme, Bärte), keine Gartenzwerge. SNES-Pixel-Look, alle Grafik wird im Code gemalt.
