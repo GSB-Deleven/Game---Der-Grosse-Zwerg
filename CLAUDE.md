@@ -45,6 +45,10 @@ Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https:
   Missionen: «Der Staudamm» (Belohnung Holzhütte), «Post mit Glutherz» (Garde-Rüstung). Steinhaus ist gezeichnet,
   wartet auf die nächste Mission.
 - Menü schliesst bei Klick daneben; Drachenflug zeigt Steuer-Anleitung (Wischen / Pfeiltasten).
+- **Aktuelle Initiative (Branch `grafik-effekte-test`):** «Secret of Mana» HD-2D Grafik-Upgrade:
+  - Details & Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-ROADMAP.md).
+  - Partikelsystem (Waldsporen, Blätter, Lichtstaub) ist aktiv.
+  - Nächste Schritte: Detaillierte Bäume (Blätter-Cluster/Rinde) und Zwergen-Spritesheet-Integration (Weg B). Referenzbilder liegen in `docs/referenzen/`.
 
 ## Offene Ideen
 - Issue #20: weitere Missionen (Mühle nach Sturm reparieren, Troll mit Zahnweh, Nebel im Wald/Laternen,

@@ -794,6 +794,43 @@ function erzeugeSchein(scene) {
   s.setTransform(1, 0, 0, 0.375, 0, 3.75);
   s.fillStyle = gs; s.fillRect(0, 0, 32, 32);
   schatten.refresh();
+
+  // Atmosphäre-Partikel: weicher Leuchtpunkt (für Glühwürmchen-Schwärme, Waldstaub, Lichtfunken)
+  if (!scene.textures.exists('partikel_glanz')) {
+    const gl = scene.textures.createCanvas('partikel_glanz', 8, 8);
+    const gc = gl.getContext();
+    const gg = gc.createRadialGradient(4, 4, 0, 4, 4, 4);
+    gg.addColorStop(0, 'rgba(255,255,255,1)');
+    gg.addColorStop(0.3, 'rgba(255,255,220,0.7)');
+    gg.addColorStop(1, 'rgba(255,255,180,0)');
+    gc.fillStyle = gg; gc.fillRect(0, 0, 8, 8);
+    gl.refresh();
+  }
+
+  // Kleine Blätter (zwei Formen für Vielfalt)
+  if (!scene.textures.exists('blatt0')) {
+    const bl0 = scene.textures.createCanvas('blatt0', 5, 3);
+    const b0c = bl0.getContext();
+    b0c.fillStyle = '#6a9a3a'; b0c.fillRect(1, 0, 3, 1); b0c.fillRect(0, 1, 5, 1); b0c.fillRect(1, 2, 3, 1);
+    b0c.fillStyle = '#8ac04a'; b0c.fillRect(2, 0, 1, 1); b0c.fillRect(1, 1, 1, 1);
+    bl0.refresh();
+    const bl1 = scene.textures.createCanvas('blatt1', 3, 5);
+    const b1c = bl1.getContext();
+    b1c.fillStyle = '#c07830'; b1c.fillRect(0, 1, 1, 3); b1c.fillRect(1, 0, 1, 5); b1c.fillRect(2, 1, 1, 3);
+    b1c.fillStyle = '#d8a048'; b1c.fillRect(1, 1, 1, 1); b1c.fillRect(1, 3, 1, 1);
+    bl1.refresh();
+  }
+
+  // Winziger Staubpartikel (weich, neutral)
+  if (!scene.textures.exists('partikel_staub')) {
+    const st = scene.textures.createCanvas('partikel_staub', 4, 4);
+    const stc = st.getContext();
+    const stg = stc.createRadialGradient(2, 2, 0, 2, 2, 2);
+    stg.addColorStop(0, 'rgba(220,210,180,0.8)');
+    stg.addColorStop(1, 'rgba(220,210,180,0)');
+    stc.fillStyle = stg; stc.fillRect(0, 0, 4, 4);
+    st.refresh();
+  }
 }
 
 function erzeugeLichtmaske(scene) {

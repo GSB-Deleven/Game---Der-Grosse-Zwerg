@@ -78,6 +78,7 @@ export class Welt extends Phaser.Scene {
     beiGroesse(this, () => this.richteKameraEin());
     this.richteEingabeEin();
     this.erzeugeLeben();
+    this.erzeugeAtmosphaere();
     this.erzeugeDunkelheit();
     // Dauerhafte Folgen schon erlebter Ereignisse wiederherstellen (z.B. Drache sichtbar)
     for (const [name, schritte] of Object.entries(this.karte.ereignisse || {})) {
@@ -630,6 +631,145 @@ export class Welt extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
+  // ATMOSPHÄRE: schwebende Partikel für Stimmung (Waldsporen, Blätter, Staub)
+  // -------------------------------------------------------------------------
+
+  // Stimmungs-Presets: was schwebt auf welcher Karte?
+  // Jedes Preset erzeugt leichte Partikel, die innerhalb der Kamera schweben.
+  static STIMMUNG = {
+    waldsporen: {
+      textur: 'partikel_glanz', anzahl: 18, blend: 'ADD',
+      tiefe: 99820, // über der Dunkelheit → selbstleuchtend
+      tint: [0xc0ffa0, 0xa0ff80, 0xe0ffb0, 0xfff8a0],
+      groesse: [0.25, 0.6], alpha: [0.15, 0.55],
+      drift: { x: 3, y: -2 }, schwebe: { rx: 14, ry: 8, tempo: 0.5 },
+      puls: { min: 0.15, max: 0.55, tempo: 2.5 },
+    },
+    blaetter: {
+      textur: ['blatt0', 'blatt1'], anzahl: 10, blend: 'NORMAL',
+      tiefe: 97500, // unter der Dunkelheit → werden verdunkelt
+      tint: [0x8ac04a, 0x6a9a3a, 0xc07830, 0xd8a048, 0xb09030],
+      groesse: [0.6, 1.0], alpha: [0.5, 0.9],
+      drift: { x: 6, y: 8 }, schwebe: { rx: 10, ry: 4, tempo: 0.7 },
+      drehen: true,
+    },
+    lichtstaub: {
+      textur: 'partikel_staub', anzahl: 14, blend: 'NORMAL',
+      tiefe: 97100,
+      tint: [0xffeedd, 0xffe8c0, 0xfffff0],
+      groesse: [0.5, 1.0], alpha: [0.12, 0.35],
+      drift: { x: 1, y: -1 }, schwebe: { rx: 20, ry: 12, tempo: 0.3 },
+      puls: { min: 0.12, max: 0.35, tempo: 1.5 },
+    },
+    hoehlenglimm: {
+      textur: 'partikel_glanz', anzahl: 10, blend: 'ADD',
+      tiefe: 99820,
+      tint: [0x80c0ff, 0xa0d0ff, 0xc0a0ff, 0xe0d0ff],
+      groesse: [0.2, 0.45], alpha: [0.1, 0.4],
+      drift: { x: 0, y: -2 }, schwebe: { rx: 8, ry: 10, tempo: 0.3 },
+      puls: { min: 0.1, max: 0.4, tempo: 1.8 },
+    },
+    funkenglut: {
+      textur: 'partikel_glanz', anzahl: 8, blend: 'ADD',
+      tiefe: 99820,
+      tint: [0xff9040, 0xffc060, 0xff6030, 0xffe080],
+      groesse: [0.15, 0.35], alpha: [0.2, 0.5],
+      drift: { x: 2, y: -5 }, schwebe: { rx: 6, ry: 4, tempo: 0.8 },
+      puls: { min: 0.2, max: 0.5, tempo: 3.5 },
+    },
+    schneeflocken: {
+      textur: 'partikel_staub', anzahl: 12, blend: 'NORMAL',
+      tiefe: 99860,
+      tint: [0xffffff, 0xe8f0ff, 0xf0f8ff],
+      groesse: [0.5, 1.2], alpha: [0.4, 0.8],
+      drift: { x: -4, y: 6 }, schwebe: { rx: 16, ry: 3, tempo: 0.6 },
+    },
+  };
+
+  // Automatische Stimmung anhand der Level-Eigenschaften
+  stimmungFuerKarte() {
+    const leben = this.karte.leben || {};
+    // Explizit gesetzt? Dann nehmen wir das.
+    if (leben.stimmung) return leben.stimmung;
+    // Sonst automatisch ableiten
+    const liste = [];
+    if (this.karte.dunkel >= 0.5 && leben.gluehwuermchen) liste.push('waldsporen');
+    else if (this.karte.dunkel >= 0.5) liste.push('hoehlenglimm');
+    if (leben.falter && !this.karte.dunkel) liste.push('lichtstaub');
+    if (leben.wolken && leben.falter) liste.push('blaetter');
+    if (leben.schnee && !leben.stimmung) liste.push('schneeflocken');
+    return liste;
+  }
+
+  erzeugeAtmosphaere() {
+    this.atmosphaere = [];
+    const namen = this.stimmungFuerKarte();
+    for (const name of namen) {
+      const preset = Welt.STIMMUNG[name];
+      if (!preset) continue;
+      const partikel = [];
+      const cam = this.cameras.main.worldView;
+      for (let i = 0; i < preset.anzahl; i++) {
+        const tex = Array.isArray(preset.textur) ? Phaser.Utils.Array.GetRandom(preset.textur) : preset.textur;
+        const tint = Phaser.Utils.Array.GetRandom(preset.tint);
+        const [gMin, gMax] = preset.groesse;
+        const skala = gMin + Math.random() * (gMax - gMin);
+        const [aMin, aMax] = preset.alpha;
+        const startAlpha = aMin + Math.random() * (aMax - aMin);
+        const ox = Math.random() * (this.breite * KACHEL);
+        const oy = Math.random() * (this.hoehe * KACHEL);
+        const s = this.add.image(ox, oy, tex)
+          .setDepth(preset.tiefe)
+          .setScale(skala)
+          .setAlpha(startAlpha)
+          .setTint(tint);
+        if (preset.blend === 'ADD') s.setBlendMode(Phaser.BlendModes.ADD);
+        partikel.push({
+          s, ox, oy, phase: Math.random() * Math.PI * 2 * 10,
+          skala, grundAlpha: startAlpha, tint,
+          preset: name,
+        });
+      }
+      this.atmosphaere.push({ name, preset, partikel });
+    }
+  }
+
+  aktualisiereAtmosphaere(zeit, delta) {
+    if (!this.atmosphaere || !this.atmosphaere.length) return;
+    const dt = delta / 1000;
+    const cam = this.cameras.main.worldView;
+    const kartenB = this.breite * KACHEL;
+    const kartenH = this.hoehe * KACHEL;
+    for (const gruppe of this.atmosphaere) {
+      const p = gruppe.preset;
+      for (const a of gruppe.partikel) {
+        a.phase += dt;
+        // Grundbewegung: langsames Driften + Sinuswellen-Schweben
+        const schw = p.schwebe;
+        a.ox += p.drift.x * dt;
+        a.oy += p.drift.y * dt;
+        // Am Kartenrand sanft umbrechen (endloser Strom)
+        if (a.ox > kartenB + 16) a.ox -= kartenB + 32;
+        if (a.ox < -16) a.ox += kartenB + 32;
+        if (a.oy > kartenH + 16) a.oy -= kartenH + 32;
+        if (a.oy < -16) a.oy += kartenH + 32;
+        const nx = a.ox + Math.sin(a.phase * schw.tempo) * schw.rx + Math.cos(a.phase * schw.tempo * 0.7) * schw.rx * 0.3;
+        const ny = a.oy + Math.cos(a.phase * schw.tempo * 0.8) * schw.ry;
+        a.s.setPosition(nx, ny);
+        // Pulsierendes Leuchten
+        if (p.puls) {
+          const t = (Math.sin(a.phase * p.puls.tempo) + 1) / 2;
+          a.s.setAlpha(p.puls.min + t * (p.puls.max - p.puls.min));
+        }
+        // Blätter drehen sich langsam
+        if (p.drehen) {
+          a.s.setAngle(Math.sin(a.phase * 1.3) * 40);
+        }
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // HELD
   // -------------------------------------------------------------------------
   erzeugeHeld() {
@@ -870,6 +1010,7 @@ export class Welt extends Phaser.Scene {
     this.animiereFiguren(zeit);
     this.aktualisiereLeben(zeit, delta);
     this.zeichneDunkelheit(zeit);
+    this.aktualisiereAtmosphaere(zeit, delta);
 
     this.held.setDepth(this.held.y);
     this.heldSchatten.setPosition(this.held.x, this.held.y - 1);
