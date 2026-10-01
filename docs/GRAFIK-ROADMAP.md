@@ -1,55 +1,46 @@
-# Grafik-Roadmap: "Secret of Mana" HD-2D Magie
+# Grafik: vom 80er- zum 90er-Look
 
-**Ziel:** Das Spiel für Liv (5) und ihren Bruder (3) atmosphärisch und visuell aufwerten, inspiriert vom SNES-Klassiker *Secret of Mana*.
+**Ziel:** Mehr Details und Tiefe, etwa wie späte SNES- oder GBA-Spiele (Vorbild *Secret of Mana*).
+Alles bleibt **im Code gemalt**, die Kachelgrösse (16 px) und alle Bildgrössen bleiben gleich.
+Kollision, Fusspunkte, Obst-Plätze und die Kleiderkiste funktionieren deshalb unverändert.
 
----
+Vorschau ohne Spiel: `npm run dev`, dann
+`galerie.html?nur=zwerge` (alle Figuren), `galerie.html?nur=welt` (Boden-Probe, Gebäude, Deko) oder `?nur=drache`.
 
-## 1. Übersicht & Architektur
+## Stand (Oktober 2026): erledigt
 
-- **Branch:** `grafik-effekte-test` (alle Experimente finden hier statt, `main` bleibt stabil).
-- **Referenz-Bilder:**
-  - `docs/referenzen/secret-of-mana-stil.png`: Ziel-Ästhetik (üppige Baumkronen, Wasserlilien, Lichtakzente, lebendige Natur).
-  - `docs/referenzen/zwerg-spritesheet.png`: Ziel-Detailgrad für den Zwerg (markanter Bart, Hörnerhelm, Gürtel, Muskeln, Hammer).
+### 1. Mal-Grundlage (`src/grafik/figuren-baukasten.js`)
+- **5 statt 3 Farbtöne:** `rampe5()` leitet aus jeder Rampe `[dunkel, mittel, hell]` einen kühlen
+  Tiefschatten und ein warmes Glanzlicht ab. `stufe(rampe, 0..4)` holt einen Ton.
+- **Kugel-Licht:** runde Teile (`ellipse`) werden wie eine Kugel beleuchtet, mit Reflexlicht unten rechts.
+- **Farbige Umrisse:** dunkel, aber in der Farbe des Teils getönt (typisch GBA), statt fast schwarz.
+- **`straehnen()`:** färbt Haare und Bärte als fliessende Strähnen um.
 
----
+### 2. Figuren
+- Grosser Zwerg (alle Ansichten und Posen): Bart in Strähnen, geflochtene Zöpfe mit Goldring, Helm mit
+  Mittelgrat und Glanz, Nieten, Hörner mit Ringen, Schulterstücke, Armschienen, Gürtelschnalle, Tasche,
+  Stiefel mit Sohle und Fellstulpe, Rucksack mit Riemen. Kleiderfarben laufen weiter über `HELD_FARBEN`.
+- Dorf-Zwerge: Bärte in Strähnen, Zöpfe, Stiefel, Falten, Gürtelschnallen, Glanz auf Helm, Kapuzensaum.
 
-## 2. Die drei Säulen
+### 3. Welt (`src/grafik/welt-grafik.js`)
+- **Bäume:** `krone()` baut Kronen aus vielen einzeln beleuchteten Blätter-Büscheln, `stamm()` malt Rinde,
+  Wurzeln und Astgabel, `tannenEtage()` gezackte Tannen-Äste mit Nadel-Furchen. Auch Büsche, Beeren, Rosen.
+- **Gebäude:** Pinsel `ziegel()` (Dachziegel), `bretter()` (Holz mit Maserung, auch runde Baumstämme)
+  und `mauerwerk()` (Steine mit Lichtkante und Moos) an Häusern, Stall, Turm, Schloss, Tor, Tür, Kiste.
+- **Boden:** Gras mit 6 Tönen, Büscheln, Klee und Blümchen; Kopfsteinpflaster mit Licht und Schatten pro Stein
+  und Halmen am Wegrand; Wasser wird zur Mitte tiefer und hat Schaum am Ufer; dazu Acker, Holzboden mit
+  Nägeln, Steinplatten mit Fase und Rissen, Sand-Rippel, weicher Schnee, Höhlenpflaster, Mauern mit Moos.
+- **Atmosphäre** (`src/scenes/Welt.js`, `Welt.STIMMUNG`): Leuchtsporen im Wald, Glimmen in der Höhle,
+  Lichtstaub und Blätter auf Wiesen, Funken am Drachenhort. Die Anzahl richtet sich nach der Kartengrösse.
+  Von Hand wählen: `leben: { stimmung: 'blaetter' }` oder eine Liste.
 
-### Säule 1: Partikelsystem & Atmosphäre (STATUS: ✅ Erster Wurf fertig)
-- **Dateien:** `src/grafik/welt-grafik.js`, `src/scenes/Welt.js`
-- **Was umgesetzt ist:**
-  - Texturen: `partikel_glanz` (weicher Leuchtpunkt, additiv), `blatt0`/`blatt1` (fallende Blätter mit Drehung), `partikel_staub` (feiner Lichtstaub).
-  - Presets in `Welt.STIMMUNG`:
-    - `waldsporen`: Grün/goldene Leuchtsporen im dunklen Wald (über der Dunkelheitsschicht).
-    - `blaetter`: Herabsegelnde Blätter auf windigen Karten.
-    - `lichtstaub`: Sonnenstaub im Dorf und auf Wiesen.
-    - `hoehlenglimm`: Mystisches Leuchten in Höhlen.
-    - `schneeflocken`: Schneetreiben im Gebirge.
+## Entscheidungen
+- **Kein fertiges Bild als Sprite-Blatt** (der frühere «Weg B»). Das hätte gegen den Grundsatz
+  «alle Grafik im Code» verstossen, die Kleiderkiste gebrochen und nicht zum Pixel-Stil gepasst.
+- Ladezeit: Die Texturen werden beim Start und pro Karte gemalt. Gemessen mit 4-fach gedrosselter CPU
+  braucht der Start etwa 8 % länger als vorher. Farbtabellen werden nicht pro Pixel neu angelegt.
 
-### Säule 2: Bäume & Natur-Details (STATUS: 🟡 Als Nächstes)
-- **Dateien:** `src/grafik/welt-grafik.js` (`laubbaum`, `obstbaum`, `tanne`), `src/levels/legende.js`
-- **Geplante Schritte:**
-  - **Foliage Clumps (Blätter-Cluster):** Statt glatter Ovale wolkenartige Büschel mit individuellem Glanzlicht (oben-links) und Schattentiefe (unten).
-  - **Organischer Stamm:** Rindenmaserung, Astgabeln, sichtbare Wurzeln im Boden.
-  - **Farbpalette:** 5–6 Grüntöne statt bisher 3 für spürbare Farbtiefe.
-  - **Deko-Objekte:** Wasserlilien auf dem See (`src/levels/see.js`), detaillierte Blumenbüschel.
-
-### Säule 3: Figuren & Zwerg-Animationen (STATUS: 🟡 Entscheidung: Weg B - Spritesheets)
-- **Entscheidung:** Echte handgezeichnete Spritesheets (Weg B) statt rein prozeduraler Ellipsen.
-- **Referenz:** `docs/referenzen/zwerg-spritesheet.png`
-- **Geplante Schritte:**
-  - Zwergen-Spritesheet in passende Frames slicen (Idle, Laufen, Jubeln, Strecken, ggf. Tragen).
-  - In `src/grafik/figur-texturen.js` / `src/scenes/Boot.js` einbinden.
-  - Phaser-Animationen anstelle der bisherigen Laufphasen registrieren.
-  - Fallback/Kompatibilität mit Kleiderkiste und Missionen wahren.
-
----
-
-## 3. Nahtlose Übergabe (Antigravity ↔ Claude)
-
-- Jedes Mal, wenn gewechselt wird:
-  1. `git status` und `git diff` prüfen.
-  2. `npm run pruefen` (Karten-Integrität) und `npm run build` ausführen.
-  3. Fortschritt in `CLAUDE.md` und dieser Datei aktualisieren.
-  4. Änderungen auf `grafik-effekte-test` committen und pushen:
-     `git add . && git commit -m "..." && git push origin grafik-effekte-test`
+## Ideen für später
+- Wasserlilien und Schilf am See, Blumenbüschel als Deko-Objekt.
+- Schatten von Bäumen und Häusern auf den Boden (weiche Ellipse wie unter den Figuren).
+- Glutherz und Pony mit `straehnen()`/Schuppen-Muster nachziehen.

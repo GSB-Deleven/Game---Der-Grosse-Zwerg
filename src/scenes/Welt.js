@@ -686,30 +686,30 @@ export class Welt extends Phaser.Scene {
     },
   };
 
-  // Automatische Stimmung anhand der Level-Eigenschaften
+  // Automatische Stimmung anhand der Level-Eigenschaften (oder von Hand: leben.stimmung = 'name' oder ['a', 'b'])
   stimmungFuerKarte() {
     const leben = this.karte.leben || {};
-    // Explizit gesetzt? Dann nehmen wir das.
-    if (leben.stimmung) return leben.stimmung;
-    // Sonst automatisch ableiten
+    if (leben.stimmung) return [].concat(leben.stimmung);
     const liste = [];
     if (this.karte.dunkel >= 0.5 && leben.gluehwuermchen) liste.push('waldsporen');
     else if (this.karte.dunkel >= 0.5) liste.push('hoehlenglimm');
     if (leben.falter && !this.karte.dunkel) liste.push('lichtstaub');
     if (leben.wolken && leben.falter) liste.push('blaetter');
-    if (leben.schnee && !leben.stimmung) liste.push('schneeflocken');
+    if (leben.dampf) liste.push('funkenglut'); // Drachenhort: warme Funken
+    // Schnee: dafür sorgt schon leben.schnee (erzeugeLeben)
     return liste;
   }
 
   erzeugeAtmosphaere() {
     this.atmosphaere = [];
-    const namen = this.stimmungFuerKarte();
-    for (const name of namen) {
+    // Anzahl passt sich der Kartengrösse an (Preset-Zahl gilt für ca. 300 Felder)
+    const flaeche = Math.max(0.5, (this.breite * this.hoehe) / 300);
+    for (const name of this.stimmungFuerKarte()) {
       const preset = Welt.STIMMUNG[name];
       if (!preset) continue;
       const partikel = [];
-      const cam = this.cameras.main.worldView;
-      for (let i = 0; i < preset.anzahl; i++) {
+      const anzahl = Math.round(preset.anzahl * flaeche);
+      for (let i = 0; i < anzahl; i++) {
         const tex = Array.isArray(preset.textur) ? Phaser.Utils.Array.GetRandom(preset.textur) : preset.textur;
         const tint = Phaser.Utils.Array.GetRandom(preset.tint);
         const [gMin, gMax] = preset.groesse;
@@ -724,11 +724,7 @@ export class Welt extends Phaser.Scene {
           .setAlpha(startAlpha)
           .setTint(tint);
         if (preset.blend === 'ADD') s.setBlendMode(Phaser.BlendModes.ADD);
-        partikel.push({
-          s, ox, oy, phase: Math.random() * Math.PI * 2 * 10,
-          skala, grundAlpha: startAlpha, tint,
-          preset: name,
-        });
+        partikel.push({ s, ox, oy, phase: Math.random() * Math.PI * 20 });
       }
       this.atmosphaere.push({ name, preset, partikel });
     }
@@ -737,7 +733,6 @@ export class Welt extends Phaser.Scene {
   aktualisiereAtmosphaere(zeit, delta) {
     if (!this.atmosphaere || !this.atmosphaere.length) return;
     const dt = delta / 1000;
-    const cam = this.cameras.main.worldView;
     const kartenB = this.breite * KACHEL;
     const kartenH = this.hoehe * KACHEL;
     for (const gruppe of this.atmosphaere) {

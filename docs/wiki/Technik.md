@@ -11,10 +11,10 @@
 | `src/main.js` | Start, Szenen, Taste F (Vollbild) |
 | `src/scenes/` | Titel, Spielstaende, Geschichte, Welt (das eigentliche Spiel), Oberflaeche (Herzen, Sprechfeld, Touch), Pause (Menü), Splash, Entscheidung, Flug, KapitelEnde, Abspann |
 | `src/levels/` | Karten als Textraster, `legende.js` (Zeichen → Boden/Objekt), `index.js` (Karten + Kapitel) |
-| `src/grafik/figuren-baukasten.js` | Figuren aus Teilen (Umriss + Schattierung, alle Laufphasen) |
+| `src/grafik/figuren-baukasten.js` | Figuren aus Teilen (farbiger Umriss, 5-Ton-Schattierung, Haarsträhnen, alle Laufphasen) |
 | `src/grafik/figuren-liste.js` | Aussehen aller Figuren |
 | `src/grafik/drache.js` | Glutherz (sitzend, fliegend, Augen) und das Pony |
-| `src/grafik/welt-grafik.js` | Boden mit Übergängen, Gebäude, Deko, Tiere, Licht |
+| `src/grafik/welt-grafik.js` | Boden mit Übergängen, Bäume aus Blätter-Büscheln, Gebäude (Ziegel, Holz, Mauerwerk), Deko, Tiere, Licht |
 | `src/grafik/knoepfe.js` | Touch-Steuerkreuz im Zwergen-Stil (Pixel für Pixel gemalt) |
 | `src/systeme/` | Speichern (3 Plätze), Musik, Töne, Plappern/Text, Kapitelwechsel, Vollbild, Bildschirm-Anpassung (`bildschirm.js`) |
 | `src/texte/de.js` | Allgemeine Texte, Bildergeschichten |

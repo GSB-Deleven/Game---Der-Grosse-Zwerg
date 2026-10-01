@@ -1,7 +1,7 @@
 # Figuren
 
 Alle Figuren sind im Stil klassischer Fantasy-/D&D-Zwerge gezeichnet: lange geflochtene Bärte, Helme, Kettenhemden –
-keine Gartenzwerge. Alle Figuren sind im Code gezeichnet (siehe [[Technik]]); `galerie.html` zeigt sie alle.
+keine Gartenzwerge. Alle Figuren sind im Code gezeichnet (siehe [[Technik]]); `galerie.html` zeigt sie alle (`?nur=welt` zeigt Boden, Gebäude und Deko).
 
 | Figur | Wo | Wunsch |
 |---|---|---|

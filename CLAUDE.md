@@ -3,20 +3,6 @@
 Kinderspiel (Phaser 3 + Vite) nach Davids Gute-Nacht-Geschichte, für Liv (5) und ihren Bruder (3).
 Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https://claude.ai/artifact/7xCpQAoHUWttCtGYtPqEUU
 
-## 🎯 Aktueller Arbeitsauftrag & Übergabe (Branch: `grafik-effekte-test`)
-**Sofort-Fokus:** Wir arbeiten am **«Secret of Mana» HD-2D Grafik-Upgrade** auf dem Branch **`grafik-effekte-test`**.
-Ausführliche Roadmap und Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-ROADMAP.md).
-
-- **Was bereits erledigt ist:**
-  - ✅ Partikelsystem & Atmosphäre (Waldsporen, Blätterfall, Lichtstaub, Höhlenglimmen in `src/scenes/Welt.js` und `src/grafik/welt-grafik.js`).
-- **Was als Nächstes zu tun ist (hier direkt anknüpfen!):**
-  - 🌳 **Bäume & Natur verschönern:** `laubbaum`, `obstbaum` und `tanne` in `src/grafik/welt-grafik.js` aufwerten: Dichte, wolkenartige Blätter-Cluster mit Glanzkante und Schattentiefe, organische Rindenmaserung und Wurzeln (Ziel-Look siehe `docs/referenzen/secret-of-mana-stil.png`).
-  - 🧔 **Zwerg aufwerten (Entscheidung: Weg B - Spritesheets):** Handgezeichnete Spritesheets aus `docs/referenzen/zwerg-spritesheet.png` einbinden (Laufen, Stehen, Aktionen) anstelle der einfachen geometrischen Ellipsen.
-- **Workflow bei Modellwechsel (Claude ↔ Antigravity):**
-  - Immer auf Branch `grafik-effekte-test` bleiben.
-  - Nach Änderungen: `npm run pruefen` (Karten) und `npm run build` ausführen.
-  - Änderungen auf `grafik-effekte-test` committen und pushen (keine Modellnamen im Commit-Text).
-
 ## Grundsätze (nicht verhandelbar)
 - Kein Kampf, keine Gewalt, kein Game Over, man kann nichts verlieren. Freundschaft statt Kampf.
 - D&D-/Tolkien-Zwerge (Hörnerhelme, Bärte), keine Gartenzwerge. SNES-Pixel-Look, alle Grafik wird im Code gemalt.
@@ -51,7 +37,7 @@ Ausführliche Roadmap und Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-RO
 - `src/grafik/` – Figuren-Baukasten, Held (Kleider-Farben austauschbar), Welt-Objekte, Drache.
 - `src/texte/de.js` – Geschichten, Gegenstände, WEGWEISER-Sprüche.
 
-## Stand (29.09.2026)
+## Stand (01.10.2026)
 - Kapitel 1–5 fertig: Zwergenfeste → Königin → Reise → Drache Glutherz → Flug & Fest (Ehrengarde).
 - Aufgaben-Vielfalt: Hühner einfangen (Oma Runa), Versteckis (Nella), Farben sortieren (Gärtnerin, Burghof),
   Bauaufgaben (Trittsteine, Brücke, Strickleiter), Wegweiser mit Running Gag (Erebor, Auenland … immer wieder Mordor).
@@ -59,10 +45,9 @@ Ausführliche Roadmap und Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-RO
   Missionen: «Der Staudamm» (Belohnung Holzhütte), «Post mit Glutherz» (Garde-Rüstung). Steinhaus ist gezeichnet,
   wartet auf die nächste Mission.
 - Menü schliesst bei Klick daneben; Drachenflug zeigt Steuer-Anleitung (Wischen / Pfeiltasten).
-- **Aktuelle Initiative (Branch `grafik-effekte-test`):** «Secret of Mana» HD-2D Grafik-Upgrade:
-  - Details & Status siehe [`docs/GRAFIK-ROADMAP.md`](docs/GRAFIK-ROADMAP.md).
-  - Partikelsystem (Waldsporen, Blätter, Lichtstaub) ist aktiv.
-  - Nächste Schritte: Detaillierte Bäume (Blätter-Cluster/Rinde) und Zwergen-Spritesheet-Integration (Weg B). Referenzbilder liegen in `docs/referenzen/`.
+- Grafik-Upgrade auf 90er-Look (Okt. 2026): 5-Ton-Schattierung, farbige Umrisse, detaillierter Held und
+  Dorf-Zwerge, Bäume aus Blätter-Büscheln, neuer Boden, Ziegel/Holz/Mauerwerk, Atmosphäre-Partikel.
+  Details und Ideen: `docs/GRAFIK-ROADMAP.md`. Vorschau: `galerie.html?nur=zwerge` bzw. `?nur=welt`.
 
 ## Offene Ideen
 - Issue #20: weitere Missionen (Mühle nach Sturm reparieren, Troll mit Zahnweh, Nebel im Wald/Laternen,

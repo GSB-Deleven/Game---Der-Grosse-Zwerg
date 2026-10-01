@@ -8,7 +8,7 @@
     h2 { font-size: 16px; margin: 20px 0 8px; color: #f2c94c; }
     .reihe { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
     figure { margin: 0; text-align: center; font-size: 11px; }
-    canvas { image-rendering: pixelated; background: #5da048; display: block; }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; background: #5da048; display: block; }
   </style>
 </head>
 <body>
@@ -19,6 +19,7 @@
     import { baueHeld, baueFigur, alsCanvas } from './src/grafik/figuren-baukasten.js';
     import { FIGUREN_AUSSEHEN } from './src/grafik/figuren-liste.js';
     import { baueDrache, baueTier, baueAugen, baueFlugDrache } from './src/grafik/drache.js';
+    import { alleWeltBilder, maleBoden } from './src/grafik/welt-grafik.js';
     const f = +(new URLSearchParams(location.search).get('f') || 4);
     const inhalt = document.getElementById('inhalt');
     const gruppe = (titel, bilder) => {
@@ -31,17 +32,34 @@
       }
     };
     const nur = new URLSearchParams(location.search).get('nur');
+    // ?nur=welt: Gebäude, Deko und eine Boden-Probe
+    if (nur === 'welt') {
+      const leinwand = document.createElement('canvas');
+      const probe = [
+        'gggggwwwwwgggffff', 'gbbggwwwwwggsssss', 'ggggwwwwwwgggssss', 'eeeeggwwwgggxxxxx', 'eeeegggrrrgghhhhh',
+        'eeeegggrrrgghhhhh', 'gggggggpppggnnnnn', 'mmmmgggpppggqqqqq', 'mmmmfffpppggkkkkk',
+      ].map((z) => [...z].map((c) => ({ g: 'gras', b: 'blumen', w: 'wasser', f: 'fels', s: 'steinboden', e: 'erde', x: 'sand', r: 'bruecke', h: 'holzboden', p: 'weg', n: 'schnee', q: 'hoehle', k: 'teppich', m: 'felswand' })[c]));
+      const szene = { textures: { exists: () => false, createCanvas: (k, b, h) => { leinwand.width = b; leinwand.height = h; return { getContext: () => leinwand.getContext('2d'), refresh() {} }; } } };
+      maleBoden(szene, 'probe', probe);
+      leinwand.style.width = `${leinwand.width * f}px`;
+      inhalt.append(Object.assign(document.createElement('h2'), { textContent: 'Boden' }), leinwand);
+      const { objekte, kleinteile } = alleWeltBilder();
+      gruppe('Gebäude und Deko', objekte);
+      gruppe('Kleinteile', kleinteile);
+    }
     if (!nur || nur === 'drache') {
       gruppe('Glutherz – ernst', baueDrache('ernst'));
       gruppe('Glutherz – froh', baueDrache('froh'));
       gruppe('Glutherz – Flug', { oben: baueFlugDrache(0), mitte: baueFlugDrache(1), unten: baueFlugDrache(2), augen: baueAugen() });
       gruppe('Pony', baueTier('pony'));
     }
-    const held = baueHeld();
-    for (const richtung of ['unten', 'oben', 'seite']) {
-      gruppe(`Grosser Zwerg – ${richtung}`, Object.fromEntries(Object.entries(held).filter(([k]) => k.startsWith(`held_${richtung}`))));
+    if (nur !== 'welt' && nur !== 'drache') {
+      const held = baueHeld();
+      for (const richtung of ['unten', 'oben', 'seite']) {
+        gruppe(`Grosser Zwerg – ${richtung}`, Object.fromEntries(Object.entries(held).filter(([k]) => k.startsWith(`held_${richtung}`))));
+      }
+      for (const [name, a] of Object.entries(FIGUREN_AUSSEHEN)) gruppe(name, baueFigur(a));
     }
-    for (const [name, a] of Object.entries(FIGUREN_AUSSEHEN)) gruppe(name, baueFigur(a));
   </script>
 </body>
 </html>

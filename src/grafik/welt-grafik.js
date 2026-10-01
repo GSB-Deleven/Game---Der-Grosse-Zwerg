@@ -1,13 +1,18 @@
 // WELT-GRAFIK: Boden mit weichen Übergängen, Gebäude, Deko und kleine Tiere.
 // Alles wird im Code gemalt (keine Bilddateien nötig), im selben SNES-Stil wie die Figuren.
-import { Ebene, ellipse, rechteck, vieleck, teil, RAMPEN, UMRISS, baueFigur, alsTextur } from './figuren-baukasten.js';
+import { Ebene, ellipse, rechteck, vieleck, teil, RAMPEN, UMRISS, baueFigur, alsTextur, stufe } from './figuren-baukasten.js';
 
 const K = 16; // Kachelgrösse
 
 // ---------------------------------------------------------------------------
 // Hilfen
 // ---------------------------------------------------------------------------
-const rgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const RGB_CACHE = new Map();
+const rgb = (hex) => {
+  let c = RGB_CACHE.get(hex);
+  if (!c) { const n = parseInt(hex.slice(1), 16); c = [(n >> 16) & 255, (n >> 8) & 255, n & 255]; RGB_CACHE.set(hex, c); }
+  return c;
+};
 function zufall(x, y, s = 0) {
   let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0;
   h = (h ^ (h >>> 13)) * 1274126177;
@@ -30,6 +35,8 @@ const R = {
   blatt: ['#24532a', '#3f8a44', '#74c26c'],
   blattHell: ['#2f6b34', '#56a24e', '#8fd46c'],
   tanne: ['#173d2a', '#2a6040', '#4a8a58'],
+  laub: ['#1e4a2a', '#2f7040', '#58a05a'],
+  dachHolz: ['#5a2e16', '#7a4020', '#a0582e'],
   heu: ['#a8862b', '#e0c050', '#fff0a0'],
   wasser: ['#2a5a96', '#3d74b8', '#79aee6'],
   stoffRot: ['#8a2626', '#c8403a', '#f07060'],
@@ -44,7 +51,15 @@ const R = {
 // ---------------------------------------------------------------------------
 const FARBEN = {
   gras: ['#4a8a3c', '#5da048', '#6cb154', '#7cc262'].map(rgb),
+  gras6: ['#3f7c36', '#4a8a3c', '#56993f', '#63a748', '#72b556', '#86c560'].map(rgb),
   weg: ['#6e6254', '#a8987e', '#bcab8e', '#d2c2a2'].map(rgb),
+  pflaster: ['#5e5244', '#7e705c', '#9a8a70', '#b2a284', '#c8b896', '#e0d4b4'].map(rgb),
+  fuge: ['#463c32', '#54502e'].map(rgb),
+  platte: ['#3a3440', '#5a5262', '#6a6274', '#7a7284', '#8a8294', '#a49cae'].map(rgb),
+  brett: ['#2e1c10', '#4e321c', '#5e3e24', '#6e4a2c', '#82593a', '#9a6e48'].map(rgb),
+  hoehle: ['#2c2230', '#362a3a', '#3e3242', '#46384a', '#504254', '#5e4e62'].map(rgb),
+  hoehleFuge: ['#1c141e', '#1c141e'].map(rgb),
+  tief: ['#1e4680', '#24528e', '#2e62a2', '#3a76b8', '#4f8ccc', '#6aa8dc', '#9cd0f0', '#e4f6ff'].map(rgb),
   erde: ['#4f311b', '#6b4428', '#7f5433'].map(rgb),
   wasser: ['#2a5a96', '#3d74b8', '#4f88c8', '#8fc4f0', '#d8f0ff'].map(rgb),
   fels: ['#4a4450', '#5e5866', '#77707e', '#948c9a', '#aaa2b0'].map(rgb),
@@ -68,17 +83,18 @@ const IST_FELS = new Set(['fels', 'felswand', 'rune', 'hoehlenwand']);
 // Kopfsteinpflaster: nächste Zelle in einem verschobenen Raster
 function pflaster(px, py, groesse = 5) {
   const gx = Math.floor(px / groesse), gy = Math.floor(py / (groesse - 1));
-  let d1 = 99, d2 = 99, id = 0;
+  let d1 = 99, d2 = 99, id = 0, dx = 0, dy = 0;
   for (let j = -1; j <= 1; j++) {
     for (let i = -1; i <= 1; i++) {
       const cx = gx + i, cy = gy + j;
       const ox = (cx + zufall(cx, cy, 3) * 0.8 + (cy % 2) * 0.5) * groesse;
       const oy = (cy + zufall(cx, cy, 4) * 0.7) * (groesse - 1);
-      const d = Math.hypot(px - ox, (py - oy) * 1.15);
-      if (d < d1) { d2 = d1; d1 = d; id = zufall(cx, cy, 5); } else if (d < d2) d2 = d;
+      const ex = px - ox, ey = (py - oy) * 1.15;
+      const d = Math.sqrt(ex * ex + ey * ey);
+      if (d < d1) { d2 = d1; d1 = d; id = zufall(cx, cy, 5); dx = ex; dy = py - oy; } else if (d < d2) d2 = d;
     }
   }
-  return { rand: d2 - d1 < 0.9, id, mitte: d1 };
+  return { rand: d2 - d1 < 0.9, id, mitte: d1, dx, dy, kante: d2 - d1 };
 }
 
 export function maleBoden(scene, key, boden) {
@@ -116,55 +132,74 @@ export function maleBoden(scene, key, boden) {
           } else if (t === 'weg') {
             const graskante = abstandZu(tx, ty, px, py, (n) => IST_GRAS.has(n));
             if (graskante < 1.5 + rauschen(x / 2, y / 2, 9) * 2.5) c = maleGras(x, y);
-            else {
-              const p = pflaster(x, y);
-              c = p.rand ? FARBEN.weg[0] : FARBEN.weg[p.id < 0.3 ? 1 : p.id < 0.75 ? 2 : 3];
-              if (!p.rand && p.mitte < 1.2 && p.id > 0.5) c = FARBEN.weg[3];
-            }
+            else if (graskante < 3 + rauschen(x / 2, y / 2, 9) * 2.5 && zufall(x, y, 31) > 0.72) c = FARBEN.gras6[zufall(x, y, 32) > 0.5 ? 2 : 4]; // Halme ragen über den Weg
+            else c = malePflaster(pflaster(x, y), x, y, FARBEN.pflaster);
           } else if (t === 'erde') {
             const graskante = abstandZu(tx, ty, px, py, (n) => IST_GRAS.has(n) || n === 'weg');
             if (graskante < 1 + rauschen(x / 2, y / 2, 7) * 2) c = maleGras(x, y);
             else {
               const furche = y % 5;
-              c = furche === 0 ? FARBEN.erde[0] : furche === 1 ? FARBEN.erde[2] : FARBEN.erde[1];
-              if (furche === 3 && (x + Math.floor(y / 5) * 3) % 6 < 2) c = rgb('#5da048');
-              if (furche === 2 && (x + Math.floor(y / 5) * 3) % 6 === 0) c = rgb('#7cc262');
+              c = furche === 0 ? rgb('#3e2614') : furche === 1 ? rgb('#8a5c36') : furche === 2 ? FARBEN.erde[2] : FARBEN.erde[1];
+              if (furche === 4 && zufall(x, y, 33) > 0.6) c = FARBEN.erde[0];
+              if (zufall(x, y, 34) > 0.94) c = furche === 0 ? FARBEN.erde[1] : rgb('#9a6c40'); // Krümel
+              const pflanze = (x + Math.floor(y / 5) * 3) % 6;
+              if (furche === 3 && pflanze < 2) c = rgb(pflanze ? '#4a8a3c' : '#5da048');
+              if (furche === 2 && pflanze === 0) c = rgb('#7cc262');
+              if (furche === 2 && pflanze === 1) c = rgb('#9ad870');
             }
           } else if (t === 'wasser') {
             const ufer = abstandZu(tx, ty, px, py, (n) => n && n !== 'wasser' && n !== 'bruecke');
             const welle = Math.sin(x * 0.45 + Math.sin(y * 0.3) * 2 + y * 0.9);
-            c = FARBEN.wasser[1];
-            if (rauschen(x / 7, y / 5, 2) > 0.62) c = FARBEN.wasser[2];
-            if (welle > 0.93 && zufall(x, y, 1) > 0.4) c = FARBEN.wasser[3];
-            if (ufer < 4) c = FARBEN.wasser[0];
-            if (ufer < 2.2 + rauschen(x / 2, y / 2, 4)) c = FARBEN.wasser[4];
-            if (ufer < 1) c = rgb('#b8a070');
+            const T = FARBEN.tief;
+            // vom Ufer zur Mitte immer tiefer und dunkler
+            let i = ufer < 3 ? 5 : ufer < 6 ? 4 : ufer < 10 ? 3 : ufer < 16 ? 2 : 1;
+            if (rauschen(x / 7, y / 5, 2) > 0.64) i = Math.min(5, i + 1);
+            if (rauschen(x / 11, y / 9, 3) < 0.25) i = Math.max(0, i - 1);
+            c = T[i];
+            if (welle > 0.94 && zufall(x, y, 1) > 0.5) c = T[Math.min(6, i + 2)];
+            if (welle > 0.995 && zufall(x, y, 6) > 0.7) c = T[7];
+            if (ufer < 2.2 + rauschen(x / 2, y / 2, 4)) c = T[6]; // Schaum am Ufer
+            if (ufer < 1.3 + rauschen(x / 2, y / 2, 5) * 0.6) c = T[7];
+            if (ufer < 0.8) c = rgb('#b8a070');
           } else if (t === 'fels') {
             c = maleFels(x, y, tx, ty, px, py, typ);
           } else if (t === 'felswand' || t === 'rune') {
             c = maleMauer(x, y, px, py, tx, ty, typ, t === 'rune');
           } else if (t === 'steinboden') {
-            const fx = x % 16, fy = y % 16;
+            const fx = x % 8, fy = y % 8;
             const plattenId = zufall(Math.floor(x / 8), Math.floor(y / 8), 2);
-            c = (fx % 8 === 0 || fy % 8 === 0) ? FARBEN.stein[0] : FARBEN.stein[plattenId < 0.33 ? 1 : plattenId < 0.66 ? 2 : 3];
-            if ((fx % 8 === 1 || fy % 8 === 1) && c !== FARBEN.stein[0]) c = FARBEN.stein[3];
+            const S = FARBEN.platte;
+            let v = 1 + Math.floor(plattenId * 3) + (rauschen(x / 3, y / 3, 41) > 0.7 ? 1 : 0);
+            if (fx === 1 || fy === 1) v = 5; else if (fx === 7 || fy === 7) v = 1; // Fase: Licht oben links, Schatten unten rechts
+            c = (fx === 0 || fy === 0) ? S[0] : S[v];
+            // feine Risse in manchen Platten
+            const riss = zufall(Math.floor(x / 8), Math.floor(y / 8), 50);
+            if (riss > 0.85 && fx > 1 && fx < 6 && fy > 1 && fy < 7 && fx === 2 + Math.floor((fy - 2) * (riss - 0.85) * 12) % 4) c = S[0];
           } else if (t === 'teppich') {
             c = FARBEN.teppich[1];
             if (px === 1 || px === 14) c = FARBEN.teppich[3];
             else if (px === 0 || px === 15) c = FARBEN.teppich[0];
-            else if ((px + y) % 8 === 0 && px > 3 && px < 12) c = FARBEN.teppich[2];
+            else if (px === 2 || px === 13) c = FARBEN.teppich[0];
+            else if (Math.abs(px - 7.5) + Math.abs(((y % 8) - 3.5)) < 3 && Math.abs(px - 7.5) + Math.abs(((y % 8) - 3.5)) > 1.5) c = FARBEN.teppich[3]; // Rauten-Muster
+            else if ((px + y) % 2 === 0 && zufall(x, y, 42) > 0.7) c = FARBEN.teppich[2];
           } else if (t === 'holzboden' || t === 'bruecke') {
             const brett = Math.floor(y / 4);
-            c = y % 4 === 0 ? FARBEN.holz[0] : FARBEN.holz[brett % 2 ? 2 : 3];
-            if ((x + brett * 7) % 19 === 0) c = FARBEN.holz[0];
-            if (t === 'bruecke' && (py < 2 || py > 13)) c = py === 0 || py === 15 ? FARBEN.holz[0] : FARBEN.holz[1];
+            const H = FARBEN.brett;
+            const ton = Math.floor(zufall(Math.floor((x + brett * 7) / 19), brett, 43) * 2);
+            const maser = Math.sin(x * 0.5 + brett * 3 + Math.sin(x * 0.13 + brett) * 3) > 0.75;
+            c = y % 4 === 0 ? H[0] : y % 4 === 1 ? H[4 + ton] : H[2 + ton - (maser ? 1 : 0)];
+            const stoss = (x + brett * 7) % 19;
+            if (stoss === 0) c = H[0];
+            if (stoss === 1 && y % 4 !== 0) c = H[4];
+            if ((stoss === 2 || stoss === 17) && y % 4 === 2) c = rgb('#a0a4ac'); // Nagelköpfe
+            if (t === 'bruecke' && (py < 2 || py > 13)) c = py === 0 || py === 15 ? H[0] : py === 1 || py === 14 ? H[4] : H[3];
           } else if (t === 'schnee') {
-            const n = rauschen(x / 6, y / 6, 21);
-            c = n < 0.3 ? rgb('#c8d4e6') : n < 0.7 ? rgb('#e4ecf6') : rgb('#f8fbff');
-            if (zufall(x, y, 22) > 0.97) c = rgb('#ffffff');
+            const n = rauschen(x / 6, y / 6, 21) * 0.7 + rauschen(x / 18, y / 14, 44) * 0.3;
+            c = n < 0.22 ? rgb('#c6d2ea') : n < 0.42 ? rgb('#d8e2f2') : n < 0.72 ? rgb('#e8eef8') : rgb('#f8fbff');
+            if (zufall(x, y, 22) > 0.975) c = rgb('#ffffff');
+            if (zufall(x, y, 45) > 0.996) c = rgb('#bfe4ff'); // Glitzer
           } else if (t === 'hoehle') {
-            const p = pflaster(x, y, 7);
-            c = p.rand ? rgb('#241a26') : (p.id < 0.4 ? rgb('#3a2e3c') : p.id < 0.8 ? rgb('#443646') : rgb('#4e4050'));
+            c = malePflaster(pflaster(x, y, 7), x, y, FARBEN.hoehle, FARBEN.hoehleFuge);
           } else if (t === 'hoehlenwand') {
             const n = rauschen(x / 4, y / 4, 23);
             c = n < 0.35 ? rgb('#1a121c') : n < 0.7 ? rgb('#2a1e2c') : rgb('#3a2c3c');
@@ -186,7 +221,10 @@ export function maleBoden(scene, key, boden) {
             if ((py % 5 === 3) && px > 3 && px < 12) c = rgb('#5e4428');
           } else if (t === 'sand') {
             const n = rauschen(x / 4, y / 4, 26);
+            const rippel = Math.sin(x * 0.35 + y * 0.9 + rauschen(x / 8, y / 8, 46) * 5);
             c = n < 0.4 ? rgb('#c8a870') : n < 0.8 ? rgb('#dcc08a') : rgb('#ecd4a4');
+            if (rippel > 0.82) c = rgb('#b8965e'); else if (rippel < -0.85) c = rgb('#f4e2b8');
+            if (zufall(x, y, 47) > 0.985) c = rgb('#8a7a64'); // Kiesel
           } else {
             c = maleGras(x, y);
           }
@@ -208,10 +246,23 @@ export function maleBoden(scene, key, boden) {
           setze(bx, by + 2, rgb('#3f7a34'));
         }
       }
-      // Grasbüschel auf normalem Gras
-      if (t === 'gras' && zufall(tx, ty, 50) > 0.55) {
-        const bx = tx * K + 2 + Math.floor(zufall(tx, ty, 51) * 11), by = ty * K + 4 + Math.floor(zufall(tx, ty, 52) * 9);
-        for (const [dx, dy, c] of [[0, 0, '#3f7a34'], [0, -1, '#3f7a34'], [-2, 0, '#3f7a34'], [-2, -1, '#7cc262'], [2, 0, '#3f7a34'], [2, -2, '#7cc262'], [1, -1, '#4f9140'], [-1, -1, '#4f9140']]) setze(bx + dx, by + dy, rgb(c));
+      // Grasbüschel, Klee und kleine Blümchen auf normalem Gras
+      if (t === 'gras') {
+        const G = FARBEN.gras6;
+        for (let n = 0; n < 3; n++) {
+          if (zufall(tx, ty, 50 + n * 7) < 0.45) continue;
+          const bx = tx * K + 2 + Math.floor(zufall(tx, ty, 51 + n * 7) * 11), by = ty * K + 4 + Math.floor(zufall(tx, ty, 52 + n * 7) * 9);
+          for (const [dx, dy, i] of [[0, 0, 0], [0, -1, 2], [0, -2, 4], [-2, 0, 0], [-2, -1, 3], [-1, -1, 1], [2, 0, 0], [2, -1, 3], [2, -2, 5], [1, -1, 1], [-1, 1, 0], [1, 1, 0]]) setze(bx + dx, by + dy, G[i]);
+        }
+        if (zufall(tx, ty, 70) > 0.8) { // Kleeblatt
+          const bx = tx * K + 3 + Math.floor(zufall(tx, ty, 71) * 10), by = ty * K + 3 + Math.floor(zufall(tx, ty, 72) * 10);
+          for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [-1, 0]]) setze(bx + dx, by + dy, G[5]);
+          setze(bx, by + 2, G[0]);
+        }
+        if (zufall(tx, ty, 73) > 0.9) { // einzelnes Blümchen
+          const bx = tx * K + 3 + Math.floor(zufall(tx, ty, 74) * 10), by = ty * K + 3 + Math.floor(zufall(tx, ty, 75) * 10);
+          setze(bx, by, rgb(zufall(tx, ty, 76) > 0.5 ? '#ffffff' : '#f2e070')); setze(bx, by + 1, G[0]);
+        }
       }
       // Kieselsteine auf Wegen
       if (t === 'weg' && zufall(tx, ty, 60) > 0.8) {
@@ -239,12 +290,24 @@ export function maleBoden(scene, key, boden) {
 }
 
 function maleGras(x, y) {
-  const n = rauschen(x / 9, y / 9, 1) * 0.7 + rauschen(x / 3, y / 3, 2) * 0.3;
-  let i = n < 0.35 ? 0 : n < 0.62 ? 1 : n < 0.82 ? 2 : 3;
-  const r = zufall(x, y, 3);
-  if (r > 0.93) i = Math.min(3, i + 1);
-  else if (r < 0.07) i = Math.max(0, i - 1);
-  return FARBEN.gras[i];
+  const n = rauschen(x / 9, y / 9, 1) * 0.5 + rauschen(x / 3, y / 3, 2) * 0.25 + rauschen(x / 30, y / 26, 13) * 0.25;
+  let i = n < 0.3 ? 0 : n < 0.42 ? 1 : n < 0.56 ? 2 : n < 0.7 ? 3 : n < 0.82 ? 4 : 5;
+  // feine Halm-Struktur: kurze senkrechte Striche
+  const h = zufall(x, Math.floor(y / 2), 3);
+  if (h > 0.9) i = Math.min(5, i + 1);
+  else if (h < 0.1) i = Math.max(0, i - 1);
+  return FARBEN.gras6[i];
+}
+
+// Ein Pflasterstein: Glanzkante oben links, Schatten unten rechts, dunkle Fugen (manchmal mit Moos)
+function malePflaster(p, x, y, P, fuge = FARBEN.fuge) {
+  if (p.rand) return fuge[rauschen(x / 5, y / 5, 48) > 0.68 ? 1 : 0];
+  const r = Math.max(1.5, p.mitte + p.kante * 0.5);
+  const licht = -(p.dx * 0.6 + p.dy * 0.8) / r;
+  let v = 1.6 + p.id * 2 + licht * 1.4;
+  if (p.kante < 1.6 && licht < -0.2) v -= 1; // Schattenkante unten rechts
+  if (zufall(x, y, 49) > 0.97) v -= 1; // Körnung
+  return P[Math.max(0, Math.min(5, Math.round(v)))];
 }
 
 function maleFels(x, y, tx, ty, px, py, typ) {
@@ -276,8 +339,12 @@ function maleMauer(x, y, px, py, tx, ty, typ, rune) {
   const fugeY = y % 5 === 0;
   const unten = typ(tx, ty + 1);
   const sockel = unten && !IST_FELS.has(unten) && py > 11;
-  let c = fugeX || fugeY ? FARBEN.mauer[0] : FARBEN.mauer[zufall(Math.floor((x + versatz) / 8), reihe, 4) > 0.5 ? 2 : 3];
+  const steinId = zufall(Math.floor((x + versatz) / 8), reihe, 4);
+  let c = fugeX || fugeY ? FARBEN.mauer[0] : FARBEN.mauer[steinId < 0.3 ? 1 : steinId < 0.7 ? 2 : 3];
   if (!fugeX && !fugeY && y % 5 === 1) c = FARBEN.mauer[4];
+  else if (!fugeX && !fugeY && (y % 5 === 4 || (x + versatz) % 8 === 7)) c = FARBEN.mauer[1]; // Schattenkante
+  if ((fugeX || fugeY) && rauschen(x / 4, y / 3, 51) > 0.75) c = rgb('#4a5a30'); // Moos in den Fugen
+  if (!fugeX && !fugeY && zufall(x, y, 52) > 0.95) c = FARBEN.mauer[1];
   if (sockel) c = py === 12 ? FARBEN.mauer[4] : FARBEN.mauer[1];
   if (rune) {
     // goldene Zwergen-Rune, leicht leuchtend
@@ -286,6 +353,140 @@ function maleMauer(x, y, px, py, tx, ty, typ, rune) {
     else if (r.some(([rx, ry]) => Math.abs(rx - px) + Math.abs(ry - py) === 1)) c = rgb('#8a6a3a');
   }
   return c;
+}
+
+// ---------------------------------------------------------------------------
+// NATUR-BAUSTEINE: Baumkronen aus Blätter-Büscheln, Stämme mit Rinde
+// ---------------------------------------------------------------------------
+// Krone: viele kleine, einzeln beleuchtete Büschel innerhalb einer Hülle aus Ellipsen.
+// Hintere (obere) Büschel zuerst, vordere überdecken sie – so entsteht Tiefe.
+function krone(t, huelle, rampe, { r = 4.6, schritt = 4.6, saat = 1 } = {}) {
+  const drin = (x, y, rand) => huelle.some(([cx, cy, rx, ry]) => ((x - cx) / (rx - rand)) ** 2 + ((y - cy) / (ry - rand)) ** 2 <= 1);
+  const minX = Math.min(...huelle.map((h) => h[0] - h[2])), maxX = Math.max(...huelle.map((h) => h[0] + h[2]));
+  const minY = Math.min(...huelle.map((h) => h[1] - h[3])), maxY = Math.max(...huelle.map((h) => h[1] + h[3]));
+  const bueschel = [];
+  for (let y = minY; y <= maxY; y += schritt * 0.8) {
+    for (let x = minX; x <= maxX; x += schritt) {
+      const bx = x + (zufall(Math.round(x), Math.round(y), saat) - 0.5) * 2.4 + ((y / schritt) % 2) * schritt * 0.5;
+      const by = y + (zufall(Math.round(x), Math.round(y), saat + 1) - 0.5) * 2;
+      if (!drin(bx, by, r * 0.7)) continue;
+      bueschel.push([bx, by, r * (0.85 + zufall(Math.round(bx), Math.round(by), saat + 2) * 0.35)]);
+    }
+  }
+  bueschel.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+  for (const [bx, by, br] of bueschel) {
+    const hoehe = (by - minY) / (maxY - minY); // oben heller, unten im Schatten
+    ellipse(t, bx, by, br, br * 0.88, rampe, { licht: 0.1 - hoehe * 0.8 });
+    // Schattenkante unten rechts trennt das Büschel vom Nachbarn
+    for (let y = Math.floor(by - br); y <= Math.ceil(by + br); y++) {
+      for (let x = Math.floor(bx - br); x <= Math.ceil(bx + br); x++) {
+        const nx = (x + 0.5 - bx) / br, ny = (y + 0.5 - by) / (br * 0.88), r2 = nx * nx + ny * ny;
+        if (r2 <= 1 && r2 > 0.6 && ny > 0.1 && nx + ny > 0.2) t.setze(x, y, stufe(rampe, hoehe > 0.6 ? 0 : 0.6));
+      }
+    }
+    // ein paar Blatt-Glanzpunkte auf der Lichtseite
+    for (let i = 0; i < 3; i++) {
+      const gx = Math.round(bx - br * 0.45 + zufall(i, Math.round(bx * 7 + by), saat + 3) * br * 0.5);
+      const gy = Math.round(by - br * 0.5 + zufall(i, Math.round(by * 5 + bx), saat + 4) * br * 0.4);
+      if (t.voll(gx, gy)) t.setze(gx, gy, stufe(rampe, hoehe < 0.5 ? 4 : 3));
+    }
+  }
+}
+
+// Stamm mit Rindenmaserung, Wurzeln und Astgabel
+function stamm(t, x, y0, b, h, { wurzeln = true, gabel = true } = {}) {
+  const holz = RAMPEN.holz;
+  rechteck(t, x, y0, b, h, holz);
+  if (wurzeln) {
+    vieleck(t, [[x - 3, y0 + h], [x + b + 3, y0 + h], [x + b, y0 + h - 4], [x, y0 + h - 4]], holz);
+    for (const [wx, s] of [[x - 3, -1], [x + b + 2, 1]]) { t.setze(wx + s, y0 + h - 1, stufe(holz, 1)); t.setze(wx, y0 + h - 1, stufe(holz, 2)); }
+  }
+  if (gabel) {
+    vieleck(t, [[x, y0 + 2], [x - 4, y0 - 4], [x - 2, y0 - 5], [x + 2, y0]], holz);
+    vieleck(t, [[x + b, y0 + 2], [x + b + 4, y0 - 4], [x + b + 2, y0 - 5], [x + b - 2, y0]], holz);
+  }
+  // Rinde: senkrechte, leicht wellige Furchen, Licht links
+  for (let yy = y0 - 4; yy < y0 + h; yy++) {
+    for (let xx = x - 4; xx < x + b + 4; xx++) {
+      if (!t.voll(xx, yy)) continue;
+      const furche = (xx + Math.round(Math.sin(yy * 0.7 + xx) * 0.8)) % 3 === 0;
+      let v = xx < x + b * 0.35 ? 3 : xx < x + b * 0.75 ? 2 : 1;
+      if (furche) v -= 1.3;
+      if (zufall(xx, yy, 77) > 0.9) v -= 1;
+      t.setze(xx, yy, stufe(holz, v));
+    }
+  }
+}
+
+// Tannen-Etage mit gezacktem Rand und Nadelstrichen
+function tannenEtage(t, cx, oben, unten, halb, rampe) {
+  const punkte = [[cx, oben]];
+  const zacken = Math.max(3, Math.round(halb / 1.6));
+  for (let i = 0; i <= zacken * 2; i++) {
+    const x = cx + halb - (i * halb) / zacken;
+    punkte.push([x, unten - (i % 2 ? 2.2 : 0)]);
+  }
+  vieleck(t, punkte, rampe);
+  for (let y = Math.floor(oben); y <= unten; y++) {
+    for (let x = Math.floor(cx - halb); x <= Math.ceil(cx + halb); x++) {
+      if (!t.voll(x, y)) continue;
+      const dx = x + 0.5 - cx;
+      let v = dx < -halb * 0.25 ? 3 : dx < halb * 0.3 ? 2.2 : 1.2;
+      if ((y + Math.round(Math.abs(dx) * 0.8)) % 3 === 0) v -= 1.1; // Nadel-Furchen parallel zum Hang
+      if (y > unten - 3) v -= 0.6;
+      if (y - oben < 2 && Math.abs(dx) < 1.5) v = 4;
+      t.setze(x, y, stufe(rampe, v));
+    }
+  }
+}
+
+// Dachziegel: übermalt die schon gemalten Pixel im Bereich mit Ziegelreihen (Schatten unter jeder Reihe, Lichtkante unten)
+function ziegel(t, rampe, x0, y0, x1, y1, { reihe = 4, breite = 5 } = {}) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (!t.voll(x, y)) continue;
+      const r = Math.floor((y - y0) / reihe), ry = (y - y0) % reihe;
+      const fuge = (x + (r % 2) * Math.floor(breite / 2)) % breite === 0;
+      const seite = (x - x0) / Math.max(1, x1 - x0); // links heller
+      let v = 2.4 - seite * 1 + (zufall(Math.floor((x + (r % 2) * 2) / breite), r, 61) - 0.5) * 0.8;
+      if (ry === 0) v = 0.4; else if (ry === reihe - 1) v += 1.1;
+      if (fuge && ry > 0) v -= 1.2;
+      t.setze(x, y, stufe(rampe, v));
+    }
+  }
+}
+// Holzbretter mit Maserung, waagrecht (Blockhaus) oder senkrecht (Stall, Tür)
+function bretter(t, rampe, x0, y0, x1, y1, { breite = 4, senkrecht = false, rund = false } = {}) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (!t.voll(x, y)) continue;
+      const a = senkrecht ? x - x0 : y - y0, b = senkrecht ? y : x;
+      const nr = Math.floor(a / breite), pos = a % breite;
+      let v = 2 + (zufall(nr, 3, 62) - 0.5) * 0.9;
+      if (rund) v += pos === 0 ? 1.2 : pos === breite - 1 ? -1.2 : pos === 1 ? 0.6 : 0; // runde Baumstämme
+      else if (pos === 0) v = 0.3; else if (pos === 1) v += 0.9;
+      if (Math.sin(b * 0.45 + nr * 2.1 + Math.sin(b * 0.11 + nr) * 2.5) > 0.82 && pos > 0) v -= 0.9; // Maserung
+      if (zufall(b, nr, 63) > 0.97 && pos > 1) v = 0.6; // Astloch
+      t.setze(x, y, stufe(rampe, v));
+    }
+  }
+}
+// Mauerwerk aus behauenen Steinen: Lichtkante oben/links, Schatten unten/rechts, Moos in einigen Fugen
+function mauerwerk(t, rampe, x0, y0, x1, y1, { hoehe = 5, breite = 8 } = {}) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (!t.voll(x, y)) continue;
+      const r = Math.floor((y - y0) / hoehe), ry = (y - y0) % hoehe;
+      const versatz = (r % 2) * Math.floor(breite / 2);
+      const sx = (x - x0 + versatz) % breite;
+      const id = zufall(Math.floor((x - x0 + versatz) / breite), r, 64);
+      let v = 1.6 + id * 0.9;
+      if (ry === 0 || sx === 0) v = 0.4;
+      else if (ry === 1 || sx === 1) v += 0.7;
+      else if (ry === hoehe - 1 || sx === breite - 1) v -= 0.8;
+      t.setze(x, y, (ry === 0 || sx === 0) && rauschen(x / 4, y / 3, 65) > 0.78 ? rgb('#4a5a30') : stufe(rampe, v));
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -299,20 +500,19 @@ const OBJEKTE = {
     teil(e, (t) => { rechteck(t, 34, 2, 7, 14, R.stein); rechteck(t, 33, 1, 9, 3, R.stein, { licht: 0.5 }); });
     teil(e, (t) => {
       rechteck(t, 4, 28, 40, 28, R.mauer);
-      for (let y = 30; y < 56; y += 5) for (let x = 4 + ((y / 5) % 2) * 4; x < 44; x += 8) { t.setze(x, y, R.mauer[0]); t.setze(x, y + 1, R.mauer[0]); }
-      for (let x = 4; x < 44; x++) for (let y = 29; y < 56; y += 5) t.setze(x, y, R.mauer[0]);
+      mauerwerk(t, R.mauer, 4, 29, 43, 51);
       rechteck(t, 4, 52, 40, 4, R.stein, { licht: -0.4 });
+      mauerwerk(t, R.stein, 4, 52, 43, 55, { hoehe: 4, breite: 10 });
     });
     teil(e, (t) => {
       vieleck(t, [[9, 6], [39, 6], [47, 31], [1, 31]], R.schiefer);
-      for (let y = 10; y < 31; y += 4) for (let x = 2; x < 47; x++) if (t.voll(x, y)) t.setze(x, y, R.schiefer[0]);
-      for (let y = 8; y < 31; y += 4) for (let x = 4 + (y % 8); x < 46; x += 6) if (t.voll(x, y)) t.setze(x, y + 1, R.schiefer[0]);
+      ziegel(t, R.schiefer, 1, 7, 47, 31);
       rechteck(t, 9, 5, 30, 2, R.schiefer, { licht: 0.8 });
     });
     teil(e, (t) => {
       rechteck(t, 19, 38, 10, 18, RAMPEN.holz);
       ellipse(t, 24, 39, 5, 4, RAMPEN.holz, { nurOben: 39 });
-      for (let y = 40; y < 56; y++) t.setze(24, y, RAMPEN.holz[0]);
+      bretter(t, RAMPEN.holz, 19, 35, 28, 55, { senkrecht: true, breite: 5 });
       rechteck(t, 19, 42, 10, 1, RAMPEN.stahl); rechteck(t, 19, 50, 10, 1, RAMPEN.stahl);
       t.setze(26, 47, RAMPEN.gold[2]);
     });
@@ -330,28 +530,17 @@ const OBJEKTE = {
   }),
 
   tanne: () => mach(24, 42, (e) => {
-    teil(e, (t) => rechteck(t, 10, 32, 4, 9, RAMPEN.holz));
-    for (const [y0, b] of [[22, 11], [13, 9], [5, 6]]) {
-      teil(e, (t) => {
-        vieleck(t, [[12, y0 - 6], [12 + b, y0 + 11], [12 - b, y0 + 11]], R.tanne);
-        for (let x = 12 - b + 2; x < 12 + b - 1; x += 3) t.setze(x, y0 + 10, R.tanne[0]);
-      });
-    }
+    teil(e, (t) => stamm(t, 10, 32, 4, 9, { gabel: false }));
+    for (const [y0, b] of [[22, 11], [13, 9], [5, 6]]) teil(e, (t) => tannenEtage(t, 12, y0 - 6, y0 + 11, b, R.tanne));
   }),
 
   obstbaum: () => mach(40, 46, (e) => {
-    teil(e, (t) => { rechteck(t, 17, 30, 6, 15, RAMPEN.holz); rechteck(t, 14, 42, 12, 3, RAMPEN.holz); t.setze(19, 36, RAMPEN.holz[0]); });
-    teil(e, (t) => {
-      for (const [x, y, rx, ry] of [[20, 13, 13, 11], [10, 21, 9, 8], [30, 21, 9, 8], [20, 24, 12, 8]]) ellipse(t, x, y, rx, ry, R.blatt);
-      for (let i = 0; i < 40; i++) {
-        const x = 4 + Math.floor(zufall(i, 1, 7) * 32), y = 3 + Math.floor(zufall(i, 2, 7) * 28);
-        if (t.voll(x, y)) { t.setze(x, y, R.blatt[zufall(i, 3, 7) > 0.5 ? 0 : 2]); }
-      }
-    });
+    teil(e, (t) => stamm(t, 17, 31, 6, 14));
+    teil(e, (t) => krone(t, [[20, 13, 13, 11], [10, 21, 9, 8], [30, 21, 9, 8], [20, 24, 12, 8]], R.blatt, { saat: 7 }));
   }),
 
   busch: () => mach(20, 16, (e) => {
-    teil(e, (t) => { ellipse(t, 6, 10, 6, 5, R.blattHell); ellipse(t, 14, 10, 6, 5, R.blattHell); ellipse(t, 10, 6, 6, 5, R.blattHell); });
+    teil(e, (t) => krone(t, [[6.5, 10, 6, 5], [13.5, 10, 6, 5], [10, 6.5, 6, 5]], R.blattHell, { r: 3.4, schritt: 3.2, saat: 3 }));
     const b = new Ebene(20, 16);
     for (const [x, y] of [[6, 8], [13, 6], [10, 11], [15, 11]]) { b.setze(x, y, '#e05a8a'); }
     b.aufmalen(e);
@@ -378,8 +567,8 @@ const OBJEKTE = {
   kiste: () => mach(16, 16, (e) => {
     teil(e, (t) => {
       rechteck(t, 1, 3, 14, 12, RAMPEN.holz);
-      for (let i = 0; i < 12; i++) { t.setze(2 + i, 4 + i * 0.9, RAMPEN.holz[0]); }
-      for (let x = 1; x < 15; x++) { t.setze(x, 7, RAMPEN.holz[0]); t.setze(x, 11, RAMPEN.holz[0]); }
+      bretter(t, RAMPEN.holz, 1, 3, 14, 14);
+      for (let i = 0; i < 12; i++) { t.setze(2 + i, 4 + i * 0.9, RAMPEN.holz[0]); t.setze(2 + i, 3 + i * 0.9, RAMPEN.holz[2]); }
       rechteck(t, 1, 3, 14, 2, RAMPEN.holz, { licht: 0.8 });
     });
   }),
@@ -410,12 +599,13 @@ const OBJEKTE = {
     teil(e, (t) => {
       rechteck(t, 0, 5, 16, 2, RAMPEN.holz); rechteck(t, 0, 10, 16, 2, RAMPEN.holz);
       rechteck(t, 2, 2, 3, 13, RAMPEN.holz, { licht: 0.3 }); rechteck(t, 11, 2, 3, 13, RAMPEN.holz, { licht: 0.3 });
+      for (const px of [2, 11]) { t.setze(px + 1, 2, stufe(RAMPEN.holz, 4)); t.setze(px + 1, 7, stufe(RAMPEN.stahl, 3)); t.setze(px + 1, 12, stufe(RAMPEN.stahl, 3)); }
     });
   }),
 
   brunnen: () => mach(28, 36, (e) => {
     teil(e, (t) => { rechteck(t, 3, 6, 2, 22, RAMPEN.holz); rechteck(t, 23, 6, 2, 22, RAMPEN.holz); });
-    teil(e, (t) => { vieleck(t, [[0, 8], [14, 0], [28, 8], [25, 10], [3, 10]], R.schiefer); });
+    teil(e, (t) => { vieleck(t, [[0, 8], [14, 0], [28, 8], [25, 10], [3, 10]], R.schiefer); ziegel(t, R.schiefer, 0, 1, 28, 10, { reihe: 3, breite: 4 }); });
     teil(e, (t) => { rechteck(t, 5, 8, 18, 2, RAMPEN.holz); for (let y = 10; y < 16; y++) t.setze(14, y, RAMPEN.beige[0]); rechteck(t, 12, 15, 5, 4, RAMPEN.stahl); });
     teil(e, (t) => {
       ellipse(t, 14, 27, 13, 8, R.stein);
@@ -505,7 +695,7 @@ const OBJEKTE = {
     for (const [x, y, r] of [[6, 13, 4.5], [15, 13, 5], [10, 7, 4.5], [17, 6, 3]]) teil(e, (t) => ellipse(t, x, y, r, r * 0.8, R.stein));
   }),
   beerenbusch: () => mach(20, 18, (e) => {
-    teil(e, (t) => { ellipse(t, 6, 12, 6, 5, R.blatt); ellipse(t, 14, 12, 6, 5, R.blatt); ellipse(t, 10, 7, 7, 6, R.blatt); });
+    teil(e, (t) => krone(t, [[6, 12, 6, 5], [14, 12, 6, 5], [10, 7, 7, 6]], R.blatt, { r: 3.6, schritt: 3.6, saat: 5 }));
     const b = new Ebene(20, 18);
     for (const [x, y] of [[5, 9], [8, 6], [12, 10], [15, 8], [7, 13], [13, 14], [10, 4]]) { b.setze(x, y, '#4a3a9a'); b.setze(x + 1, y, '#6a5ac8'); b.setze(x, y + 1, '#3a2a7a'); b.setze(x + 1, y + 1, '#4a3a9a'); }
     b.aufmalen(e);
@@ -518,12 +708,12 @@ const OBJEKTE = {
     teil(e, (t) => { ellipse(t, 11, 12, 10, 6, R.heu); ellipse(t, 11, 8, 7, 5, R.heu); for (let i = 0; i < 12; i++) t.setze(3 + i * 1.5, 9 + (i % 3) * 2, R.heu[0]); });
   }),
   laubbaum: () => mach(36, 44, (e) => {
-    teil(e, (t) => { rechteck(t, 15, 28, 6, 15, RAMPEN.holz); });
-    teil(e, (t) => { for (const [x, y, rx, ry] of [[18, 14, 13, 11], [9, 22, 9, 8], [27, 22, 9, 8], [18, 25, 11, 7]]) ellipse(t, x, y, rx, ry, R.tanne); });
+    teil(e, (t) => stamm(t, 15, 29, 6, 14));
+    teil(e, (t) => krone(t, [[18, 14, 13, 11], [9, 22, 9, 8], [27, 22, 9, 8], [18, 25, 11, 7]], R.laub, { saat: 11 }));
   }),
   turm: () => mach(32, 72, (e) => {
-    teil(e, (t) => { rechteck(t, 4, 26, 24, 45, R.mauer); for (let y = 30; y < 70; y += 6) for (let x = 4; x < 28; x++) t.setze(x, y, R.mauer[0]); rechteck(t, 13, 36, 6, 9, RAMPEN.stiefel, { rund: 2 }); });
-    teil(e, (t) => { vieleck(t, [[16, 0], [31, 27], [1, 27]], R.schiefer); });
+    teil(e, (t) => { rechteck(t, 4, 26, 24, 45, R.mauer); mauerwerk(t, R.mauer, 4, 26, 27, 70, { hoehe: 6 }); rechteck(t, 13, 36, 6, 9, RAMPEN.stiefel, { rund: 2 }); });
+    teil(e, (t) => { vieleck(t, [[16, 0], [31, 27], [1, 27]], R.schiefer); ziegel(t, R.schiefer, 1, 3, 31, 27); });
     teil(e, (t) => { rechteck(t, 15, 0, 2, 2, RAMPEN.holz); vieleck(t, [[17, -6 + 6], [26, -2 + 6], [17, 2 + 4]], R.stoffRot); });
   }),
   banner: () => mach(16, 30, (e) => {
@@ -543,7 +733,7 @@ const OBJEKTE = {
     g.aufmalen(e);
   }),
   rosen: () => mach(18, 16, (e) => {
-    teil(e, (t) => { ellipse(t, 9, 10, 8, 5, R.blatt); });
+    teil(e, (t) => krone(t, [[9, 10, 8, 5]], R.blatt, { r: 3.2, schritt: 3.2, saat: 9 }));
     const g = new Ebene(18, 16);
     for (const [x, y] of [[4, 8], [9, 6], [13, 9], [7, 11], [12, 12]]) { g.setze(x, y, '#e8303a'); g.setze(x + 1, y, '#ff6a70'); g.setze(x, y + 1, '#a8202a'); g.setze(x + 1, y + 1, '#e8303a'); }
     g.aufmalen(e);
@@ -558,10 +748,11 @@ const OBJEKTE = {
     teil(e, (t) => { rechteck(t, 33, 4, 6, 14, R.stein); });
     teil(e, (t) => {
       rechteck(t, 5, 24, 38, 25, RAMPEN.holz);
-      for (let y = 26; y < 49; y += 4) for (let x = 5; x < 43; x++) t.setze(x, y, RAMPEN.holz[0]);
+      bretter(t, RAMPEN.holz, 5, 24, 42, 48, { rund: true });
+      for (let y = 25; y < 49; y += 4) { t.setze(5, y, stufe(RAMPEN.beige, 2)); t.setze(42, y, stufe(RAMPEN.beige, 1)); } // Stammenden
     });
-    teil(e, (t) => { vieleck(t, [[24, 6], [47, 27], [1, 27]], ['#5a2e16', '#7a4020', '#a0582e']); for (let y = 12; y < 27; y += 4) for (let x = 1; x < 47; x++) if (t.voll(x, y)) t.setze(x, y, '#4a2410'); });
-    teil(e, (t) => { rechteck(t, 20, 34, 9, 15, ['#3a2410', '#5a3a20', '#7a5030']); t.setze(27, 42, RAMPEN.gold[2]); });
+    teil(e, (t) => { vieleck(t, [[24, 6], [47, 27], [1, 27]], R.dachHolz); ziegel(t, R.dachHolz, 1, 8, 47, 27, { breite: 6 }); });
+    teil(e, (t) => { rechteck(t, 20, 34, 9, 15, ['#3a2410', '#5a3a20', '#7a5030']); bretter(t, ['#3a2410', '#5a3a20', '#7a5030'], 20, 34, 28, 48, { senkrecht: true, breite: 3 }); t.setze(27, 42, RAMPEN.gold[2]); });
     teil(e, (t) => { rechteck(t, 9, 32, 7, 6, ['#e0a030', '#f2c94c', '#fff0a0']); t.setze(12, 32, RAMPEN.holz[0]); t.setze(12, 37, RAMPEN.holz[0]); for (let x = 9; x < 16; x++) t.setze(x, 35, RAMPEN.holz[0]); });
     teil(e, (t) => { rechteck(t, 33, 32, 7, 6, ['#e0a030', '#f2c94c', '#fff0a0']); for (let x = 33; x < 40; x++) t.setze(x, 35, RAMPEN.holz[0]); });
   }),
@@ -599,8 +790,8 @@ const OBJEKTE = {
   beet_gelb: () => beet(BLUMEN_FARBEN.gelb),
   beet_blau: () => beet(BLUMEN_FARBEN.blau),
   stall: () => mach(48, 50, (e) => {
-    teil(e, (t) => { rechteck(t, 3, 20, 42, 29, RAMPEN.holz); for (let x = 3; x < 45; x += 4) for (let y = 20; y < 49; y++) t.setze(x, y, RAMPEN.holz[0]); });
-    teil(e, (t) => { vieleck(t, [[8, 2], [40, 2], [47, 22], [1, 22]], ['#6a3a1e', '#8a4a26', '#b0643a']); for (let y = 6; y < 22; y += 4) for (let x = 2; x < 46; x++) if (t.voll(x, y)) t.setze(x, y, '#5a2e16'); });
+    teil(e, (t) => { rechteck(t, 3, 20, 42, 29, RAMPEN.holz); bretter(t, RAMPEN.holz, 3, 20, 44, 48, { senkrecht: true }); });
+    teil(e, (t) => { vieleck(t, [[8, 2], [40, 2], [47, 22], [1, 22]], R.dachHolz); ziegel(t, R.dachHolz, 1, 3, 47, 22, { breite: 6 }); });
     teil(e, (t) => { rechteck(t, 16, 30, 16, 19, RAMPEN.stiefel); for (let i = 0; i < 16; i++) { t.setze(16 + i, 30 + i * 1.15, RAMPEN.holz[1]); t.setze(31 - i, 30 + i * 1.15, RAMPEN.holz[1]); } });
   }),
   kristall: () => mach(14, 20, (e) => {
@@ -620,14 +811,14 @@ const OBJEKTE = {
     teil(e, (t) => { ellipse(t, 24, 30, 14, 14, ['#050308', '#0e0a12', '#1a141e']); rechteck(t, 10, 30, 28, 14, ['#050308', '#0e0a12', '#1a141e']); }, { umriss: false });
   }),
   schlosstor: () => mach(48, 48, (e) => {
-    teil(e, (t) => { rechteck(t, 0, 4, 48, 44, R.mauer); for (let y = 8; y < 48; y += 6) for (let x = 0; x < 48; x++) t.setze(x, y, R.mauer[0]); for (let x = 0; x < 48; x += 8) rechteck(t, x, 0, 5, 5, R.mauer, { licht: 0.5 }); });
-    teil(e, (t) => { ellipse(t, 24, 26, 12, 10, RAMPEN.holz, { nurOben: 26 }); rechteck(t, 12, 26, 24, 22, RAMPEN.holz); for (let x = 14; x < 36; x += 4) for (let y = 18; y < 48; y++) if (t.voll(x, y)) t.setze(x, y, RAMPEN.stahl[0]); });
+    teil(e, (t) => { rechteck(t, 0, 4, 48, 44, R.mauer); mauerwerk(t, R.mauer, 0, 4, 47, 47, { hoehe: 6 }); for (let x = 0; x < 48; x += 8) rechteck(t, x, 0, 5, 5, R.mauer, { licht: 0.5 }); });
+    teil(e, (t) => { ellipse(t, 24, 26, 12, 10, RAMPEN.holz, { nurOben: 26 }); rechteck(t, 12, 26, 24, 22, RAMPEN.holz); bretter(t, RAMPEN.holz, 12, 16, 35, 47, { senkrecht: true }); for (let x = 14; x < 36; x += 4) for (let y = 18; y < 48; y++) if (t.voll(x, y) && y % 8 < 2) t.setze(x, y, stufe(RAMPEN.stahl, y % 8 ? 1 : 3)); });
   }),
   schloss: () => mach(112, 96, (e) => {
-    teil(e, (t) => { rechteck(t, 16, 36, 80, 60, R.mauer); for (let y = 40; y < 96; y += 6) for (let x = 16 + ((y / 6) % 2) * 4; x < 96; x += 8) { t.setze(x, y, R.mauer[0]); } for (let x = 16; x < 96; x += 8) rechteck(t, x, 30, 5, 6, R.mauer, { licht: 0.5 }); });
+    teil(e, (t) => { rechteck(t, 16, 36, 80, 60, R.mauer); mauerwerk(t, R.mauer, 16, 36, 95, 95, { hoehe: 6 }); for (let x = 16; x < 96; x += 8) rechteck(t, x, 30, 5, 6, R.mauer, { licht: 0.5 }); });
     for (const tx of [0, 88]) {
-      teil(e, (t) => { rechteck(t, tx + 2, 24, 20, 72, R.mauer); for (let y = 28; y < 96; y += 6) for (let x = tx + 2; x < tx + 22; x++) t.setze(x, y, R.mauer[0]); rechteck(t, tx + 8, 40, 8, 10, R.glas, { rund: 2 }); });
-      teil(e, (t) => vieleck(t, [[tx + 12, 0], [tx + 24, 25], [tx, 25]], R.schiefer));
+      teil(e, (t) => { rechteck(t, tx + 2, 24, 20, 72, R.mauer); mauerwerk(t, R.mauer, tx + 2, 24, tx + 21, 95, { hoehe: 6 }); rechteck(t, tx + 8, 40, 8, 10, R.glas, { rund: 2 }); });
+      teil(e, (t) => { vieleck(t, [[tx + 12, 0], [tx + 24, 25], [tx, 25]], R.schiefer); ziegel(t, R.schiefer, tx, 3, tx + 24, 25); });
       teil(e, (t) => vieleck(t, [[tx + 12, 0], [tx + 21, 3], [tx + 12, 6]], R.stoffRot));
     }
     teil(e, (t) => { rechteck(t, 46, 4, 20, 34, R.mauer); vieleck(t, [[56, -8 + 8], [68, 10], [44, 10]], R.schiefer); rechteck(t, 52, 16, 8, 12, R.glas, { rund: 2 }); });
@@ -639,7 +830,7 @@ const OBJEKTE = {
     teil(e, (t) => {
       rechteck(t, 2, 4, 12, 12, RAMPEN.holz);
       ellipse(t, 8, 5, 6, 4, RAMPEN.holz, { nurOben: 5 });
-      for (let y = 2; y < 16; y++) t.setze(8, y, RAMPEN.holz[0]);
+      bretter(t, RAMPEN.holz, 2, 1, 13, 15, { senkrecht: true });
       rechteck(t, 2, 7, 12, 1, RAMPEN.stahl); rechteck(t, 2, 12, 12, 1, RAMPEN.stahl);
       t.setze(10, 10, RAMPEN.gold[2]);
     });
@@ -843,6 +1034,14 @@ function erzeugeLichtmaske(scene) {
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
   tex.refresh();
+}
+
+// Für die Galerie: alle Gebäude, Deko und Kleinteile als Ebenen
+export function alleWeltBilder() {
+  const bilder = {};
+  for (const [name, bau] of Object.entries(OBJEKTE)) bilder[name] = bau();
+  bilder.statue = statue();
+  return { objekte: bilder, kleinteile: kleinteile() };
 }
 
 export function erzeugeWeltTexturen(scene) {

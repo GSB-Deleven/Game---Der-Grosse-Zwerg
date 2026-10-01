@@ -173,6 +173,7 @@ Die Figuren setzt ein **Baukasten** aus Teilen zusammen (Stiefel, Rumpf, Bart, H
 |---|---|
 | Texte, Wünsche und Figuren eines Ortes | `src/levels/<ort>.js` |
 | Aussehen der Figuren (Bart, Helm, Farben) | `src/grafik/figuren-liste.js` |
+| Grafik-Stil, Bäume, Boden, Gebäude | `src/grafik/` und [docs/GRAFIK-ROADMAP.md](docs/GRAFIK-ROADMAP.md) |
 | Ein **neues Level** bauen | [docs/NEUES-LEVEL.md](docs/NEUES-LEVEL.md) |
 | Bildergeschichten, allgemeine Texte | `src/texte/de.js` |
 | Kapitel und Drehbücher | `src/levels/index.js` |
