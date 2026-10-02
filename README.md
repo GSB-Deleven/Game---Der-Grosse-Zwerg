@@ -167,6 +167,21 @@ Die Figuren setzt ein **Baukasten** aus Teilen zusammen (Stiefel, Rumpf, Bart, H
 
 ---
 
+## 🕰️ So ist das Spiel gewachsen
+
+<table>
+<tr>
+<td width="33%" align="center"><b>26.09. · Prototyp</b><br><img src="docs/verlauf/2026-09-26-prototyp/dorf.png" alt="Prototyp"></td>
+<td width="33%" align="center"><b>27.09. · Alle Kapitel</b><br><img src="docs/verlauf/2026-09-27-alle-kapitel/dorf.png" alt="Alle Kapitel"></td>
+<td width="33%" align="center"><b>01.10. · 90er-Look</b><br><img src="docs/bilder/dorf.png" alt="90er-Look"></td>
+</tr>
+</table>
+
+Vom Klötzchen-Dorf zum detaillierten Pixel-Look: alle Stufen mit Bildern und was als Nächstes kommt
+stehen im **[Verlauf](docs/VERLAUF.md)**.
+
+---
+
 ## 🛠️ Selbst etwas ändern
 
 | Was | Wo |

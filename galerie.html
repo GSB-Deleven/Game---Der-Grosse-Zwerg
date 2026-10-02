@@ -47,13 +47,33 @@
       gruppe('Gebäude und Deko', objekte);
       gruppe('Kleinteile', kleinteile);
     }
+    // ?nur=gruppenbild: das Gruppenbild für das README (1200 x 400), als Bild mit Rechtsklick speicherbar
+    if (nur === 'gruppenbild') {
+      document.body.style.margin = '0';
+      inhalt.previousElementSibling.remove(); inhalt.previousElementSibling.remove();
+      const c = document.createElement('canvas'); c.width = 1200; c.height = 400; c.id = 'gruppenbild';
+      const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+      const himmel = g.createLinearGradient(0, 0, 0, 260); himmel.addColorStop(0, '#5aa0e0'); himmel.addColorStop(1, '#b8dcf4');
+      g.fillStyle = himmel; g.fillRect(0, 0, 1200, 260);
+      g.fillStyle = '#4a8a3c'; g.fillRect(0, 260, 1200, 140);
+      g.fillStyle = '#5da048'; g.fillRect(0, 260, 1200, 8);
+      const setze = (e, x, fussY, skala) => g.drawImage(alsCanvas(e, skala), Math.round(x - (e.b * skala) / 2), Math.round(fussY - e.h * skala));
+      const held = baueHeld();
+      setze(held.held_unten_jubeln, 110, 362, 5);
+      setze(held.held_seite_steh0, 270, 362, 5);
+      const namen = ['mama', 'tilda', 'bruno', 'schmied', 'koenigin', 'bibliothekar', 'wache', 'nella', 'bote', 'oma'];
+      namen.forEach((n, i) => setze(baueFigur(FIGUREN_AUSSEHEN[n])[i % 3 ? 'steh0' : 'jubeln'], 382 + i * 58, 358, 3));
+      const drache = baueDrache('froh');
+      setze(drache.jubeln, 1072, 366, 3.4);
+      inhalt.append(c);
+    }
     if (!nur || nur === 'drache') {
       gruppe('Glutherz – ernst', baueDrache('ernst'));
       gruppe('Glutherz – froh', baueDrache('froh'));
       gruppe('Glutherz – Flug', { oben: baueFlugDrache(0), mitte: baueFlugDrache(1), unten: baueFlugDrache(2), augen: baueAugen() });
       gruppe('Pony', baueTier('pony'));
     }
-    if (nur !== 'welt' && nur !== 'drache') {
+    if (!['welt', 'drache', 'gruppenbild'].includes(nur)) {
       const held = baueHeld();
       for (const richtung of ['unten', 'oben', 'seite']) {
         gruppe(`Grosser Zwerg – ${richtung}`, Object.fromEntries(Object.entries(held).filter(([k]) => k.startsWith(`held_${richtung}`))));

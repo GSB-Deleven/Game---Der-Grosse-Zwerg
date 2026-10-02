@@ -18,6 +18,9 @@ Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https:
 - Nach Code-Änderungen: `npm run pruefen` (Karten), `npm run build`, Testlauf (unten), dann Artefakt:
   `npm run build:artefakt` und `dist-artefakt/spiel.html` auf die Artefakt-URL oben neu veröffentlichen.
 - Doku mitpflegen: README.md, `docs/NEUES-LEVEL.md` (Level-/Missions-Anleitung), `docs/wiki/*.md`.
+- Bilder-Verlauf: Bei sichtbaren Grafik-Änderungen die README-Bilder aus `docs/bilder/` nach
+  `docs/verlauf/<datum>-<name>/` verschieben (nie löschen), neue Bilder machen (gleiche Namen; Gruppenbild via
+  `galerie.html?nur=gruppenbild`), Stufe in `docs/VERLAUF.md` ergänzen und `docs/wiki/Verlauf.md` angleichen.
 - `@claude` in Issues läuft über `.github/workflows/claude.yml` (Secret CLAUDE_CODE_OAUTH_TOKEN; Details im Wiki
   «Mitarbeit-und-Planung»). Es gibt keine geplanten Routinen mehr (gelöscht, um Tokens zu sparen).
 

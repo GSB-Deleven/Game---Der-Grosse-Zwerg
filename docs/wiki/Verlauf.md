@@ -1,0 +1,86 @@
+# 🕰️ So ist das Spiel gewachsen
+
+<!-- Wird aus docs/VERLAUF.md erzeugt – dort bearbeiten. -->
+
+Vom ersten spielbaren Dorf bis heute: Hier sieht man, wie «Der Grosse Zwerg» Schritt für Schritt entstanden ist.
+Alle Bilder sind echte Bildschirmfotos aus dem jeweiligen Stand. Die alten Bilder liegen in
+[`docs/verlauf/`](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/tree/main/docs/verlauf), die aktuellen in [`docs/bilder/`](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/tree/main/docs/bilder).
+
+---
+
+## 1 · Der erste Prototyp — 26.09.2026
+
+Davids Gute-Nacht-Geschichte wird zum Spiel: Kapitel 1 «Die Zwergenfeste» ist spielbar.
+Einfache Klötzchen-Grafik, glatte Flächen, Wasser in einem Blau, eine normale Schrift.
+Aber schon dabei: der Grosse Zwerg mit Hörnerhelm und rotem Bart, der gelbe Pfeil und das Helfen-Herz.
+
+| Titelbild | Im Dorf |
+|---|---|
+| ![Prototyp Titel](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-26-prototyp/titel.png) | ![Prototyp Dorf](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-26-prototyp/dorf.png) |
+
+---
+
+## 2 · Der SNES-Look — 26.09.2026, am Abend
+
+Alles neu gezeichnet, wie auf dem Super Nintendo: Figuren aus Teilen mit Umriss und Schattierung,
+Boden mit weichen Übergängen und Kopfsteinpflaster, Laternen mit Lichtschein, Hühner, Schmetterlinge.
+Dazu drei Spielstände und grosse Splash-Bilder für schöne Momente.
+
+| Titelbild | Im Dorf |
+|---|---|
+| ![SNES-Look Titel](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-26-snes-look/titel.png) | ![SNES-Look Dorf](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-26-snes-look/dorf.png) |
+
+---
+
+## 3 · Die ganze Geschichte — 27.09.2026
+
+Alle fünf Kapitel sind da: die Königin, die grosse Reise über See, Tal und durch den dunklen Wald,
+Glutherz in der Drachenhöhle, der Flug zum Schloss und das grosse Fest. Pixel-Schrift, Menü mit
+Einstellungen und eine Steuerung für das Handy (hochkant mit einer Hand oder quer).
+
+| Im Dorf | Der dunkle Wald |
+|---|---|
+| ![Dorf 27.09.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-27-alle-kapitel/dorf.png) | ![Wald 27.09.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-27-alle-kapitel/wald.png) |
+| **Glutherz** | **Das Fest** |
+| ![Höhle 27.09.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-27-alle-kapitel/hoehle.png) | ![Marktplatz 27.09.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-27-alle-kapitel/marktplatz.png) |
+
+![Figuren 27.09.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/verlauf/2026-09-27-alle-kapitel/figuren.png)
+
+**29.09.2026 · Kapitel 6 «Die Ehrengarde»:** Das Spiel hört nicht mehr auf. Der Grosse Zwerg wohnt mit
+Glutherz in einem eigenen Zuhause, holt Aufträge am Missionsbrett und zieht sich an der Kleiderkiste um.
+Neue Aufgaben: Hühner einfangen, Versteckis, Blumen nach Farben sortieren, Wegweiser mit Witzen.
+
+---
+
+## 4 · Der 90er-Look — 01.10.2026 (heute)
+
+Mehr Details, wie bei späten SNES- und Game-Boy-Advance-Spielen: 5 statt 3 Farbtöne pro Farbe,
+farbige Umrisse, Bärte mit Strähnen, Helme mit Glanz, Bäume aus vielen Blätter-Büscheln, Gras mit Klee,
+Pflastersteine mit Licht und Schatten, tieferes Wasser, Dachziegel und Mauersteine, schwebende Leuchtsporen im Wald.
+Alles weiterhin im Code gemalt.
+
+| Im Dorf | Der dunkle Wald |
+|---|---|
+| ![Dorf 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/dorf.png) | ![Wald 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/wald.png) |
+| **Am See** | **Das Fest** |
+| ![See 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/see.png) | ![Marktplatz 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/marktplatz.png) |
+
+![Figuren 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/figuren.png)
+
+---
+
+## 🔭 Wohin es geht
+
+- **Grafik:** Glutherz und das Pony im neuen Look, Wasserlilien und Schilf am See, weiche Schatten von
+  Bäumen und Häusern (siehe [Grafik-Roadmap](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/blob/main/docs/GRAFIK-ROADMAP.md)).
+- **Neue Missionen** ([Issue #20](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues/20)):
+  Mühle nach dem Sturm reparieren, ein Troll mit Zahnweh, Laternen gegen den Nebel im Wald,
+  ein Geburtstagskuchen für die Königin, das Winterfest.
+- **Zuhause:** das Steinhaus als Belohnung, Sattel und Halstuch für Glutherz.
+- **Stimmen:** echte Stimmen statt Plappern ([Issue #11](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues/11)).
+
+---
+
+<sub>So wird der Verlauf weitergeführt: Wenn sich der Look sichtbar ändert, wandern die alten README-Bilder aus
+`docs/bilder/` nach `docs/verlauf/<datum>-<name>/`, neue Bilder kommen nach `docs/bilder/`, und hier kommt eine
+neue Stufe dazu. Das Gruppenbild entsteht mit `galerie.html?nur=gruppenbild`.</sub>

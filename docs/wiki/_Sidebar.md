@@ -4,6 +4,7 @@
 - [[Steuerung]]
 - [[Geschichte und Kapitel]]
 - [[Figuren]]
+- [[Verlauf]]
 - [[Neues Level bauen]]
 - [[Technik]]
 - [[Entwicklung und Tests]]
