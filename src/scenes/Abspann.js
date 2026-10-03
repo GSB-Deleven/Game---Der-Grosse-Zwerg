@@ -59,7 +59,7 @@ export class Abspann extends Phaser.Scene {
       ['Spielidee und Wünsche: Liv', 32, '#f2c94c'],
       [`Gespielt von: ${stand.name}`, 30, '#ffffff'],
       ['', 30],
-      ['Glutherz, der Drache', 28], ['Königin Brunhild', 28], ['und alle Zwerge der Zwergenfeste', 28],
+      ['Füürio, der Drache', 28], ['Königin Brunhild', 28], ['und alle Zwerge der Zwergenfeste', 28],
       ['', 30],
       [`Gesammelt: ${stand.herzen} Herzen und ${stand.sterne || 0} Sterne`, 26, '#f59ac0'],
       ['', 40],

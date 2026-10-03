@@ -30,7 +30,7 @@ export const TEXTE = {
   ],
 
   kapitel6: [
-    'Von nun an wohnten der Grosse Zwerg und Glutherz zusammen, gleich neben dem Schloss.',
+    'Von nun an wohnten der Grosse Zwerg und Füürio zusammen, gleich neben dem Schloss.',
     'Am Anfang hatten sie nur ein kleines Zelt. Aber für die Ehrengarde gab es im Zwergenreich viel zu tun!',
     'Schau aufs Missionsbrett! Mit jeder Mission wird euer Zuhause schöner, und es gibt neue Kleider.',
   ],

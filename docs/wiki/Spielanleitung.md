@@ -19,7 +19,7 @@
 - **Farben:** Die Gärtnerin im Burghof wünscht sich eine rote, eine gelbe und eine blaue Blume.
   Den Pfeil zum richtigen Beet gibt es erst, wenn man einmal die falsche Farbe bringt.
 - **Wegweiser** antippen: Jeder zeigt zu einem anderen berühmten Ort … und Mordor kommt immer wieder vor.
-- Beim **Drachenflug** zeigt eine Tafel, wie man Glutherz steuert: auf dem Handy nach oben oder unten wischen, am Computer ↑ und ↓.
+- Beim **Drachenflug** zeigt eine Tafel, wie man Füürio steuert: auf dem Handy nach oben oder unten wischen, am Computer ↑ und ↓.
 - Im **Menü** genügt ein Tipp neben das Fenster, um weiterzuspielen.
 - **Nach dem Abspann** geht es weiter mit der **Ehrengarde**: Am Missionsbrett eine Mission antippen (sie wird vorgelesen),
   nochmals tippen oder «Los!» – nach jeder Mission wird das Zuhause schöner oder es gibt neue Kleider (rote Kiste).

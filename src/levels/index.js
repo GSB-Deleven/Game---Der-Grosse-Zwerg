@@ -82,7 +82,7 @@ export const KAPITEL = {
       { zustand: ['d', 'froh'] },
       { licht: 0.15 },
       { jubel: 'd' },
-      { splash: { titel: 'Freunde!', text: 'Glutherz und der Grosse Zwerg sind jetzt Freunde.', bild: 'fig_drache_froh_jubeln', farbe: 0xe05a8a } },
+      { splash: { titel: 'Freunde!', text: 'Füürio und der Grosse Zwerg sind jetzt Freunde.', bild: 'fig_drache_froh_jubeln', farbe: 0xe05a8a } },
       { sage: ['d', 'Du bist der Erste, der keine Angst vor mir hat!'] },
       { sage: ['d', 'Spring auf meinen Rücken! Wir machen einen Rundflug!'] },
       { sage: ['held', 'Juhu! Komm, wir fliegen zum Schloss der Königin!'] },

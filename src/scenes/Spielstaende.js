@@ -240,11 +240,18 @@ export class Spielstaende extends Phaser.Scene {
       rahmen.push(r);
       c.add([r, img]);
     });
-    c.add(nameText);
-    c.add(this.add.text(0, 100, '(Name ändern: auf den Namen tippen)', stil(16, '#aaaaaa')).setOrigin(0.5));
-    nameText.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.namenEingeben(name, (neu) => {
-      if (neu) { name = neu.slice(0, 14); nameText.setText(name); }
-    }));
+    // Name in einem Kästchen mit Stift: die ganze Fläche ist antippbar (Feld öffnet beim Loslassen,
+    // sonst erscheint auf dem iPad die Tastatur nicht zuverlässig)
+    const nameKasten = this.add.rectangle(0, 60, 340, 58, 0x1b1420, 0.85).setStrokeStyle(3, 0x8a8296);
+    const stift = this.add.text(150, 60, '✎', { fontFamily: 'sans-serif', fontSize: '30px', color: '#f2c94c' }).setOrigin(0.5);
+    c.add([nameKasten, nameText, stift]);
+    c.add(this.add.text(0, 102, '(Name ändern: Kästchen antippen)', stil(16, '#aaaaaa')).setOrigin(0.5));
+    nameKasten.setInteractive({ useHandCursor: true })
+      .on('pointerover', () => nameKasten.setStrokeStyle(3, 0xf2c94c))
+      .on('pointerout', () => nameKasten.setStrokeStyle(3, 0x8a8296))
+      .on('pointerup', () => this.namenEingeben(name, (neu) => {
+        if (neu) { name = neu.slice(0, 14); nameText.setText(name); }
+      }));
     const abbrechen = () => this.schliesseDialog();
     const los = () => {
       const stand = leererSpielstand(name, gewaehlt);
@@ -263,19 +270,32 @@ export class Spielstaende extends Phaser.Scene {
     this.zeigeFokus({ x: 610, y: 440, b: 240, h: 64 });
   }
 
-  // Für Eltern: Name über ein normales Eingabefeld eintippen
+  // Für Eltern: Name über ein normales Eingabefeld eintippen (mit OK-Knopf für Touch)
   namenEingeben(vorher, fertig) {
     if (this.namensFeld) return;
+    const huelle = document.createElement('div');
+    Object.assign(huelle.style, {
+      position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 10,
+      display: 'flex', gap: '8px', alignItems: 'center',
+    });
     const feld = document.createElement('input');
     feld.id = 'spielstand-name';
     feld.value = vorher;
     feld.maxLength = 14;
+    feld.autocomplete = 'off';
     Object.assign(feld.style, {
-      position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 10,
       font: '28px "Pixelify Sans", sans-serif', padding: '10px 16px', borderRadius: '12px',
       border: '4px solid #f2c94c', background: '#1b1420', color: '#fff', width: '260px', textAlign: 'center',
     });
-    document.body.appendChild(feld);
+    const ok = document.createElement('button');
+    ok.id = 'spielstand-name-ok';
+    ok.textContent = 'OK';
+    Object.assign(ok.style, {
+      font: '28px "Pixelify Sans", sans-serif', padding: '10px 18px', borderRadius: '12px',
+      border: '4px solid #f2c94c', background: '#3f8a44', color: '#fff', cursor: 'pointer',
+    });
+    huelle.append(feld, ok);
+    document.body.appendChild(huelle);
     // Das Spiel reserviert Tasten wie W, A, S, D und die Leertaste für die Steuerung.
     // Solange das Namensfeld offen ist, gehören alle Tasten dem Feld.
     const tastatur = this.input.keyboard;
@@ -286,18 +306,24 @@ export class Spielstaende extends Phaser.Scene {
     feld.addEventListener('keypress', lassDurch);
     feld.focus();
     feld.select();
-    this.namensFeld = feld;
+    this.namensFeld = huelle;
+    const geoeffnet = Date.now();
     const ende = () => {
       if (!this.namensFeld) return;
       const wert = feld.value.trim();
       tastatur.enableGlobalCapture();
-      feld.remove();
+      huelle.remove();
       this.namensFeld = null;
       fertig(wert);
     };
-    feld.addEventListener('keydown', (e) => { if (e.key === 'Enter') ende(); });
-    feld.addEventListener('blur', ende);
-    this.events.once('shutdown', () => { tastatur.enableGlobalCapture(); feld.remove(); });
+    feld.addEventListener('keydown', (e) => { if (e.key === 'Enter') ende(); if (e.key === 'Escape') { feld.value = ''; ende(); } });
+    ok.addEventListener('pointerdown', (e) => { e.preventDefault(); ende(); });
+    // Kurz nach dem Öffnen nimmt der Browser manchmal den Fokus weg (Antippen) – dann einfach wieder hinein
+    feld.addEventListener('blur', () => {
+      if (Date.now() - geoeffnet < 500) { setTimeout(() => this.namensFeld && feld.focus(), 0); return; }
+      setTimeout(() => { if (document.activeElement !== ok) ende(); }, 0);
+    });
+    this.events.once('shutdown', () => { tastatur.enableGlobalCapture(); huelle.remove(); });
   }
 
   starte(nummer, stand) {

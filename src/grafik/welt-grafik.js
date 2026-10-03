@@ -738,7 +738,7 @@ const OBJEKTE = {
     for (const [x, y] of [[4, 8], [9, 6], [13, 9], [7, 11], [12, 12]]) { g.setze(x, y, '#e8303a'); g.setze(x + 1, y, '#ff6a70'); g.setze(x, y + 1, '#a8202a'); g.setze(x + 1, y + 1, '#e8303a'); }
     g.aufmalen(e);
   }),
-  // --- Das Zuhause von Grossem Zwerg und Glutherz (3 x 2 Felder, wird mit Missionen ausgebaut)
+  // --- Das Zuhause von Grossem Zwerg und Füürio (3 x 2 Felder, wird mit Missionen ausgebaut)
   zuhause0: () => mach(48, 40, (e) => { // Zelt
     teil(e, (t) => { vieleck(t, [[24, 4], [45, 38], [3, 38]], RAMPEN.beige); for (let y = 10; y < 38; y += 5) for (let x = 3; x < 46; x++) if (t.voll(x, y) && (x + y) % 3 === 0) t.setze(x, y, RAMPEN.beige[0]); });
     teil(e, (t) => { vieleck(t, [[24, 16], [31, 38], [17, 38]], ['#3a2a20', '#5a4030', '#7a5a40']); });
@@ -773,7 +773,7 @@ const OBJEKTE = {
     teil(e, (t) => { rechteck(t, 2, 6, 16, 11, ['#6a2a1e', '#8a3a26', '#b0543a'], { rund: 1 }); for (let x = 2; x < 18; x++) t.setze(x, 9, RAMPEN.gold[1]); t.setze(10, 11, RAMPEN.gold[2]); });
     teil(e, (t) => { vieleck(t, [[4, 6], [9, 2], [13, 3], [9, 7]], R.stoffRot); });
   }),
-  stammhaufen: () => mach(28, 18, (e) => { // Baumstämme, die Glutherz geholt hat
+  stammhaufen: () => mach(28, 18, (e) => { // Baumstämme, die Füürio geholt hat
     for (const [y, x0] of [[14, 1], [14, 12], [9, 6]]) {
       teil(e, (t) => { rechteck(t, x0 + 2, y - 3, 13, 6, RAMPEN.holz); ellipse(t, x0 + 15, y, 2.6, 3, RAMPEN.beige); t.setze(x0 + 15, y, RAMPEN.holz[1]); });
     }

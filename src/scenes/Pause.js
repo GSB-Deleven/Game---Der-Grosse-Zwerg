@@ -17,7 +17,7 @@ const TEXT = [{ name: 'Langsam', wert: 1.5 }, { name: 'Normal', wert: 1 }, { nam
 const BELEGUNG = [
   ['Laufen', 'Pfeiltasten / W A S D', 'Stick / Steuerkreuz', 'Steuerkreuz oder hintippen'],
   ['Helfen / Reden', 'Leertaste / Enter / E', 'A (oder B, X, Y)', 'Herz-Knopf'],
-  ['Menü', 'Esc / P', 'Start', 'Pause-Knopf oben'],
+  ['Menü', 'Esc / P', 'Start / Select', 'Pause-Knopf oben'],
   ['Vollbild', 'F', 'im Menü', 'im Menü'],
   ['Im Menü wählen', 'Pfeiltasten + Enter', 'Steuerkreuz + A', 'antippen'],
 ];
@@ -57,7 +57,7 @@ export class Pause extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => this.druecke());
     this.input.keyboard.on('keydown-SPACE', () => this.druecke());
     this.input.gamepad?.on('down', (pad, k) => {
-      if (k.index === 9 || k.index === 1) this.weiter();
+      if (k.index === 9 || k.index === 8 || k.index === 1) this.weiter();
       else if (k.index === 0) this.druecke();
       else if (k.index === 12) this.fokus(-1);
       else if (k.index === 13) this.fokus(1);

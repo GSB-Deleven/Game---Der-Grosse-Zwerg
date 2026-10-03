@@ -56,12 +56,12 @@ export default {
       { sage: ['d', 'Warum? Warum willst du mir nichts tun? Alle wollen mich vertreiben.'] },
       { sage: ['d', 'Ich will doch gar nichts Böses. Ich will nur etwas essen, etwas trinken und in Frieden leben.'] },
       { sage: ['held', 'Das müssen wir nur der Königin sagen! Wir zwei können doch Freunde sein.'] },
-      { sage: ['d', 'Freunde? Ich … ich heisse Glutherz. Aber jetzt habe ich erst einmal riesigen Hunger.'] },
+      { sage: ['d', 'Freunde? Ich … ich heisse Füürio. Aber jetzt habe ich erst einmal riesigen Hunger.'] },
     ],
   },
   figuren: {
     d: {
-      name: 'Glutherz',
+      name: 'Füürio',
       aussehen: 'drache',
       stimme: { hoehe: 0.5, tempo: 0.9 },
       versteckt: true,

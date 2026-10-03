@@ -8,7 +8,7 @@ import { sichere, ladeEinstellungen } from '../systeme/speichern.js';
 import { KAPITEL } from '../levels/index.js';
 import { schliesseMissionAb } from '../systeme/missionen.js';
 
-// DER FLUG: Der Grosse Zwerg reitet auf Glutherz zum Schloss.
+// DER FLUG: Der Grosse Zwerg reitet auf Füürio zum Schloss.
 // Hoch und runter steuern (antippen/ziehen, Pfeiltasten, Stick), Sterne sammeln. Nichts kann schiefgehen.
 
 const ABSCHNITTE = [
@@ -18,7 +18,7 @@ const ABSCHNITTE = [
   { name: 'see', text: 'Über den grossen See – schau, wie er glitzert!', himmel: [0x7ab8f0, 0xf8c8a0] },
   { name: 'schloss', text: 'Da vorne ist das Schloss der Königin!', himmel: [0xe89a6a, 0xf8d8a0] },
 ];
-// Mission «Post mit Glutherz»: Briefe statt Sterne, am Ende nach Hause
+// Mission «Post mit Füürio»: Briefe statt Sterne, am Ende nach Hause
 const POST = [
   { name: 'wald', text: 'Post für die Waldzwerge! Sammle die Briefe ein!', himmel: [0x5aa0e0, 0xbfe3f5] },
   { name: 'see', text: 'Ein Brief für die Fischerin am See!', himmel: [0x7ab8f0, 0xf8c8a0] },
@@ -128,7 +128,7 @@ export class Flug extends Phaser.Scene {
 
     this.schloss = this.add.image(1300, 470, 'obj_schloss').setOrigin(0.5, 1).setScale(3).setVisible(false);
 
-    // Glutherz mit dem Grossen Zwerg auf dem Rücken
+    // Füürio mit dem Grossen Zwerg auf dem Rücken
     this.reiter = this.add.container(240, this.ziel);
     this.drache = this.add.image(0, 0, 'flugdrache1').setScale(2.4);
     this.held = this.add.image(-10, -8, 'held_seite_jubeln').setOrigin(0.5, 46 / 48).setScale(2.1);
@@ -163,7 +163,7 @@ export class Flug extends Phaser.Scene {
     this.naechsterAbschnitt();
   }
 
-  // Zu Beginn: Tafel «Sammle die Sterne!» und wie man Glutherz steuert (passend zum Gerät)
+  // Zu Beginn: Tafel «Sammle die Sterne!» und wie man Füürio steuert (passend zum Gerät)
   zeigeAnleitung() {
     const einst = ladeEinstellungen();
     const touch = einst.touch === 'an' || (einst.touch !== 'aus' && this.sys.game.device.input.touch);
@@ -183,7 +183,7 @@ export class Flug extends Phaser.Scene {
     this.tweens.add({ targets: tafel, scale: 1, alpha: 1, duration: 450, ease: 'Back.easeOut' });
     this.anleitung = tafel;
 
-    // Pfeile über und unter Glutherz, dazu ein «Finger», der hoch und runter wischt
+    // Pfeile über und unter Füürio, dazu ein «Finger», der hoch und runter wischt
     const pfeile = this.add.container(0, 0).setDepth(19);
     const oben = this.add.triangle(0, -95, 0, 22, 18, 0, 36, 22, 0xffffff).setStrokeStyle(4, 0x1b1420);
     const unten = this.add.triangle(0, 95, 0, 0, 18, 22, 36, 0, 0xffffff).setStrokeStyle(4, 0x1b1420);
@@ -196,7 +196,7 @@ export class Flug extends Phaser.Scene {
       this.tweens.add({ targets: finger, y: { from: 55, to: -55 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
     this.steuerPfeile = pfeile;
-    sprich(`${this.ding === 'brief' ? 'Sammle die Briefe' : 'Sammle die Sterne'}! ${touch ? 'Wisch nach oben oder unten' : 'Drück die Pfeiltasten hoch oder runter'}, dann fliegt Glutherz hoch oder runter.`, { hoehe: 0.75 });
+    sprich(`${this.ding === 'brief' ? 'Sammle die Briefe' : 'Sammle die Sterne'}! ${touch ? 'Wisch nach oben oder unten' : 'Drück die Pfeiltasten hoch oder runter'}, dann fliegt Füürio hoch oder runter.`, { hoehe: 0.75 });
     // spätestens nach 12 Sekunden ausblenden
     this.time.delayedCall(12000, () => this.versteckeAnleitung());
   }

@@ -13,7 +13,7 @@
 | `src/levels/` | Karten als Textraster, `legende.js` (Zeichen → Boden/Objekt), `index.js` (Karten + Kapitel) |
 | `src/grafik/figuren-baukasten.js` | Figuren aus Teilen (farbiger Umriss, 5-Ton-Schattierung, Haarsträhnen, alle Laufphasen) |
 | `src/grafik/figuren-liste.js` | Aussehen aller Figuren |
-| `src/grafik/drache.js` | Glutherz (sitzend, fliegend, Augen) und das Pony |
+| `src/grafik/drache.js` | Füürio (sitzend, fliegend, Augen) und das Pony |
 | `src/grafik/welt-grafik.js` | Boden mit Übergängen, Bäume aus Blätter-Büscheln, Gebäude (Ziegel, Holz, Mauerwerk), Deko, Tiere, Licht |
 | `src/grafik/knoepfe.js` | Touch-Steuerkreuz im Zwergen-Stil (Pixel für Pixel gemalt) |
 | `src/systeme/` | Speichern (3 Plätze), Musik, Töne, Plappern/Text, Kapitelwechsel, Vollbild, Bildschirm-Anpassung (`bildschirm.js`) |

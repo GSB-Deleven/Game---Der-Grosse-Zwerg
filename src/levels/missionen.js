@@ -1,5 +1,5 @@
 // MISSIONEN DER EHRENGARDE (Kapitel 6)
-// Nach dem grossen Fest beschützen der Grosse Zwerg und Glutherz das Zwergenreich.
+// Nach dem grossen Fest beschützen der Grosse Zwerg und Füürio das Zwergenreich.
 // Jede Mission bringt eine Belohnung: das Zuhause wird grösser oder es gibt neue Kleider.
 //
 // Neue Mission:
@@ -13,14 +13,14 @@ export const MISSIONEN = [
   {
     id: 'damm',
     titel: 'Der Staudamm',
-    text: 'Der Fluss ist über die Ufer getreten! Baut mit Glutherz einen Damm aus Baumstämmen.',
+    text: 'Der Fluss ist über die Ufer getreten! Baut mit Füürio einen Damm aus Baumstämmen.',
     bild: 'holz',
     karte: 'damm',
     belohnung: { haus: 1 },
   },
   {
     id: 'post',
-    titel: 'Post mit Glutherz',
+    titel: 'Post mit Füürio',
     text: 'Die Brieftauben haben Schnupfen. Fliegt die Briefe durchs ganze Reich!',
     bild: 'brief',
     szene: 'Flug',

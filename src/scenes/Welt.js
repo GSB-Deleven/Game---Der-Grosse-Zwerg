@@ -843,7 +843,13 @@ export class Welt extends Phaser.Scene {
     this.input.keyboard.on('keydown-E', () => this.beiAktion());
     this.input.keyboard.on('keydown-ESC', () => this.oeffnePause());
     this.input.keyboard.on('keydown-P', () => this.oeffnePause());
+    // Nach dem Menü kurz keine Controller-Knöpfe annehmen: Der Knopf, der das Menü geschlossen hat,
+    // ist sonst beim Weiterspielen noch «neu gedrückt» und öffnet es gleich wieder.
+    const ruhe = () => { this.padRuheBis = this.time.now + 350; };
+    this.events.on('resume', ruhe);
+    this.events.once('shutdown', () => this.events.off('resume', ruhe));
     this.input.gamepad?.on('down', (pad, knopf) => {
+      if (this.time.now < (this.padRuheBis || 0)) return;
       if (knopf.index === 9 || knopf.index === 8) this.oeffnePause();
       else if (knopf.index <= 3) this.beiAktion();
     });

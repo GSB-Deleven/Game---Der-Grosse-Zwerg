@@ -43,4 +43,4 @@ Vorschau ohne Spiel: `npm run dev`, dann
 ## Ideen für später
 - Wasserlilien und Schilf am See, Blumenbüschel als Deko-Objekt.
 - Schatten von Bäumen und Häusern auf den Boden (weiche Ellipse wie unter den Figuren).
-- Glutherz und Pony mit `straehnen()`/Schuppen-Muster nachziehen.
+- Füürio und Pony mit `straehnen()`/Schuppen-Muster nachziehen.

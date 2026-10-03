@@ -4,7 +4,7 @@
 |---|---|---|---|
 | Laufen | Pfeiltasten oder W A S D | Stick oder Steuerkreuz | Steuerkreuz (Zwergen-Schild, standardmässig rechts) – oder einfach irgendwo **hintippen** |
 | Helfen / Reden / Aufheben | Leertaste, Enter oder E | A (oder B, X, Y) | grosser **Herz-Knopf** gegenüber dem Steuerkreuz – oder Figur antippen |
-| Menü öffnen / schliessen | Esc oder P | Start | Pause-Knopf oben rechts |
+| Menü öffnen / schliessen | Esc oder P | Start oder Select | Pause-Knopf oben rechts |
 | Vollbild | F | über das Menü | über das Menü |
 | Im Menü wählen | Pfeiltasten + Enter, ←/→ wechselt den Reiter | Steuerkreuz + A | antippen |
 | Spielstand wählen («Wer spielt?») | ←/→ + Enter, Esc = zurück, Entf = löschen | Steuerkreuz/Stick + A, B = zurück, X = löschen | antippen |

@@ -67,16 +67,20 @@ Alles weiterhin im Code gemalt.
 
 ![Figuren 01.10.](https://raw.githubusercontent.com/GSB-Deleven/Game-Der_Grosse_Zwerg/main/docs/bilder/figuren.png)
 
+**03.10.2026 · Der Drache heisst jetzt Füürio.** Auf Wunsch der Familie trägt Glutherz einen neuen Namen.
+Dazu: Der Xbox-Controller funktioniert jetzt überall, auch bei «Wer spielt?», und den Namen eines neuen
+Spiels ändert man über ein gut sichtbares Kästchen.
+
 ---
 
 ## 🔭 Wohin es geht
 
-- **Grafik:** Glutherz und das Pony im neuen Look, Wasserlilien und Schilf am See, weiche Schatten von
+- **Grafik:** Füürio und das Pony im neuen Look, Wasserlilien und Schilf am See, weiche Schatten von
   Bäumen und Häusern (siehe [Grafik-Roadmap](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/blob/main/docs/GRAFIK-ROADMAP.md)).
 - **Neue Missionen** ([Issue #20](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues/20)):
   Mühle nach dem Sturm reparieren, ein Troll mit Zahnweh, Laternen gegen den Nebel im Wald,
   ein Geburtstagskuchen für die Königin, das Winterfest.
-- **Zuhause:** das Steinhaus als Belohnung, Sattel und Halstuch für Glutherz.
+- **Zuhause:** das Steinhaus als Belohnung, Sattel und Halstuch für Füürio.
 - **Stimmen:** echte Stimmen statt Plappern ([Issue #11](https://github.com/GSB-Deleven/Game-Der_Grosse_Zwerg/issues/11)).
 
 ---

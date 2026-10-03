@@ -41,11 +41,11 @@ Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https:
 - `src/texte/de.js` – Geschichten, Gegenstände, WEGWEISER-Sprüche.
 
 ## Stand (01.10.2026)
-- Kapitel 1–5 fertig: Zwergenfeste → Königin → Reise → Drache Glutherz → Flug & Fest (Ehrengarde).
+- Kapitel 1–5 fertig: Zwergenfeste → Königin → Reise → Drache Füürio → Flug & Fest (Ehrengarde).
 - Aufgaben-Vielfalt: Hühner einfangen (Oma Runa), Versteckis (Nella), Farben sortieren (Gärtnerin, Burghof),
   Bauaufgaben (Trittsteine, Brücke, Strickleiter), Wegweiser mit Running Gag (Erebor, Auenland … immer wieder Mordor).
-- Kapitel 6 «Die Ehrengarde» (endlos): Zuhause mit Glutherz, Missionsbrett, Kleiderkiste.
-  Missionen: «Der Staudamm» (Belohnung Holzhütte), «Post mit Glutherz» (Garde-Rüstung). Steinhaus ist gezeichnet,
+- Kapitel 6 «Die Ehrengarde» (endlos): Zuhause mit Füürio, Missionsbrett, Kleiderkiste.
+  Missionen: «Der Staudamm» (Belohnung Holzhütte), «Post mit Füürio» (Garde-Rüstung). Steinhaus ist gezeichnet,
   wartet auf die nächste Mission.
 - Menü schliesst bei Klick daneben; Drachenflug zeigt Steuer-Anleitung (Wischen / Pfeiltasten).
 - Grafik-Upgrade auf 90er-Look (Okt. 2026): 5-Ton-Schattierung, farbige Umrisse, detaillierter Held und
@@ -54,6 +54,6 @@ Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https:
 
 ## Offene Ideen
 - Issue #20: weitere Missionen (Mühle nach Sturm reparieren, Troll mit Zahnweh, Nebel im Wald/Laternen,
-  Geburtstagskuchen der Königin, Winterfest), Zubehör für Glutherz (Sattel, Halstuch), Steinhaus-Belohnung.
+  Geburtstagskuchen der Königin, Winterfest), Zubehör für Füürio (Sattel, Halstuch), Steinhaus-Belohnung.
 - Issue #11: echte Stimmen statt Plappern.
 - Issue-Vorlage «Neue Mission» (`.github/ISSUE_TEMPLATE/mission.yml`).

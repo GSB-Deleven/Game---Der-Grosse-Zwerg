@@ -1,5 +1,5 @@
 // MISSION «Der Staudamm» (Kapitel 6)
-// Der Fluss ist über die Ufer getreten (Ç = überflutete Wiese). Glutherz hat Baumstämme geholt (Ð),
+// Der Fluss ist über die Ufer getreten (Ç = überflutete Wiese). Füürio hat Baumstämme geholt (Ð),
 // der Grosse Zwerg schichtet sie oben am Fluss zu einem Damm auf (b = Bauaufgabe).
 export default {
   name: 'Am wilden Fluss',
@@ -27,7 +27,7 @@ export default {
   ausgaenge: {},
   figuren: {
     d: {
-      name: 'Glutherz',
+      name: 'Füürio',
       aussehen: 'drache',
       zustand: 'froh',
       stimme: { hoehe: 0.5 },
@@ -69,7 +69,7 @@ export default {
       { jubel: ['f', 'd'] },
       { sage: ['f', 'Mein Garten ist wieder da! Danke, ihr zwei!'] },
       { sage: ['d', 'Und durch die kleine Lücke im Damm fliesst genau so viel Wasser, wie der Fluss braucht.'] },
-      { splash: { titel: 'Der Damm hält!', text: 'Der Grosse Zwerg und Glutherz haben den Fluss gezähmt.', bild: 'holz', farbe: 0x3d74b8 } },
+      { splash: { titel: 'Der Damm hält!', text: 'Der Grosse Zwerg und Füürio haben den Fluss gezähmt.', bild: 'holz', farbe: 0x3d74b8 } },
       { missionFertig: 'damm' },
     ],
   },

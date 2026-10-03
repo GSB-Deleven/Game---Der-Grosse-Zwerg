@@ -30,23 +30,23 @@ Im **Thronsaal** erzählt Königin Brunhild vom Drachen und bittet ihn um Hilfe.
 ## Kapitel 4 – Der Drache
 Auf dem Gipfel riecht es nach Feuer und Schwefel. In der Höhle geht die Fackel aus, zwei grosse Augen leuchten …
 Ein einziger grosser Herz-Knopf: **«Halt, lieber Drache – ich will dir nichts tun!»**
-Der Drache **Glutherz** will nur essen, trinken und in Frieden leben. Der Grosse Zwerg bringt ihm Pilze und Wasser –
+Der Drache **Füürio** will nur essen, trinken und in Frieden leben. Der Grosse Zwerg bringt ihm Pilze und Wasser –
 und sie werden Freunde.
 
 ## Kapitel 5 – Der Flug und das grosse Fest
-Auf Glutherz' Rücken fliegen sie über Wald, Berge, Tal und See (Sterne sammeln!) bis zum Schloss.
+Auf Füürio' Rücken fliegen sie über Wald, Berge, Tal und See (Sterne sammeln!) bis zum Schloss.
 Auf dem Marktplatz kommt die Königin herunter – und ernennt die beiden zu **Ehrenmitgliedern der königlichen Garde**.
 Abspann: «Spielidee und Wünsche: Liv».
 
 ## Kapitel 6 – Die Ehrengarde (hört nie auf)
-Nach dem Abspann geht es weiter: Der Grosse Zwerg und Glutherz wohnen zusammen gleich neben dem Schloss.
+Nach dem Abspann geht es weiter: Der Grosse Zwerg und Füürio wohnen zusammen gleich neben dem Schloss.
 Am Anfang ist ihr **Zuhause** nur ein Zelt. Am **Missionsbrett** wählt man eine Mission (Bildkarten, werden vorgelesen).
 Jede Mission bringt eine **Belohnung**: Das Zuhause wird grösser (Zelt → Holzhütte → Steinhaus) oder es gibt neue Kleider
 (in der **roten Kiste** kann man sich umziehen). Geschaffte Missionen haben einen Haken und lassen sich nochmals spielen.
 
 | Mission | Was passiert | Belohnung |
 |---|---|---|
-| Der Staudamm | Der Fluss ist über die Ufer getreten. Glutherz hat Baumstämme geholt, der Grosse Zwerg schichtet 3 davon zum Damm auf – das Wasser geht zurück. | Holzhütte |
-| Post mit Glutherz | Die Brieftauben haben Schnupfen: mit Glutherz durchs Reich fliegen und Briefe einsammeln. | Rüstung der Garde (goldener Helm) |
+| Der Staudamm | Der Fluss ist über die Ufer getreten. Füürio hat Baumstämme geholt, der Grosse Zwerg schichtet 3 davon zum Damm auf – das Wasser geht zurück. | Holzhütte |
+| Post mit Füürio | Die Brieftauben haben Schnupfen: mit Füürio durchs Reich fliegen und Briefe einsammeln. | Rüstung der Garde (goldener Helm) |
 
 Neue Missionen: siehe **Neues Level bauen** (Abschnitt «Neue Mission») oder ein Issue mit der Vorlage «Neue Mission» und **@claude**.

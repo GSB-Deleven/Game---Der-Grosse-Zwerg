@@ -1,4 +1,4 @@
-// KAPITEL 6 – Das Zuhause von Grossem Zwerg und Glutherz
+// KAPITEL 6 – Das Zuhause von Grossem Zwerg und Füürio
 // §  = das Zuhause (wird mit jeder Mission grösser: Zelt → Holzhütte → Steinhaus)
 // Ø  = Missionsbrett der Garde, Þ = Kleiderkiste
 export default {
@@ -27,7 +27,7 @@ export default {
   ausgaenge: {},
   figuren: {
     d: {
-      name: 'Glutherz',
+      name: 'Füürio',
       aussehen: 'drache',
       zustand: 'froh',
       stimme: { hoehe: 0.5 },

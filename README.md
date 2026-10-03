@@ -104,8 +104,8 @@ Das Spiel füllt jeden Bildschirm aus. **Quer** liegt das Steuerkreuz rechts und
 | 1️⃣ **Die Zwergenfeste** | Dorf, Runen-Bibliothek | Essen, Wasser, Äpfel und Bücher, Hühner einfangen und Versteckis: Der Grosse Zwerg hilft allen. Die frechen Kinder werden Freunde, und der Bote der Königin kommt. |
 | 2️⃣ **Der Ruf der Königin** | Burghof, Thronsaal | Pony Flocke hat Hunger, die Gärtnerin braucht eine rote, gelbe und blaue Blume. Königin Brunhild erzählt vom Drachen. |
 | 3️⃣ **Die grosse Reise** | See, Tal, Wald, Berg | Trittsteine über den See, eine Brücke übers Tal, Glühwürmchen im dunklen Wald, eine Strickleiter und Mut für die ängstlichen Zwerge |
-| 4️⃣ **Der Drache** | Gipfel, Höhle | Die Fackel geht aus, zwei leuchtende Augen … *«Halt, lieber Drache, ich will dir nichts tun!»* Glutherz wird ein Freund. |
-| 5️⃣ **Der Flug und das Fest** | Flug, Marktplatz | Auf Glutherz über das ganze Reich bis zum Schloss. Die Königin ernennt beide zu Ehrenmitgliedern der Garde. |
+| 4️⃣ **Der Drache** | Gipfel, Höhle | Die Fackel geht aus, zwei leuchtende Augen … *«Halt, lieber Drache, ich will dir nichts tun!»* Füürio wird ein Freund. |
+| 5️⃣ **Der Flug und das Fest** | Flug, Marktplatz | Auf Füürio über das ganze Reich bis zum Schloss. Die Königin ernennt beide zu Ehrenmitgliedern der Garde. |
 | 🛡️ **Die Ehrengarde** | Zuhause, Missionen | Nach dem Abspann geht es weiter: Missionen am Missionsbrett (Staudamm bauen, Post fliegen …). Jede Mission baut das gemeinsame Zuhause aus (Zelt → Holzhütte → Steinhaus) oder bringt neue Kleider. |
 
 ![Thronsaal der Königin](docs/bilder/thronsaal.png)
@@ -114,7 +114,7 @@ Das Spiel füllt jeden Bildschirm aus. **Quer** liegt das Steuerkreuz rechts und
 
 ![Der dunkle Wald](docs/bilder/wald.png)
 
-![Glutherz in der Drachenhöhle](docs/bilder/hoehle.png)
+![Füürio in der Drachenhöhle](docs/bilder/hoehle.png)
 
 ![Der Flug zum Schloss](docs/bilder/flug.png)
 
@@ -126,7 +126,7 @@ Das Spiel füllt jeden Bildschirm aus. **Quer** liegt das Steuerkreuz rechts und
 
 🧔 **Echte Zwerge.** D&D-Zwerge mit Flechtbärten, Helmen und Rüstung, keine Gartenzwerge. Jede Figur hat ihr eigenes Aussehen und ihre eigene Stimmlage.
 
-🐉 **Glutherz, der rote Drache.** Gross, feuerrot und am Anfang nur zwei leuchtende Augen im Dunkeln. Später fliegt man auf seinem Rücken über das ganze Reich.
+🐉 **Füürio, der rote Drache.** Gross, feuerrot und am Anfang nur zwei leuchtende Augen im Dunkeln. Später fliegt man auf seinem Rücken über das ganze Reich.
 
 🎨 **Alles selbst gezeichnet.** Es gibt keine Bilddateien: Figuren, Gebäude, Böden, Töne und Musik entstehen im Code, mit Umriss und Schattierung im SNES-Stil.
 

@@ -25,6 +25,22 @@ import { Missionen } from './scenes/Missionen.js';
 export const BREITE = 960;
 export const HOEHE = 540;
 
+// Fehler in Phaser umgehen: Ist der Controller nicht als Nummer 0 angemeldet (unter Windows häufig),
+// hat die Controller-Liste eine Lücke, und Phaser stürzt beim Verlassen jeder Szene ab
+// (undefined.removeAllListeners). Diese zwei Funktionen überspringen Lücken, sonst wie das Original.
+const ControllerPlugin = Phaser.Input.Gamepad?.GamepadPlugin;
+if (ControllerPlugin) {
+  ControllerPlugin.prototype.stopListeners = function () {
+    this.target.removeEventListener('gamepadconnected', this.onGamepadHandler);
+    this.target.removeEventListener('gamepaddisconnected', this.onGamepadHandler);
+    this.sceneInputPlugin.pluginEvents.off(Phaser.Input.Events.UPDATE, this.update);
+    this.gamepads.forEach((pad) => pad?.removeAllListeners());
+  };
+  ControllerPlugin.prototype.disconnectAll = function () {
+    this.gamepads.forEach((pad) => { if (pad?.pad) pad.pad.connected = false; });
+  };
+}
+
 // Controller nur einschalten, wenn der Browser das erlaubt (in eingebetteten Seiten manchmal gesperrt)
 let controllerErlaubt = false;
 try { controllerErlaubt = !!(navigator.getGamepads && (navigator.getGamepads(), true)); } catch (e) { controllerErlaubt = false; }

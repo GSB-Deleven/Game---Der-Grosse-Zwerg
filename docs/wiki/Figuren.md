@@ -23,6 +23,6 @@ keine Gartenzwerge. Alle Figuren sind im Code gezeichnet (siehe [[Technik]]); `g
 | Wanderer Oswin | Das tiefe Tal | Wasser |
 | Waldzwergin Mira | Der dunkle Wald | Fackel |
 | Angsthase Knut, Zitterbart Olaf | Der hohe Berg | Mut |
-| **Glutherz, der Drache** | Drachenhöhle, Marktplatz | Pilze, dann Wasser |
+| **Füürio, der Drache** | Drachenhöhle, Marktplatz | Pilze, dann Wasser |
 
 Das Aussehen steht in `src/grafik/figuren-liste.js`, die Texte in den Level-Dateien `src/levels/*.js`.

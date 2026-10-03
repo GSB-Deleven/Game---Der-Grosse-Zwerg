@@ -19,7 +19,8 @@ export function rand(scene) {
 // breite: wie breit der wichtige Teil ist (z. B. nur das Menü-Fenster), damit er hochkant grösser bleibt
 export function mittig(scene, breite = BREITE) {
   const setze = () => {
-    const cam = scene.cameras.main;
+    const cam = scene.cameras?.main;
+    if (!cam) return; // Szene schon beendet
     cam.setZoom(zoomFuer(scene, breite));
     cam.centerOn(BREITE / 2, HOEHE / 2);
   };
@@ -31,7 +32,7 @@ export function mittig(scene, breite = BREITE) {
 // Ruft eine Funktion jetzt und bei jeder Grössenänderung auf (bis die Szene endet)
 export function beiGroesse(scene, fn) {
   fn();
-  const f = () => fn();
+  const f = () => { if (scene.cameras?.main) fn(); }; // nur solange die Szene lebt
   scene.scale.on('resize', f);
   scene.events.once('shutdown', () => scene.scale.off('resize', f));
 }

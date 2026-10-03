@@ -88,7 +88,7 @@ Weitere Möglichkeiten:
 |---|---|
 | `wunsch: 'mut'` | Wird erfüllt, sobald man mit der Figur redet (Herz in der Blase) |
 | `wunsch: 'reden'` + `gespraech: [...]` | Ein Gespräch als Drehbuch (siehe unten), danach erfüllt |
-| `wuensche: [{ wunsch, sagt, danke }, …]` | Mehrere Wünsche nacheinander (wie bei Glutherz) |
+| `wuensche: [{ wunsch, sagt, danke }, …]` | Mehrere Wünsche nacheinander (wie bei Füürio) |
 | `anzahl: 3` | Braucht 3 Stück (Blase zeigt «1/3») |
 | `wunsch: 'huehner'`, `anzahl: 3`, `ausreisser: [[x, y], …]` | **Hühner einfangen:** Hühner laufen an diesen Stellen herum. Beim ersten Hinlaufen flattern sie davon, beim zweiten Mal hüpfen sie zurück zur Figur (`weiter: 'Noch {rest}!'`) |
 | `wunsch: 'suchen'`, `verstecke: [[x, y], …]` | **Versteckis:** Die Figur versteckt sich hinter einem dieser Dinge (Busch, Fass, Tanne …). Das richtige raschelt und kichert. Texte: `zaehlen`, `leer: [...]`, `gefunden` |
@@ -97,7 +97,7 @@ Weitere Möglichkeiten:
 | `versteckt: true` | Erst unsichtbar, erscheint durch ein Ereignis (`zeige`) |
 | `licht: 70`, `lichtNachErfuellt: true` | Leuchtet (in dunklen Karten), optional erst nach dem Helfen |
 | `sprecher: 'held'` | Der Grosse Zwerg spricht die Texte selbst |
-| `aussehen: 'drache'`, `zustand: 'froh'` | Glutherz (belegt 3 × 2 Felder) |
+| `aussehen: 'drache'`, `zustand: 'froh'` | Füürio (belegt 3 × 2 Felder) |
 | `aussehen: 'pony'` | Das Pony |
 
 Das **Aussehen** steht in `src/grafik/figuren-liste.js`, z. B.
@@ -155,7 +155,7 @@ ereignisse: {
 | `{ jubel: ['a', 'b'] }` | Figuren jubeln (mit Konfetti) |
 | `{ licht: 0.5 }` / `{ heldLicht: 40 }` / `{ fackel: false }` | Dunkelheit, Lichtkreis, Fackel aus |
 | `{ augen: { figur: 'd' } }` | Zwei leuchtende Augen im Dunkeln |
-| `{ zustand: ['d', 'froh'] }` | Glutherz schaut froh |
+| `{ zustand: ['d', 'froh'] }` | Füürio schaut froh |
 | `{ gib: 'fackel' }` | Der Grosse Zwerg bekommt etwas |
 | `{ warte: 800 }`, `{ ton: 'fanfare' }`, `{ musik: 'fest' }`, `{ wackeln: 400 }` | Pause, Ton, Musik, Wackeln |
 | `{ kapitelEnde: true }` / `{ kapitelWechsel: 5, szene: 'Flug' }` / `{ szene: 'Abspann' }` | Weiter im Spiel |

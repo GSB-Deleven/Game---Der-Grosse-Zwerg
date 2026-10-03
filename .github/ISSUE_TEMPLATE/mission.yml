@@ -1,5 +1,5 @@
 name: 🛡️ Neue Mission für die Ehrengarde
-description: Eine neue Mission für den Grossen Zwerg und Glutherz (Kapitel 6).
+description: Eine neue Mission für den Grossen Zwerg und Füürio (Kapitel 6).
 title: "Mission: "
 labels: [idee, mission]
 body:
@@ -14,12 +14,12 @@ body:
     id: aufgabe
     attributes:
       label: Was müssen die zwei tun? (ohne Kampf)
-      placeholder: z. B. "3 Bretter und 2 Steine bringen, Glutherz dreht mit seinem Atem das Mühlrad an"
+      placeholder: z. B. "3 Bretter und 2 Steine bringen, Füürio dreht mit seinem Atem das Mühlrad an"
   - type: dropdown
     id: belohnung
     attributes:
       label: Belohnung
-      options: [Ausbau vom Zuhause, Neue Kleider für den Grossen Zwerg, Etwas für Glutherz, Egal / Überraschung]
+      options: [Ausbau vom Zuhause, Neue Kleider für den Grossen Zwerg, Etwas für Füürio, Egal / Überraschung]
   - type: markdown
     attributes:
       value: "Wie eine Mission gebaut wird, steht im Wiki unter **Neues Level bauen** (Abschnitt «Neue Mission»). Mit **@claude** im Text baut Claude die Mission ein."
