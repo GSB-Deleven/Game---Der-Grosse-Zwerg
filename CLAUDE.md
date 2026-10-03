@@ -28,7 +28,7 @@ Online: https://gsb-deleven.github.io/Game-Der_Grosse_Zwerg/ · Artefakt: https:
 - `npx vite preview --port 4173 --strictPort` (nach `npm run build`), dann
   `SPIEL_URL=http://localhost:4173/Game-Der_Grosse_Zwerg/ node tests/durchlauf.mjs`
   → Löser spielt wie ein Kind (folgt dem Pfeil) durch Kapitel 1–5, Abspann und alle Missionen (~12 Min.).
-  `KAPITEL=6` = nur Missionen. Bildschirmfotos in `test-bilder/`. Hänger-Erkennung nach 90 s mit Foto `fehler.png`.
+  `KAPITEL=6` = nur Missionen. `node tests/controller.mjs` (gleiche SPIEL_URL) prüft den Weg nur mit Controller. Bildschirmfotos in `test-bilder/`. Hänger-Erkennung nach 90 s mit Foto `fehler.png`.
 - Im Browser: `?kapitel=N` springt in ein Kapitel, `?schnell` verkürzt Wartezeiten.
 - Bekannt: Einmal hing der Löser im dunklen Wald (Kapitel 3), danach nicht mehr reproduzierbar.
 

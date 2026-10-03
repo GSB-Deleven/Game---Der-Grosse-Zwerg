@@ -7,6 +7,8 @@
 | Menü öffnen / schliessen | Esc oder P | Start | Pause-Knopf oben rechts |
 | Vollbild | F | über das Menü | über das Menü |
 | Im Menü wählen | Pfeiltasten + Enter, ←/→ wechselt den Reiter | Steuerkreuz + A | antippen |
+| Spielstand wählen («Wer spielt?») | ←/→ + Enter, Esc = zurück, Entf = löschen | Steuerkreuz/Stick + A, B = zurück, X = löschen | antippen |
+| Bild für neues Spiel | ←/→, Enter = «Los geht's!» | Steuerkreuz/Stick, A = «Los geht's!» | antippen |
 | Geschichte weiterblättern | Leertaste / Enter | beliebiger Knopf | antippen |
 | Flug (Kapitel 5) | Pfeil hoch/runter | Stick hoch/runter | oben oder unten antippen/ziehen |
 

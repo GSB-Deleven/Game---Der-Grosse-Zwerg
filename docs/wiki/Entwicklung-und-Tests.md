@@ -8,6 +8,7 @@ npm run build            # dist/ für GitHub Pages
 npm run build:artefakt   # eine einzige HTML-Datei (dist-artefakt/)
 node tests/durchlauf.mjs # ganzes Spiel automatisch durchspielen (bei laufendem Server)
 KAPITEL=3 node tests/durchlauf.mjs   # nur ab Kapitel 3
+node tests/controller.mjs            # nur mit simuliertem Xbox-Controller vom Titel bis ins Dorf
 ```
 
 ## Abkürzungen im Browser

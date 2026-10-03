@@ -35,13 +35,98 @@ export class Spielstaende extends Phaser.Scene {
     this.zeigePlaetze();
 
     knopf(this, 90, 505, { text: 'Zurück', breite: 150, hoehe: 54, groesse: 24, farbe: 0x5c5460 }, () => this.scene.start('Titel'));
-    this.input.keyboard.on('keydown-ESC', () => this.scene.start('Titel'));
+    this.richteTastenEin();
+  }
+
+  // Tastatur und Controller: links/rechts wählen, A/Enter bestätigen, B/Esc zurück, X/Entf löscht einen Platz
+  richteTastenEin() {
+    this.fokusPlatz = Math.max(0, Math.min(ANZAHL_PLAETZE - 1, this.registry.get('platz') ?? 0));
+    this.fokusRahmen = this.add.graphics().setDepth(5);
+    this.zeigeFokus();
+    const k = this.input.keyboard;
+    const taste = (namen, f) => namen.forEach((n) => k.on(`keydown-${n}`, () => { if (!this.namensFeld) f(); }));
+    taste(['LEFT', 'A'], () => this.schritt(-1));
+    taste(['RIGHT', 'D'], () => this.schritt(1));
+    taste(['ENTER', 'SPACE'], () => this.bestaetige());
+    taste(['ESC', 'BACKSPACE'], () => this.zurueck());
+    taste(['DELETE', 'X'], () => this.loescheFokus());
+    this.input.gamepad?.on('down', (pad, knopf) => {
+      if (this.namensFeld) return;
+      if (knopf.index === 14) this.schritt(-1);
+      else if (knopf.index === 15) this.schritt(1);
+      else if (knopf.index === 0 || knopf.index === 9) this.bestaetige();
+      else if (knopf.index === 1 || knopf.index === 8) this.zurueck();
+      else if (knopf.index === 2) this.loescheFokus();
+    });
+    this.stickSperre = 0;
+  }
+
+  update(zeit) {
+    // Stick: ein Ausschlag = ein Schritt
+    const pad = this.input.gamepad?.pad1;
+    if (!pad || this.namensFeld) return;
+    const x = pad.leftStick.x;
+    if (Math.abs(x) < 0.5) { this.stickSperre = 0; return; }
+    if (zeit < this.stickSperre) return;
+    this.stickSperre = zeit + (this.stickSperre ? 280 : 450);
+    this.schritt(Math.sign(x));
+  }
+
+  schritt(d) {
+    if (this.dialog) { this.dialog.steuerung?.schritt(d); return; }
+    this.fokusPlatz = (this.fokusPlatz + d + ANZAHL_PLAETZE) % ANZAHL_PLAETZE;
+    spiele('knopf');
+    this.zeigeFokus();
+  }
+
+  bestaetige() {
+    if (this.dialog) { this.dialog.steuerung?.ok(); return; }
+    this.oeffnePlatz(this.fokusPlatz);
+  }
+
+  zurueck() {
+    if (this.dialog) { this.dialog.steuerung?.zurueck(); return; }
+    this.scene.start('Titel');
+  }
+
+  loescheFokus() {
+    if (this.dialog) return;
+    const stand = allePlaetze()[this.fokusPlatz];
+    if (stand) { spiele('knopf'); this.frageLoeschen(this.fokusPlatz, stand); }
+  }
+
+  // Gelber Rahmen um den gewählten Platz (bzw. um einen Knopf im Dialog)
+  zeigeFokus(ziel) {
+    const g = this.fokusRahmen;
+    if (!g) return;
+    g.clear();
+    if (!ziel) {
+      if (this.dialog) return;
+      ziel = { x: 170 + this.fokusPlatz * 310, y: 285, b: 270, h: 330 };
+    }
+    g.lineStyle(4, 0xffffff, 0.95).strokeRoundedRect(ziel.x - ziel.b / 2 - 9, ziel.y - ziel.h / 2 - 9, ziel.b + 18, ziel.h + 18, 24);
+    this.tweens.killTweensOf(g);
+    g.setAlpha(1);
+    this.tweens.add({ targets: g, alpha: 0.45, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   zeigePlaetze() {
     this.karten.removeAll(true);
     const plaetze = allePlaetze();
     for (let i = 0; i < ANZAHL_PLAETZE; i++) this.karten.add(this.karte(i, plaetze[i], 170 + i * 310, 285));
+  }
+
+  oeffnePlatz(nummer) {
+    if (this.dialog) return;
+    const c = this.karten.list[nummer];
+    const stand = allePlaetze()[nummer];
+    this.fokusPlatz = nummer;
+    this.zeigeFokus();
+    spiele('knopf');
+    this.tweens.add({
+      targets: c, scale: 0.95, duration: 80, yoyo: true,
+      onComplete: () => (stand ? this.starte(nummer, stand) : this.neuesSpiel(nummer)),
+    });
   }
 
   karte(nummer, stand, x, y) {
@@ -89,14 +174,7 @@ export class Spielstaende extends Phaser.Scene {
     c.setSize(b, h).setInteractive({ useHandCursor: true });
     c.on('pointerover', () => male(true));
     c.on('pointerout', () => male(false));
-    c.on('pointerdown', () => {
-      if (this.dialog) return;
-      spiele('knopf');
-      this.tweens.add({
-        targets: c, scale: 0.95, duration: 80, yoyo: true,
-        onComplete: () => (stand ? this.starte(nummer, stand) : this.neuesSpiel(nummer)),
-      });
-    });
+    c.on('pointerdown', () => this.oeffnePlatz(nummer));
     return c;
   }
 
@@ -107,6 +185,7 @@ export class Spielstaende extends Phaser.Scene {
     g.fillStyle(0x2a2236, 0.98).fillRoundedRect(-breite / 2, -hoehe / 2, breite, hoehe, 20);
     g.lineStyle(5, 0xf2c94c).strokeRoundedRect(-breite / 2, -hoehe / 2, breite, hoehe, 20);
     c.add(g);
+    this.zeigeFokus();
     return c;
   }
 
@@ -115,15 +194,25 @@ export class Spielstaende extends Phaser.Scene {
     this.dialog = null;
     this.namensFeld?.remove();
     this.namensFeld = null;
+    this.zeigeFokus();
   }
 
   frageLoeschen(nummer, stand) {
     const c = this.dialogRahmen(560, 240);
     c.add(this.add.text(0, -60, `Spielstand «${stand.name}» löschen?`, stil(30, '#ffffff', { align: 'center', wordWrap: { width: 500 } })).setOrigin(0.5));
-    c.add(knopf(this, -120, 50, { text: 'Löschen', breite: 200, hoehe: 70, farbe: 0xb0413e }, () => {
-      loeschePlatz(nummer); this.schliesseDialog(); this.zeigePlaetze();
-    }));
-    c.add(knopf(this, 120, 50, { text: 'Behalten', breite: 200, hoehe: 70 }, () => this.schliesseDialog()));
+    const loeschen = () => { loeschePlatz(nummer); this.schliesseDialog(); this.zeigePlaetze(); };
+    const behalten = () => this.schliesseDialog();
+    c.add(knopf(this, -120, 50, { text: 'Löschen', breite: 200, hoehe: 70, farbe: 0xb0413e }, loeschen));
+    c.add(knopf(this, 120, 50, { text: 'Behalten', breite: 200, hoehe: 70 }, behalten));
+    // Tastatur/Controller: Fokus startet sicherheitshalber auf «Behalten»
+    let wahl = 1;
+    const zeige = () => this.zeigeFokus({ x: 480 + (wahl ? 120 : -120), y: 330, b: 200, h: 70 });
+    c.steuerung = {
+      schritt: () => { wahl = 1 - wahl; spiele('knopf'); zeige(); },
+      ok: () => { spiele('knopf'); (wahl ? behalten : loeschen)(); },
+      zurueck: behalten,
+    };
+    zeige();
   }
 
   neuesSpiel(nummer) {
@@ -133,19 +222,20 @@ export class Spielstaende extends Phaser.Scene {
     let name = PLATZ_BILDER[gewaehlt];
     const nameText = this.add.text(0, 60, name, stil(40)).setOrigin(0.5);
     const rahmen = [];
-    Object.keys(PLATZ_BILDER).forEach((bild, i) => {
+    const bilder = Object.keys(PLATZ_BILDER);
+    const waehle = (bild) => {
+      spiele('knopf');
+      const alterName = PLATZ_BILDER[gewaehlt];
+      gewaehlt = bild;
+      if (name === alterName) { name = PLATZ_BILDER[bild]; nameText.setText(name); }
+      rahmen.forEach((rr, j) => rr.setStrokeStyle(bilder[j] === bild ? 5 : 4, bilder[j] === bild ? 0xf2c94c : 0x5c5460));
+    };
+    bilder.forEach((bild, i) => {
       const x = -275 + i * 110, y = -60;
       const r = this.add.rectangle(x, y, 96, 120, 0x1b1420, 0.8).setStrokeStyle(4, 0x5c5460);
       const img = this.add.image(x, y, platzTextur(this, bild));
       img.setScale(Math.min(4, 105 / img.height));
-      r.setInteractive({ useHandCursor: true }).on('pointerdown', () => {
-        spiele('knopf');
-        const alterName = PLATZ_BILDER[gewaehlt];
-        gewaehlt = bild;
-        if (name === alterName) { name = PLATZ_BILDER[bild]; nameText.setText(name); }
-        rahmen.forEach((rr) => rr.setStrokeStyle(4, 0x5c5460));
-        r.setStrokeStyle(5, 0xf2c94c);
-      });
+      r.setInteractive({ useHandCursor: true }).on('pointerdown', () => waehle(bild));
       if (bild === gewaehlt) r.setStrokeStyle(5, 0xf2c94c);
       rahmen.push(r);
       c.add([r, img]);
@@ -155,13 +245,22 @@ export class Spielstaende extends Phaser.Scene {
     nameText.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.namenEingeben(name, (neu) => {
       if (neu) { name = neu.slice(0, 14); nameText.setText(name); }
     }));
-    c.add(knopf(this, -130, 160, { text: 'Abbrechen', breite: 220, hoehe: 64, groesse: 26, farbe: 0x5c5460 }, () => this.schliesseDialog()));
-    c.add(knopf(this, 130, 160, { text: "Los geht's!", breite: 240, hoehe: 64, groesse: 28 }, () => {
+    const abbrechen = () => this.schliesseDialog();
+    const los = () => {
       const stand = leererSpielstand(name, gewaehlt);
       speicherePlatz(nummer, stand);
       this.schliesseDialog();
       this.starte(nummer, stand);
-    }));
+    };
+    c.add(knopf(this, -130, 160, { text: 'Abbrechen', breite: 220, hoehe: 64, groesse: 26, farbe: 0x5c5460 }, abbrechen));
+    c.add(knopf(this, 130, 160, { text: "Los geht's!", breite: 240, hoehe: 64, groesse: 28 }, los));
+    // Tastatur/Controller: links/rechts wählt das Bild, A/Enter = «Los geht's!», B/Esc = Abbrechen
+    c.steuerung = {
+      schritt: (d) => waehle(bilder[(bilder.indexOf(gewaehlt) + d + bilder.length) % bilder.length]),
+      ok: () => { spiele('knopf'); los(); },
+      zurueck: abbrechen,
+    };
+    this.zeigeFokus({ x: 610, y: 440, b: 240, h: 64 });
   }
 
   // Für Eltern: Name über ein normales Eingabefeld eintippen

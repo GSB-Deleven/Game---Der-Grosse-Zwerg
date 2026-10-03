@@ -218,6 +218,7 @@ npm run pruefen          # prüft alle Karten auf Sackgassen
 npm run build            # dist/ für GitHub Pages
 npm run build:artefakt   # eine einzige HTML-Datei zum Teilen
 node tests/durchlauf.mjs # spielt das ganze Spiel automatisch durch (folgt dem gelben Pfeil)
+node tests/controller.mjs # prüft die Steuerung mit einem simulierten Xbox-Controller
 ```
 
 - **Technik:** Phaser 3 und Vite, reines JavaScript
