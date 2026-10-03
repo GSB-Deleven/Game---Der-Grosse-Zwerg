@@ -80,5 +80,36 @@ window.addEventListener('keydown', (e) => {
   if ((e.key === 'f' || e.key === 'F') && !(e.target instanceof HTMLInputElement)) vollbildUmschalten(spiel);
 });
 
+// Sicherheitsnetz: Ein Fehler im Spielablauf darf das Spiel nicht einfrieren. Phaser hält sonst beim ersten
+// Fehler die ganze Schleife an. Der Fehler wird unten klein angezeigt (für Eltern), das Spiel läuft weiter.
+const fehlerGesehen = new Set();
+function zeigeFehler(fehler) {
+  const text = fehler instanceof Error
+    ? `${fehler.message} · ${(fehler.stack || '').split('\n').find((z) => /\.js|:\d+:\d+/.test(z) && !z.includes(fehler.message))?.trim() || ''}`
+    : String(fehler?.message || fehler);
+  console.error('Fehler im Spiel:', fehler);
+  if (fehlerGesehen.has(text)) return;
+  fehlerGesehen.add(text);
+  let box = document.getElementById('fehler-anzeige');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fehler-anzeige';
+    Object.assign(box.style, {
+      position: 'fixed', left: '8px', right: '8px', bottom: '8px', zIndex: 20, padding: '8px 12px', borderRadius: '10px',
+      background: 'rgba(60, 10, 20, 0.92)', color: '#fff', font: '13px sans-serif', whiteSpace: 'pre-wrap', userSelect: 'text',
+    });
+    box.title = 'Antippen zum Schliessen';
+    box.addEventListener('click', () => box.remove());
+    document.body.appendChild(box);
+  }
+  box.textContent = `Hoppla, ein Fehler (bitte an David weitergeben, antippen schliesst):\n${text}`;
+}
+const schritt = spiel.step;
+spiel.step = function (zeit, delta) {
+  try { schritt.call(this, zeit, delta); } catch (e) { zeigeFehler(e); }
+};
+window.addEventListener('error', (e) => zeigeFehler(e.error || e.message));
+window.addEventListener('unhandledrejection', (e) => zeigeFehler(e.reason));
+
 // Für automatische Tests und zum Ausprobieren in der Browser-Konsole
 window.spiel = spiel;
